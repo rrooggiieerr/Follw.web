@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Share your location</title>
+		<link rel="manifest" href="/<?=bin2hex($id)?>/manifest.webmanifest">
+		<link rel="stylesheet" href="//unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="anonymous"/>
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" crossorigin="anonymous">
+		<style>
+			#enablegeolocation {
+				display: none;
+			}
+			
+			#map {
+				height: 250px;
+			}
+			
+			#followurls tbody td.followurl {
+				font-family: monospace;
+			}
+
+			code {
+				display: block;
+				white-space: pre;
+				background-color: #F8F8F8;
+			}
+		</style>
+		<script src="//unpkg.com/jquery@3.5.1/dist/jquery.js" crossorigin="anonymous"></script>
+		<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"  crossorigin="anonymous"></script>
+		<script src="//unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin="anonymous"></script>
+		<script>
+			$(function() {
+				$("#tabs").tabs();
+			});
+			
+			var map = null;
+			var marker = null;
+			var accuracy = null;
+			
+			function setMarker(location) {
+				if(marker == null) {
+					map.setView([location.latitude, location.longitude], 10);
+					marker = L.marker([location.latitude, location.longitude]).addTo(map);
+				} else {
+					map.setView([location.latitude, location.longitude]);
+					marker.setLatLng([location.latitude, location.longitude]);
+				}
+				if('accuracy' in location) {
+					if(accuracy == null) {
+						accuracy = L.circle([location.latitude, location.longitude], {radius: location.accuracy, weight: 1}).addTo(map);
+					} else {
+						accuracy.setLatLng([location.latitude, location.longitude]);
+						accuracy.setRadius(location.accuracy);
+					}
+				} else if(accuracy != null) {
+					// Remove the accuracy circle
+					map.removeLayer(accuracy);
+					accuracy = null;
+				}
+			}
+			
+			function setMyLocation(location) {
+				$.post("/<?=bin2hex($id)?>", location);
+			}
+		
+			function updateFollowURLs() {
+				$.get("/<?=bin2hex($id)?>/followers.json", function(data) {
+					var rows = $('<tbody></tbody>');
+					data.forEach(function(entry) {
+ 						var row = $('<tr></tr>');
+
+ 						if(entry['enabled'] && !entry['expired'])
+							$(row).append(`<td class="followurl enabled"><a href="${entry['url']}" target="_blank">${entry['url']}</a></td>`);
+ 						else
+							$(row).append(`<td class="followurl disabled">${entry['url']}</td>`);
+
+						if(entry['reference'] != null)
+							$(row).append(`<td class="reference">${entry['reference']}</td>`);
+						else
+							$(row).append('<td class="reference"></td>');
+
+						if(entry['alias'] != null)
+							$(row).append(`<td class="alias">${entry['alias']}</td>`);
+						else
+							$(row).append('<td class="alias"></td>');
+
+						if(entry['enabled'])
+							$(row).append('<td><button class="disablefollowid">Disable</button></td>');
+						else
+							$(row).append('<td><button class="enablefollowid">Enable</button></td>');
+						$('.disablefollowid', row).click(entry['id'], function(event) {
+							disableFollowID(event.data);
+						});
+						$('.enablefollowid', row).click(entry['id'], function(event) {
+							enableFollowID(event.data);
+						});
+
+						if(entry['expired'])
+							$(row).append('<td class="expires">Expired</td>');
+						else if(entry['expires'] != null)
+							$(row).append(`<td class="expires">${entry['expires']}</td>`);
+						else
+							$(row).append('<td class="expires">Never</td>');
+
+						$(row).append(`<td><span class="deletefollowid">&#x1F5D1;</span></td>`);
+						$('.deletefollowid', row).click(entry['id'], function(event) {
+							deleteFollowID(event.data);
+						});
+
+ 						$(rows).append(row);
+					});
+					$('table#followurls tbody').replaceWith(rows);
+				});
+			}
+			
+			function generateFollowID(followid) {
+				$.post("/<?=bin2hex($id)?>/generatefollowid", { reference:null }, function() {
+					updateFollowURLs();
+				});
+			}
+
+			function updateFollowID(followid) {
+				$.post("/<?=bin2hex($id)?>/followid/" + follower, { }, function() {
+					updateFollowURLs();
+				});
+			}
+
+			function enableFollowID(followid) {
+				$.get("/<?=bin2hex($id)?>/follower/" + followid + "/enable", function() {
+					updateFollowURLs();
+				});
+			}
+			
+			function disableFollowID(followid) {
+				$.get("/<?=bin2hex($id)?>/follower/" + followid + "/disable", function() {
+					updateFollowURLs();
+				});
+			}
+
+			function deleteFollowID(followid) {
+				$.get("/<?=bin2hex($id)?>/follower/" + followid + "/delete", function() {
+					updateFollowURLs();
+				});
+			}
+			
+			$().ready(function() {
+				map = L.map('map').setView([0, 0], 2);
+				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+					attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+					maxZoom: 19
+				}).addTo(map);
+				
+				$.get("/<?=bin2hex($id)?>.json", function(data) {
+					setMarker({latitude: data.latitude, longitude: data.longitude});
+				});
+				
+				map.on('click', function(e) {
+					setMyLocation({latitude: e.latlng.lat, longitude: e.latlng.lng});
+					if(marker == null) {
+						marker = L.marker(e.latlng).addTo(map);
+					} else {
+						marker.setLatLng(e.latlng);
+					}
+				});
+
+				// JavaScript Geolocation API can only be used when using SSL
+				if(window.location.protocol == 'https:' && 'geolocation' in navigator) {
+					$('#enablegeolocation').show();
+				
+					$('#devicelocation').click(function() {
+						$('#devicelocation').prop('disabled', true);
+						navigator.geolocation.getCurrentPosition(function(position) {
+							setMyLocation(position.coords);
+							setMarker({latitude: position.coords.latitude, longitude: position.coords.longitude, accuracy: position.coords.accuracy});
+							$('#devicelocation').prop('disabled', false);
+						});
+					});
+				}
+
+				$('#textlocation').on("keydown", function(e) {
+					if(e.keyCode == 13) { // Enter
+						var numericRegex = /^\s*([0-9]*[\.,]?[0-9]*)\s([0-9]*[\.,]?[0-9]*)\s*$/;
+
+						var val = $(this).val();
+
+						var latitude = null;
+						var longitude = null;
+
+						// Recognise formatting and act accordingly
+						if(numericRegex.test(val)) {
+							match = val.match(numericRegex);
+							latitude = match[1].replace(",", ".");
+							longitude = match[2].replace(",", ".");
+						} else
+							console.log("Invalid location");
+						
+						if(latitude < -90 || latitude > 90) {
+							console.log("Latitude out of range");
+							latitude = null;
+						}
+
+						if(longitude < -180 || longitude > 180) {
+							console.log("Longitude out of range");
+							longitude = null;
+						}
+
+						if(latitude != null && longitude != null) {
+							setMyLocation({latitude: latitude, longitude: longitude});
+							setMarker({latitude: latitude, longitude: longitude});
+						}
+
+						return false;
+					}
+				});
+
+				$('#configuration input[name="alias"]').on("keydown", function(e) {
+					if(e.keyCode == 13) { // Enter
+						var val = $(this).val();
+						
+						console.log(val);
+
+						return false;
+					}
+				});
+				
+				updateFollowURLs();
+
+				$('#generatefollowurl').submit(function() {
+					var reference = $('input[name="reference"]', this).val();
+					if(reference == "")
+						reference = null;
+					var alias = $('input[name="alias"]', this).val();
+					if(alias == "")
+						alias = null;
+					var enabled = $('input[name="enabled"]', this).is(':checked');
+					var expires = $('input[name="expires"]', this).val();
+					if(expires == "")
+						expires = null;
+					else {
+						// Add timezone to expires timestamp
+						var timeOffsetH = Math.floor(new Date().getTimezoneOffset()/60);
+						var timeOffsetM = new Date().getTimezoneOffset() % 60;
+						if(timeOffsetH == 0)
+							expires += "+00:00";
+						else {
+							if(timeOffsetH > 0)
+								expires += "-";
+							else {
+								expires += "+";
+								timeOffsetH = -timeOffsetH;
+							}
+							if(timeOffsetH < 10)
+								expires += "0";
+							expires += timeOffsetH;
+							if(timeOffsetM > 10)
+								expires += ":" + timeOffsetM
+							else if(timeOffsetM > 0)
+								expires += ":0" + timeOffsetM
+							else
+								expires += ":00"
+						}
+					}
+
+					$.post("/<?=bin2hex($id)?>/generatefollowid", { reference:reference, alias:alias, enabled:enabled, expires:expires }, function() {
+						updateFollowURLs();
+					});
+					event.preventDefault();
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<h1>I Am Here</h1>
+		<h2>Sharing your location anonymous</h2>
+		<div  id="tabs">
+			<ul>
+				<li><a href="#sharelocation">Share your location</a></li>
+				<li><a href="#followers">Followers</a></li>
+				<li><a href="#apps">Use an app</a></li>
+				<li><a href="#integration">Integrate</a></li>
+				<li><a href="#privacy">Privacy</a></li>
+				<li><a href="#configuration">Configuration</a></li>
+			</ul>
+			<div id="sharelocation">
+				<h3>Set your location</h3>
+				<p>Different methods for sharing your location are available.</p>
+				<div id="enablegeolocation">
+					<h4>Get your location from your device</h4>
+					<p>The device you're using to access this Location Sharing URL is capable to share it's location.</p>
+					<button id="devicelocation">Request device location</button>
+				</div>
+				<h4>Select your location on the map</h4>
+				<p>Select a location on the map, just click on the position you like to share the location of.</p>
+				<div id="map"></div>
+				<h4>Text input</h4>
+				<p>You can type the latitude and longitude of the location you like to share.</p>
+				<form action="#">
+					<input type="text" id="textlocation"/>
+				</form>
+			</div>
+			<div id="followers">
+				<h3>Share your location with followers</h3>
+				<p>To have your location followed by others you can generate Location Follow URLs and manage who is allowed to see your location.</p>
+				<h4>Your Location Follow URLs</h4>
+				<table id="followurls">
+					<thead>
+						<tr>
+							<td>Location Follow URL</td>
+							<td>Reference</td>
+							<td>Alias</td>
+							<td>Disabled</td>
+							<td>Expires</td>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+				<p>Create a new unique Follow URL</p>
+				<form action="#" id="generatefollowurl">
+					<input name="reference" type="text" placeholder="Reference"/>
+					<input name="alias" type="text" placeholder="Alias"/>
+					<input name="enabled" type="checkbox"/>
+					<input name="expires" type="datetime-local"/>
+					<input type="submit" value="Create Follow URL"/>
+				</form>
+			</div>
+			<div id="apps">
+				<!--
+				<h4>Install the IAmHere app</h4>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+				<p>Install the <a href="#">IAmHere app from the Google Play Store</a></p>
+				<p>Install the <a href="#">IAmHere app from the Apple App Store</a></p>
+				-->
+				<h4>Configure OsmAnd</h4>
+				<p>You can configure OsmAnd to automatically log your current position when you are online</p>
+				<p><?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>?la={0}&lo={1}&hd={3}&al={4}&sp={5}</p>
+				<p>Set the <i>time buffer</i> to the lowest value of 1 minute.</p>
+			</div>
+			<div id="integration">
+				<h4>Integrate Follow URL in your HTML Website</h4>
+				<p>You can embed a map with your location in any website by including the following code in you HTML header.</p>
+				<code>&lt;style&gt;
+	  #iAmHereMap {
+	    height: 250px;
+	  }
+	&lt;/style&gt;
+	&lt;link rel=&quot;stylesheet&quot; href=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.css&quot; integrity=&quot;sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==&quot; crossorigin=&quot;anonymous&quot;/&gt;
+	&lt;script src=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.js&quot; integrity=&quot;sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
+	&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/IAmHere.js&quot;&gt;&lt;/script&gt;
+	&lt;script&gt;
+	  new IAmHere(&quot;iAmHereMap&quot;, &quot;<?= $protocol . $_SERVER['HTTP_HOST'] ?>/86e1cb14b2a98e00&quot;, 12);
+	&lt;/script&gt;</code>
+				<p>And include <code>&lt;div id=&quot;iAmHereMap&quot;&gt;&lt;/div&gt;</code> wherever you want to show the map with your location.</p>
+				<h4>Integrate Follow URL in your WordPress blog</h4>
+				<p>IAmHere WordPress plugin is yet to be developped.</p>
+				<h4>Integrate Follow URL in your Python compatible devices</h4>
+				<p>IAmHere Python library is yet to be developped.</p>
+			</div>
+			<div id="configuration">
+				<p>Your Location Sharing URL: <?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>/</p>
+				<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
+				<p>Because IAmHere is anonymous and doesn't know any of your contact details this Location Sharing URL can not be recovered if you lose it.</p>
+				<p>To share your location with followers generate a Location Follow URL, <b>don't share this Loaction Sharing URL</b>.</p>
+				<p>You can configure an alias which your Folowers see so they know who they're following.</p>
+				<form action="#" id="configuration">
+					Alias: <input name="alias" type="text"/>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>
