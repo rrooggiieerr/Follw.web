@@ -261,6 +261,7 @@ if($type == 'share' && $action == 'location' && ($method == 'POST' || count($_GE
 			case (substr($name, 0, 2) == 'he' ? TRUE : FALSE): // heading
 			case (substr($name, 0, 2) == 'di' ? TRUE : FALSE): // direction
 			case (substr($name, 0, 2) == 'az' ? TRUE : FALSE): // azimuth
+			case (substr($name, 0, 2) == 'co' ? TRUE : FALSE): // course
 				if($value != '') {
 					if($value < 0 || $value > 360) {
 						http_response_code(500);
