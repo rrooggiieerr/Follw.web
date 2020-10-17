@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 	<head>
-		<title>Share your location</title>
+		<title>Follw - Sharing your location with privacy</title>
 		<link rel="manifest" href="/<?=bin2hex($id)?>/manifest.webmanifest">
 		<link rel="stylesheet" href="//unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="anonymous"/>
 		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" crossorigin="anonymous">
@@ -270,22 +270,38 @@
 	</head>
 	<body>
 		<h1>Follw</h1>
-		<h2>Sharing your location anonymous</h2>
+		<h2>Sharing your location with privacy</h2>
 		<div  id="tabs">
 			<ul>
+				<li><a href="#welcome">Welcome to Follw</a></li>
 				<li><a href="#sharelocation">Share your location</a></li>
 				<li><a href="#followers">Followers</a></li>
 				<li><a href="#apps">Use an app</a></li>
-				<li><a href="#integration">Integrate</a></li>
+				<li><a href="#integration">Integration</a></li>
 				<li><a href="#privacy">Privacy</a></li>
-				<li><a href="#configuration">Configuration</a></li>
 			</ul>
+			<div id="welcome">
+				<p>Your Location Sharing URL: <?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?></p>
+				<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
+				<p>Because Follw doesn't have your contact details this Location Sharing URL can not be recovered if
+				you lose it.</p>
+				<p>To share your location with followers generate a Location Follow URL, <b>don't share this Location
+				Sharing URL with your followers</b>.</p>
+				<h2>Configuration</h2>
+				<p>You can configure an alias which your Followers see so they know who they are following. This is not
+				required and can be anything, it does not have to be your name or anything that gives away who you
+				are.</p>
+				<form action="#" id="configuration">
+					Alias: <input name="alias" type="text"/>
+				</form>
+			</div>
 			<div id="sharelocation">
 				<h3>Set your location</h3>
 				<p>Different methods for sharing your location are available.</p>
 				<div id="enablegeolocation">
 					<h4>Get your location from your device</h4>
-					<p>The device you're using to access this Location Sharing URL is capable to share it's location.</p>
+					<p>The device you're using to access this Location Sharing URL is capable to share it's
+					location.</p>
 					<button id="devicelocation">Request device location</button>
 				</div>
 				<h4>Select your location on the map</h4>
@@ -299,12 +315,13 @@
 			</div>
 			<div id="followers">
 				<h3>Share your location with followers</h3>
-				<p>To have your location followed by others you can generate Location Follow URLs and manage who is allowed to see your location.</p>
-				<h4>Your Location Follow URLs</h4>
+				<p>To have your location followed by others you can generate Follow URLs and manage who is allowed to
+				see your location.</p>
+				<h4>Your Follow URLs</h4>
 				<table id="followurls">
 					<thead>
 						<tr>
-							<td>Location Follow URL</td>
+							<td>Follow URL</td>
 							<td>Reference</td>
 							<td>Alias</td>
 							<td>Disabled</td>
@@ -316,8 +333,8 @@
 				</table>
 				<p>Create a new unique Follow URL</p>
 				<form action="#" id="generatefollowurl">
-					<input name="reference" type="text" placeholder="Reference"/>
-					<input name="alias" type="text" placeholder="Alias"/>
+					<input name="reference" type="text" placeholder="Reference for your convenience"/>
+					<input name="alias" type="text" placeholder="Alias override"/>
 					<input name="enabled" type="checkbox"/>
 					<input name="expires" type="datetime-local"/>
 					<input type="submit" value="Create Follow URL"/>
@@ -326,18 +343,25 @@
 			<div id="apps">
 				<!--
 				<h4>Install the Follw app</h4>
-				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
+				et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+				aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+				dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
+				officia deserunt mollit anim id est laborum.</p>
 				<p>Install the <a href="#">Follw app from the Google Play Store</a></p>
 				<p>Install the <a href="#">Follw app from the Apple App Store</a></p>
 				-->
 				<h4>Configure OsmAnd</h4>
+				<p>Install OsmAnd from the Google Play Store or Apple App Store and use the logging functionality to
+				share your location<./p>
 				<p>You can configure OsmAnd to automatically log your current position when you are online</p>
 				<p><?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>?la={0}&lo={1}&hd={3}&al={4}&sp={5}</p>
 				<p>Set the <i>time buffer</i> to the lowest value of 1 minute.</p>
 			</div>
 			<div id="integration">
 				<h4>Integrate Follow URL in your HTML Website</h4>
-				<p>You can embed a map with your location in any website by including the following code in you HTML header.</p>
+				<p>You can embed a map with your location in any website by including the following code in you HTML
+				header.</p>
 				<code>&lt;style&gt;
 	  #follwMap {
 	    height: 250px;
@@ -345,25 +369,20 @@
 	&lt;/style&gt;
 	&lt;link rel=&quot;stylesheet&quot; href=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.css&quot; integrity=&quot;sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==&quot; crossorigin=&quot;anonymous&quot;/&gt;
 	&lt;script src=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.js&quot; integrity=&quot;sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
-	&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/Follw.js&quot;&gt;&lt;/script&gt;
+	&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/follw.app.js&quot;&gt;&lt;/script&gt;
 	&lt;script&gt;
-	  new Follw(&quot;follwMap&quot;, &quot;<?= $protocol . $_SERVER['HTTP_HOST'] ?>/86e1cb14b2a98e00&quot;, 12);
+	  new Follw(&quot;follwMap&quot;, &quot;<?= $protocol . $_SERVER['HTTP_HOST'] ?>/followid&quot;, 12);
 	&lt;/script&gt;</code>
-				<p>And include <code>&lt;div id=&quot;follwMap&quot;&gt;&lt;/div&gt;</code> wherever you want to show the map with your location.</p>
+				<p>And include <code>&lt;div id=&quot;follwMap&quot;&gt;&lt;/div&gt;</code> wherever you want to show
+				the map with your location.</p>
 				<h4>Integrate Follow URL in your WordPress blog</h4>
 				<p>Follw.app WordPress plugin is yet to be developped.</p>
-				<h4>Integrate Follow URL in your Python compatible devices</h4>
-				<p>Follw.app Python library is yet to be developped.</p>
+				<h4>Share locations from your Python compatible devices</h4>
+				<p>Get the Follw.app Python 3 client on
+				<a href="https://github.com/rrooggiieerr/Follw.py" target="_blank">GitHub</a>.</p>
 			</div>
-			<div id="configuration">
-				<p>Your Location Sharing URL: <?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>/</p>
-				<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
-				<p>Because Follw is anonymous and doesn't know any of your contact details this Location Sharing URL can not be recovered if you lose it.</p>
-				<p>To share your location with followers generate a Location Follow URL, <b>don't share this Loaction Sharing URL</b>.</p>
-				<p>You can configure an alias which your Folowers see so they know who they're following.</p>
-				<form action="#" id="configuration">
-					Alias: <input name="alias" type="text"/>
-				</form>
+			<div id="privacy">
+				<p>Privacy statement goes here.</p>
 			</div>
 		</div>
 	</body>
