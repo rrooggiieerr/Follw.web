@@ -1,6 +1,6 @@
 {
-	"short_name": "IAmHere",
-	"name": "IAmHere: Sharing your location anonymous",
+	"short_name": "Follw.app",
+	"name": "Follw.app: Sharing your location anonymous",
 	"description": "Anonymous location sharing service",
 	"start_url": "<?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>/",
 	"background_color": "#3367D6",

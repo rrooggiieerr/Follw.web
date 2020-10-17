@@ -1,6 +1,6 @@
 <?php
 $servername = '127.0.0.1';
-$dbname = 'iamhere';
+$dbname = 'follw.app';
 $username = NULL;
 $password = NULL;
 

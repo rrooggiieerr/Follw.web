@@ -1,4 +1,4 @@
-class IAmHere {
+class Follw {
 	map = null;
 	marker = null;
 	accuracy = null;

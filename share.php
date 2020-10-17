@@ -269,7 +269,7 @@
 		</script>
 	</head>
 	<body>
-		<h1>I Am Here</h1>
+		<h1>Follw</h1>
 		<h2>Sharing your location anonymous</h2>
 		<div  id="tabs">
 			<ul>
@@ -325,10 +325,10 @@
 			</div>
 			<div id="apps">
 				<!--
-				<h4>Install the IAmHere app</h4>
+				<h4>Install the Follw app</h4>
 				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-				<p>Install the <a href="#">IAmHere app from the Google Play Store</a></p>
-				<p>Install the <a href="#">IAmHere app from the Apple App Store</a></p>
+				<p>Install the <a href="#">Follw app from the Google Play Store</a></p>
+				<p>Install the <a href="#">Follw app from the Apple App Store</a></p>
 				-->
 				<h4>Configure OsmAnd</h4>
 				<p>You can configure OsmAnd to automatically log your current position when you are online</p>
@@ -339,26 +339,26 @@
 				<h4>Integrate Follow URL in your HTML Website</h4>
 				<p>You can embed a map with your location in any website by including the following code in you HTML header.</p>
 				<code>&lt;style&gt;
-	  #iAmHereMap {
+	  #follwMap {
 	    height: 250px;
 	  }
 	&lt;/style&gt;
 	&lt;link rel=&quot;stylesheet&quot; href=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.css&quot; integrity=&quot;sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==&quot; crossorigin=&quot;anonymous&quot;/&gt;
 	&lt;script src=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.js&quot; integrity=&quot;sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
-	&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/IAmHere.js&quot;&gt;&lt;/script&gt;
+	&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/Follw.js&quot;&gt;&lt;/script&gt;
 	&lt;script&gt;
-	  new IAmHere(&quot;iAmHereMap&quot;, &quot;<?= $protocol . $_SERVER['HTTP_HOST'] ?>/86e1cb14b2a98e00&quot;, 12);
+	  new Follw(&quot;follwMap&quot;, &quot;<?= $protocol . $_SERVER['HTTP_HOST'] ?>/86e1cb14b2a98e00&quot;, 12);
 	&lt;/script&gt;</code>
-				<p>And include <code>&lt;div id=&quot;iAmHereMap&quot;&gt;&lt;/div&gt;</code> wherever you want to show the map with your location.</p>
+				<p>And include <code>&lt;div id=&quot;follwMap&quot;&gt;&lt;/div&gt;</code> wherever you want to show the map with your location.</p>
 				<h4>Integrate Follow URL in your WordPress blog</h4>
-				<p>IAmHere WordPress plugin is yet to be developped.</p>
+				<p>Follw.app WordPress plugin is yet to be developped.</p>
 				<h4>Integrate Follow URL in your Python compatible devices</h4>
-				<p>IAmHere Python library is yet to be developped.</p>
+				<p>Follw.app Python library is yet to be developped.</p>
 			</div>
 			<div id="configuration">
 				<p>Your Location Sharing URL: <?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>/</p>
 				<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
-				<p>Because IAmHere is anonymous and doesn't know any of your contact details this Location Sharing URL can not be recovered if you lose it.</p>
+				<p>Because Follw is anonymous and doesn't know any of your contact details this Location Sharing URL can not be recovered if you lose it.</p>
 				<p>To share your location with followers generate a Location Follow URL, <b>don't share this Loaction Sharing URL</b>.</p>
 				<p>You can configure an alias which your Folowers see so they know who they're following.</p>
 				<form action="#" id="configuration">

@@ -45,7 +45,7 @@ if($location == NULL) {
 				margin-bottom: 0;
 			}
 
-			#iAmHereMap {
+			#follwMap {
 				height: 250px;
 			}
 			
@@ -55,13 +55,13 @@ if($location == NULL) {
 		</style>
 		<script src="//unpkg.com/jquery@3.5.1/dist/jquery.js" crossorigin="anonymous"></script>
 		<script src="//unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin="anonymous"></script>
-		<script src="/IAmHere.js"></script>
+		<script src="/follw.app.js"></script>
 		<script>
 			document.ontouchmove = function(e) {e.preventDefault()};
 			
 			function resizeMap() {
-				$("#iAmHereMap").height($("body").innerHeight() - ($("#header").outerHeight() + $("#footer").outerHeight()));
-				iAmHere.invalidateSize();
+				$("#follwMap").height($("body").innerHeight() - ($("#header").outerHeight() + $("#footer").outerHeight()));
+				follw.invalidateSize();
 			}
 			
 			window.addEventListener("resize", resizeMap);
@@ -93,12 +93,12 @@ if($location == NULL) {
 				location.reload();
 			}
 
- 			var iAmHere = new IAmHere("iAmHereMap", "/<?=bin2hex($id)?>", 12);
- 			iAmHere.onLocationChange(onLocationChange);
- 			iAmHere.onIDDeleted(onDelete);
+ 			var follw = new Follw("follwMap", "/<?=bin2hex($id)?>", 12);
+ 			follw.onLocationChange(onLocationChange);
+ 			follw.onIDDeleted(onDelete);
  			
  			$().ready(function() {
-	 			iAmHere.setLocation(<?= $_location ?>, <?= $_accuracy ?>);
+	 			follw.setLocation(<?= $_location ?>, <?= $_accuracy ?>);
  				resizeMap()
  			});
 		</script>
@@ -107,7 +107,7 @@ if($location == NULL) {
 		<div id="header">
 			<h1 id="title"><?= $title ?></h1>
 		</div>
-		<div id="iAmHereMap"></div>
+		<div id="follwMap"></div>
 		<div id="footer">
 			<p><a href="#" target="_blank" id="navigate">Navigate to this location</a></p>
 		</div>
