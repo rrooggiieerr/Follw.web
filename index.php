@@ -4,7 +4,7 @@ $dbname = 'follw.app';
 $username = NULL;
 $password = NULL;
 
-require_once('./config.php');
+require_once('config.php');
 
 $path = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
@@ -14,7 +14,7 @@ switch($path) {
 	case '/':
 		// If /
 		// Include index.html
-		require_once('./intro.php');
+		require_once('intro.php');
 		exit();
 	case '/generatesharingid':
 		$id = NULL;
@@ -141,7 +141,7 @@ try {
 
 if($type == 'deleted') {
 	if($format == 'html')
-		require_once('./iddeleted.php');
+		require_once('iddeleted.php');
 	http_response_code(410);
 	exit();
 }
@@ -163,7 +163,7 @@ if($type == 'follow' && $action == 'location') {
 		if($statement->rowCount() != 1) {
 			if($format == 'html') {
 				$location = null;
-				require_once('./follow.php');
+				require_once('follow.php');
 			} else
 				http_response_code(204);
 			exit();
@@ -192,7 +192,7 @@ if($type == 'follow' && $action == 'location') {
 		
 	switch ($format) {
 		case 'html':
-			require_once('./follow.php');
+			require_once('follow.php');
 			break;
 		case 'json':
 			header('Content-Type: application/json');
@@ -208,7 +208,7 @@ if($type == 'follow' && $action == 'location') {
 
 if($type == 'follow' && $action == 'webmanifest') {
 	header('Content-Type: application/json');
-	require_once('./manifest.webmanifest.php');
+	require_once('manifest.webmanifest.php');
 	exit();
 }
 
@@ -301,7 +301,7 @@ if($type == 'share' && $action == 'location' && ($method == 'POST' || count($_GE
 
 if($type == 'share' && $action == 'location') {
 	if($format == 'html') {
-		require_once('./share.php');
+		require_once('share.php');
 		exit();
 	}
 	
@@ -342,7 +342,7 @@ if($type == 'share' && $action == 'location') {
 
 if($type == 'share' && $action == 'webmanifest') {
 	header('Content-Type: application/json');
-	require_once('./manifest.webmanifest.php');
+	require_once('manifest.webmanifest.php');
 	exit();
 }
 
