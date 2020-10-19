@@ -3,17 +3,15 @@
 /* @var Integer $id */
 /* @var Integer $location */
 
-if($location == NULL) {
-		$title = "No location is currently being shared";
-		$_location = 'null';
-		$_accuracy = 'null';
-} else {
-		$title = $location['alias'] . " is here";
-		$_location = '[' . $location['latitude'] . ', ' . $location['longitude'] . ']';
-		if($location['accuracy']  == NULL)
-			$_accuracy = 'null';
-		else
-			$_accuracy = $location['accuracy'];
+$title = "No location is currently being shared";
+$_location = 'null';
+$_accuracy = 'null';
+
+if(isset($location)) {
+	$title = $location['alias'] . " is here";
+	$_location = '[' . $location['latitude'] . ', ' . $location['longitude'] . ']';
+	if(array_key_exists('accuracy', $location) && isset($location['accuracy']))
+		$_accuracy = $location['accuracy'];
 }
 ?>
 <!doctype html>
