@@ -6,6 +6,11 @@
 /* @var Object $pdo */
 /* @var Integer $id */
 
+if(!isset($action)) {
+	http_response_code(404);
+	exit();
+}
+
 if($method == 'POST') {
 	http_response_code(405);
 	exit();
@@ -65,7 +70,3 @@ if($action == 'location') {
 					
 					exit();
 }
-
-//ToDo? Limit requests per IP to prevent DOS
-http_response_code(404);
-exit();

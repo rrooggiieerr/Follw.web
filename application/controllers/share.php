@@ -7,8 +7,39 @@
 /* @var String $protocol */
 /* @var Integer $id */
 
+if(!isset($action)) {
+	switch($remainer) {
+		case NULL:
+		case '':
+			break;
+		case '/generatefollowid':
+			$action = 'generatefollowid';
+			break;
+		case '/followers.json':
+			$action = 'getfollowers';
+			break;
+		case (preg_match('/^\/follower\/[0-9a-f]{16}\/enable$/', $remainer) ? TRUE : FALSE):
+			$followid = hex2bin(substr($remainer, 10, 16));
+			$action = 'enablefollower';
+			break;
+		case (preg_match('/^\/follower\/[0-9a-f]{16}\/disable$/', $remainer) ? TRUE : FALSE):
+			$followid = hex2bin(substr($remainer, 10, 16));
+			$action = 'disablefollower';
+			break;
+		case (preg_match('/^\/follower\/[0-9a-f]{16}\/delete$/', $remainer) ? TRUE : FALSE):
+			$followid = hex2bin(substr($remainer, 10, 16));
+			$action = 'deletefollower';
+			break;
+	}
+}
+
+if(!isset($action)) {
+	http_response_code(404);
+	exit();
+}
+
 if($action == 'location' && ($method == 'POST' || count($_GET) !== 0)) {
-	//ToDo Add location to database
+	// Add location to database
 	
 	$location = [];
 	
@@ -92,7 +123,7 @@ if($action == 'location') {
 		require_once(dirname(__DIR__) . '/views/share.php');
 		exit();
 	}
-	
+
 	try {
 		// Get location from database
 		$query = 'SELECT UNIX_TIMESTAMP(`timestamp`) as `timestamp`, `location` FROM `locations` WHERE `id` = ?';
