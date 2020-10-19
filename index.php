@@ -1,12 +1,14 @@
 <?php
+// These database settings should be good enough for a local test environment
+// Override settings in config.php for public testing and production environments
 $servername = '127.0.0.1';
 $dbname = 'follw';
-$username = NULL;
+$username = 'root';
 $password = NULL;
+
+@include_once('config.php');
+
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-
-@require_once('config.php');
-
 $path = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -14,7 +16,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 switch($path) {
 	case '/':
 		// If /
-		// Include index.html
+		// Show introduction
 		require_once('intro.php');
 		exit();
 	case '/generatesharingid':
