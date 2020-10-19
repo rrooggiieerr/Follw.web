@@ -1,3 +1,8 @@
+<?php
+// Fixes false "Variable is not defined" validation errors for variables created in other files
+/* @var String $protocol */
+/* @var Integer $id */
+?>
 {
 	"short_name": "Follw.app",
 	"name": "Follw.app: Sharing your location anonymous",
