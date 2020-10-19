@@ -30,7 +30,7 @@ class Follw {
 
 	init() {
 		this.element = document.getElementById(this.element);
-		this.map = L.map(this.element).fitWorld();
+		this.map = L.map(this.element, { zoomSnap: 0 }).fitWorld();
 		L.control.scale().addTo(this.map);
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>',
@@ -110,9 +110,8 @@ class Follw {
 			}
 			
 			if(this.textOverlay == null) {
-				//var leafletContainer = document.getElementById(this.element);
 				this.textOverlay = document.createElement('div');
-				this.textOverlay.id = leafletContainer.id + '_textoverlay';
+				this.textOverlay.id = this.element.id + '_textoverlay';
 				this.textOverlay.style.zIndex = 500;
 				this.textOverlay.style.position = 'relative';
 				this.textOverlay.style.textAlign = 'center';
