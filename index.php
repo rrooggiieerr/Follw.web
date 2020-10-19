@@ -17,7 +17,7 @@ switch($path) {
 	case '/':
 		// If /
 		// Show introduction
-		require_once('intro.php');
+		require_once('views/intro.php');
 		exit();
 	case '/generatesharingid':
 		$id = NULL;
@@ -144,7 +144,7 @@ try {
 
 if($type == 'deleted') {
 	if($format == 'html')
-		require_once('iddeleted.php');
+		require_once('views/iddeleted.php');
 	http_response_code(410);
 	exit();
 }
@@ -166,7 +166,7 @@ if($type == 'follow' && $action == 'location') {
 		if($statement->rowCount() != 1) {
 			if($format == 'html') {
 				$location = null;
-				require_once('follow.php');
+				require_once('views/follow.php');
 			} else
 				http_response_code(204);
 			exit();
@@ -195,7 +195,7 @@ if($type == 'follow' && $action == 'location') {
 		
 	switch ($format) {
 		case 'html':
-			require_once('follow.php');
+			require_once('views/follow.php');
 			break;
 		case 'json':
 			header('Content-Type: application/json');
@@ -211,7 +211,7 @@ if($type == 'follow' && $action == 'location') {
 
 if($type == 'follow' && $action == 'webmanifest') {
 	header('Content-Type: application/json');
-	require_once('manifest.webmanifest.php');
+	require_once('views/manifest.webmanifest.php');
 	exit();
 }
 
@@ -304,7 +304,7 @@ if($type == 'share' && $action == 'location' && ($method == 'POST' || count($_GE
 
 if($type == 'share' && $action == 'location') {
 	if($format == 'html') {
-		require_once('share.php');
+		require_once('views/share.php');
 		exit();
 	}
 	
@@ -345,7 +345,7 @@ if($type == 'share' && $action == 'location') {
 
 if($type == 'share' && $action == 'webmanifest') {
 	header('Content-Type: application/json');
-	require_once('manifest.webmanifest.php');
+	require_once('views/manifest.webmanifest.php');
 	exit();
 }
 
