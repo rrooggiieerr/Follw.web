@@ -106,8 +106,8 @@ if(isset($location)) {
  			follw.onIDDeleted(onDelete);
  			
  			$().ready(function() {
-	 			follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
  				resizeMap()
+	 			follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
  			});
 		</script>
 	</head>
