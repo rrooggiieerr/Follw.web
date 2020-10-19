@@ -1,16 +1,25 @@
+<?php
+// Fixes false "Variable is not defined" validation errors for variables created in other files
+/* @var String $protocol */
+/* @var Integer $id */
+?>
 <!doctype html>
 <html lang="en">
 	<head>
 		<title>Follw - Sharing your location with privacy</title>
 		<link rel="manifest" href="/<?=bin2hex($id)?>/manifest.webmanifest">
-		<link rel="stylesheet" href="//unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="anonymous"/>
-		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" crossorigin="anonymous">
+<?php // Styles ?>
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
+			crossorigin="anonymous"/>
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+			crossorigin="anonymous">
 		<style>
 			#enablegeolocation {
 				display: none;
 			}
 			
-			#map {
+			#shareLocationMap {
 				height: 250px;
 			}
 			
@@ -24,50 +33,39 @@
 				background-color: #F8F8F8;
 			}
 		</style>
-		<script src="//unpkg.com/jquery@3.5.1/dist/jquery.js" crossorigin="anonymous"></script>
+<?php // Scripts ?>
+		<script src="https://unpkg.com/jquery@3.5.1/dist/jquery.js"
+			integrity="sha384-/LjQZzcpTzaYn7qWqRIWYC5l8FWEZ2bIHIz0D73Uzba4pShEcdLdZyZkI4Kv676E"
+			crossorigin="anonymous"></script>
 		<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"  crossorigin="anonymous"></script>
-		<script src="//unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin="anonymous"></script>
+		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+			integrity="sha384-RFZC58YeKApoNsIbBxf4z6JJXmh+geBSgkCQXFyh+4tiFSJmJBt+2FbjxW7Ar16M"
+			crossorigin="anonymous"></script>
+		<script src="/follw.js" crossorigin="anonymous"></script>
 		<script>
+			function onDelete() {
+				location.reload();
+			}
+
+ 			var shareLocationMap = new Follw("shareLocationMap", "/<?=bin2hex($id)?>", 12);
+ 			shareLocationMap.onIDDeleted(onDelete);
+
 			$(function() {
 				$("#tabs").tabs({
 					activate: function( event, ui ) {
 						switch(ui.newPanel.attr('id')) {
 							case 'sharelocation':
-								map.invalidateSize();
+								shareLocationMap.invalidateSize();
 								break;
 						}
 					}
 				});
 			});
 			
-			var map = null;
-			var marker = null;
-			var accuracy = null;
-			
-			function setMarker(location) {
-				if(marker == null) {
-					map.setView([location.latitude, location.longitude], 10);
-					marker = L.marker([location.latitude, location.longitude]).addTo(map);
-				} else {
-					map.setView([location.latitude, location.longitude]);
-					marker.setLatLng([location.latitude, location.longitude]);
-				}
-				if('accuracy' in location) {
-					if(accuracy == null) {
-						accuracy = L.circle([location.latitude, location.longitude], {radius: location.accuracy, weight: 1}).addTo(map);
-					} else {
-						accuracy.setLatLng([location.latitude, location.longitude]);
-						accuracy.setRadius(location.accuracy);
-					}
-				} else if(accuracy != null) {
-					// Remove the accuracy circle
-					map.removeLayer(accuracy);
-					accuracy = null;
-				}
-			}
-			
 			function setMyLocation(location) {
-				$.post("/<?=bin2hex($id)?>", location);
+				$.post("/<?=bin2hex($id)?>", location, function() {
+					shareLocationMap.getLocation(true);
+				});
 			}
 		
 			function updateFollowURLs() {
@@ -151,23 +149,8 @@
 			}
 			
 			$().ready(function() {
-				map = L.map('map').setView([0, 0], 2);
-				L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>',
-					maxZoom: 19
-				}).addTo(map);
-				
-				$.get("/<?=bin2hex($id)?>.json", function(data) {
-					setMarker({latitude: data.latitude, longitude: data.longitude});
-				});
-				
-				map.on('click', function(e) {
-					setMyLocation({latitude: e.latlng.lat, longitude: e.latlng.lng});
-					if(marker == null) {
-						marker = L.marker(e.latlng).addTo(map);
-					} else {
-						marker.setLatLng(e.latlng);
-					}
+				shareLocationMap.map.on('click', function(event) {
+					setMyLocation({latitude: event.latlng.lat, longitude: event.latlng.lng});
 				});
 
 				// JavaScript Geolocation API can only be used when using SSL
@@ -178,7 +161,6 @@
 						$('#devicelocation').prop('disabled', true);
 						navigator.geolocation.getCurrentPosition(function(position) {
 							setMyLocation(position.coords);
-							setMarker({latitude: position.coords.latitude, longitude: position.coords.longitude, accuracy: position.coords.accuracy});
 							$('#devicelocation').prop('disabled', false);
 						});
 					});
@@ -213,13 +195,13 @@
 
 						if(latitude != null && longitude != null) {
 							setMyLocation({latitude: latitude, longitude: longitude});
-							setMarker({latitude: latitude, longitude: longitude});
 						}
 
-						return false;
+						event.preventDefault();
 					}
 				});
 
+				// Configuration
 				$('#configuration input[name="alias"]').on("keydown", function(e) {
 					if(e.keyCode == 13) { // Enter
 						var val = $(this).val();
@@ -230,6 +212,7 @@
 					}
 				});
 				
+				// Followers
 				updateFollowURLs();
 
 				$('#generatefollowurl').submit(function() {
@@ -314,7 +297,7 @@
 				</div>
 				<h4>Select your location on the map</h4>
 				<p>Select a location on the map, just click on the position you like to share the location of.</p>
-				<div id="map"></div>
+				<div id="shareLocationMap"></div>
 				<h4>Text input</h4>
 				<p>You can type the latitude and longitude of the location you like to share.</p>
 				<form action="#">
@@ -363,24 +346,28 @@
 				<p>Install OsmAnd from the Google Play Store or Apple App Store and use the logging functionality to
 				share your location.</p>
 				<p>You can configure OsmAnd to automatically log your current position when you are online</p>
-				<p><?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>?la={0}&lo={1}&hd={3}&al={4}&sp={5}</p>
+				<p><?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>?la={0}&amp;lo={1}&amp;hd={3}&amp;al={4}&amp;sp={5}</p>
 				<p>Set the <i>time buffer</i> to the lowest value of 1 minute.</p>
 			</div>
 			<div id="integration">
 				<h4>Integrate Follow URL in your HTML Website</h4>
 				<p>You can embed a map with your location in any website by including the following code in you HTML
 				header.</p>
-				<code>&lt;style&gt;
-	  #follwMap {
-	    height: 250px;
-	  }
-	&lt;/style&gt;
-	&lt;link rel=&quot;stylesheet&quot; href=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.css&quot; integrity=&quot;sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==&quot; crossorigin=&quot;anonymous&quot;/&gt;
-	&lt;script src=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.js&quot; integrity=&quot;sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
-	&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/follw.app.js&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
-	&lt;script&gt;
-	  new Follw(&quot;follwMap&quot;, &quot;<?= $protocol . $_SERVER['HTTP_HOST'] ?>/followid&quot;, 12);
-	&lt;/script&gt;</code>
+<code>&lt;style&gt;
+	#follwMap {
+		height: 250px;
+	}
+&lt;/style&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.css&quot;
+	integrity=&quot;sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==&quot;
+	crossorigin=&quot;anonymous&quot;/&gt;
+&lt;script src=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.js&quot;
+	integrity=&quot;sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==&quot;
+	crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/follw.js&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+	new Follw(&quot;follwMap&quot;, &quot;<?= $protocol . $_SERVER['HTTP_HOST'] ?>/followid&quot;, 12);
+&lt;/script&gt;</code>
 				<p>And include <code>&lt;div id=&quot;follwMap&quot;&gt;&lt;/div&gt;</code> wherever you want to show
 				the map with your location.</p>
 				<h4>Integrate Follow URL in your WordPress blog</h4>

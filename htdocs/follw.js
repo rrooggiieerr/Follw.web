@@ -5,6 +5,8 @@ class Follw {
 	textOverlay = null;
 	onLocationChangeHooks = [];
 	onIDDeletedHooks = [];
+	stopUpdate = false;
+	timeoutID = null;
 	
 	constructor(element, followURL, zoom = 12) {
 		this.element = element;
@@ -27,8 +29,8 @@ class Follw {
 	}
 
 	init() {
-		//this.map = L.map(this.element).fitWorld();
-		this.map = L.map(this.element);
+		this.element = document.getElementById(this.element);
+		this.map = L.map(this.element).fitWorld();
 		L.control.scale().addTo(this.map);
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>',
@@ -36,13 +38,59 @@ class Follw {
 		}).addTo(this.map);
 		
 		var _this = this;
-		setTimeout(function() {
-			_this.getLocation();
-		}, 1000);
+
+		var _onblur = window.onblur;
+		window.onblur = function() {
+			if(_onblur != null)
+				_onblur();
+			console.log("blur");
+			//_this.onInvisible();
+		}
+
+		var _onfocus = window.onfocus;
+		window.onfocus = function() {
+			if(_onfocus != null)
+				_onfocus();
+			console.log("focus");
+			//if(_this.element.offsetParent !== null)
+			//	_this.onVisible();
+		}
+
+		this.observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if(entry.intersectionRatio == 0) {
+					_this.onInvisible();
+				} else {
+					_this.onVisible();
+				}
+			});
+		}, { root: document.documentElement });
+		this.observer.observe(this.element);
 	}
 
-	setLocation(location, accuracy) {
-		if(location == null) {
+	onVisible() {
+		console.log("visible");
+		//this.invalidateSize();
+		this.stopUpdate = false;
+		if(this.timeoutID === null) {
+			/*this.timeoutID = setInterval(function() {
+				console.log("visible");
+			}, 500);*/
+			this.getLocation();
+		}
+	}
+	
+	onInvisible() {
+		console.log("invisible");
+		this.stopUpdate = true;
+		if(this.timeoutID !== null) {
+			clearTimeout(this.timeoutID);
+			this.timeoutID = null;
+		}
+	}
+
+	setMarker(location, accuracy) {
+		if(location === null) {
 			//_this.map.setView([0, 0], 2);
 			this.map.fitWorld();
 			this.map.zoomControl.disable();
@@ -62,7 +110,7 @@ class Follw {
 			}
 			
 			if(this.textOverlay == null) {
-				var leafletContainer = document.getElementById(this.element);
+				//var leafletContainer = document.getElementById(this.element);
 				this.textOverlay = document.createElement('div');
 				this.textOverlay.id = leafletContainer.id + '_textoverlay';
 				this.textOverlay.style.zIndex = 500;
@@ -70,7 +118,7 @@ class Follw {
 				this.textOverlay.style.textAlign = 'center';
 				this.textOverlay.style.top = '50%';
 				this.textOverlay.style.transform = 'translate(0%, -50%)';
-				leafletContainer.appendChild(this.textOverlay);
+				this.element.appendChild(this.textOverlay);
 			}
 			this.textOverlay.innerHTML = "No location is currently being shared";
 		} else {
@@ -107,7 +155,7 @@ class Follw {
 		}
 	}
 
-	getLocation() {
+	getLocation(once = false) {
 		var request = new XMLHttpRequest();
 		request.open('GET', this.followURL, true);
 		var _this = this;
@@ -118,16 +166,21 @@ class Follw {
 				if(typeof _this.lastTimestamp == "undefined" || _this.lastTimestamp == null || _this.lastTimestamp != data.timestamp) {
 					_this.lastTimestamp = data.timestamp;
 
-					_this.setLocation([data.latitude, data.longitude], data.accuracy);
+					_this.setMarker([data.latitude, data.longitude], data.accuracy);
 
 					_this.onLocationChangeHooks.forEach(function(hook) {
 						hook(data);
 					});
 				}
 
-				setTimeout(function() {
-					_this.getLocation();
-				}, data.interval * 1000);
+				if(!once && !_this.stopUpdate) {
+					var interval = 1;
+					if(typeof data.interval != "undefined")
+						interval = data.interval;
+					_this.timeoutID = setTimeout(function() {
+						_this.getLocation();
+					}, interval * 1000);
+				}
 			} else if (this.status == 410) {
 				// Deleted
 				_this.onIDDeletedHooks.forEach(function(hook) {
@@ -137,15 +190,15 @@ class Follw {
 				if(typeof _this.lastTimestamp == "undefined" || _this.lastTimestamp != null) {
 					_this.lastTimestamp = null;
 	
-					_this.setLocation(null, null);
+					_this.setMarker(null, null);
 					
 					_this.onLocationChangeHooks.forEach(function(hook) {
 						hook(null);
 					});
 				}
 
-				setTimeout(function() {
-					_this.getLocation();
+				_this.timeoutID = setTimeout(function() {
+					_this.getLocation(once);
 				}, 1000);
 			}
 		};
