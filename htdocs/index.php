@@ -1,2 +1,2 @@
 <?php
-require_once('../Follw.web/index.php');
+require_once('../Follw.web/application/index.php');
