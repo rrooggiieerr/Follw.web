@@ -29,7 +29,15 @@
 		<script src="//unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin="anonymous"></script>
 		<script>
 			$(function() {
-				$("#tabs").tabs();
+				$("#tabs").tabs({
+					activate: function( event, ui ) {
+						switch(ui.newPanel.attr('id')) {
+							case 'sharelocation':
+								map.invalidateSize();
+								break;
+						}
+					}
+				});
 			});
 			
 			var map = null;
@@ -353,7 +361,7 @@
 				-->
 				<h4>Configure OsmAnd</h4>
 				<p>Install OsmAnd from the Google Play Store or Apple App Store and use the logging functionality to
-				share your location<./p>
+				share your location.</p>
 				<p>You can configure OsmAnd to automatically log your current position when you are online</p>
 				<p><?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>?la={0}&lo={1}&hd={3}&al={4}&sp={5}</p>
 				<p>Set the <i>time buffer</i> to the lowest value of 1 minute.</p>
@@ -369,7 +377,7 @@
 	&lt;/style&gt;
 	&lt;link rel=&quot;stylesheet&quot; href=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.css&quot; integrity=&quot;sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==&quot; crossorigin=&quot;anonymous&quot;/&gt;
 	&lt;script src=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.js&quot; integrity=&quot;sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
-	&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/follw.app.js&quot;&gt;&lt;/script&gt;
+	&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/follw.app.js&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
 	&lt;script&gt;
 	  new Follw(&quot;follwMap&quot;, &quot;<?= $protocol . $_SERVER['HTTP_HOST'] ?>/followid&quot;, 12);
 	&lt;/script&gt;</code>
