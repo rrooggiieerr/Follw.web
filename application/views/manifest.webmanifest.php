@@ -4,9 +4,9 @@
 /* @var Integer $id */
 ?>
 {
-	"short_name": "Follw.app",
-	"name": "Follw.app: Sharing your location anonymous",
-	"description": "Anonymous location sharing service",
+	"short_name": "Follw",
+	"name": "Follw - Sharing your location with privacy",
+	"description": "Follw is a privacy focused location sharing service",
 	"start_url": "<?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>/",
 	"background_color": "#3367D6",
 	"display": "standalone",
