@@ -1,10 +1,11 @@
 <?php
 $servername = '127.0.0.1';
-$dbname = 'follw.app';
+$dbname = 'follw';
 $username = NULL;
 $password = NULL;
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 
-require_once('config.php');
+@require_once('config.php');
 
 $path = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
@@ -235,14 +236,14 @@ if($type == 'share' && $action == 'location' && ($method == 'POST' || count($_GE
 		
 		switch($name) {
 			case (substr($name, 0, 2) == 'la' ? TRUE : FALSE): // latitude
-				if($value == '' || $value < -90 || $value > 90) {
+				if($value === '' || $value < -90 || $value > 90) {
 					http_response_code(500);
 					exit();
 				}
 				$location["latitude"] = $value;
 				break;
 			case (substr($name, 0, 2) == 'lo' ? TRUE : FALSE): // longitude
-				if($value == '' || $value < -180 || $value > 180) {
+				if($value === '' || $value < -180 || $value > 180) {
 					http_response_code(500);
 					exit();
 				}
@@ -250,11 +251,11 @@ if($type == 'share' && $action == 'location' && ($method == 'POST' || count($_GE
 				break;
 			case (substr($name, 0, 2) == 'hd' ? TRUE : FALSE): // horizontal dilution of position
 			case (substr($name, 0, 2) == 'ac' ? TRUE : FALSE): // accuracy
-				if($value != '')
+				if($value !== '')
 					$location["accuracy"] = $value;
 				break;
 			case (substr($name, 0, 2) == 'al' ? TRUE : FALSE): // altitude
-				if($value != '')
+				if($value !== '')
 					$location["altitude"] = $value;
 				break;
 			case (substr($name, 0, 2) == 'be' ? TRUE : FALSE): // bearing
@@ -262,7 +263,7 @@ if($type == 'share' && $action == 'location' && ($method == 'POST' || count($_GE
 			case (substr($name, 0, 2) == 'di' ? TRUE : FALSE): // direction
 			case (substr($name, 0, 2) == 'az' ? TRUE : FALSE): // azimuth
 			case (substr($name, 0, 2) == 'co' ? TRUE : FALSE): // course
-				if($value != '') {
+				if($value !== '') {
 					if($value < 0 || $value > 360) {
 						http_response_code(500);
 						exit();
@@ -271,7 +272,7 @@ if($type == 'share' && $action == 'location' && ($method == 'POST' || count($_GE
 				}
 				break;
 			case (substr($name, 0, 2) == 'sp' ? TRUE : FALSE): // speed
-				if($value != '') {
+				if($value !== '') {
 					if($value < 0) {
 						http_response_code(500);
 						exit();
