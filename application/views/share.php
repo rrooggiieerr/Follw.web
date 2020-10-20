@@ -358,11 +358,11 @@
 		height: 250px;
 	}
 &lt;/style&gt;
-&lt;link rel=&quot;stylesheet&quot; href=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.css&quot;
-	integrity=&quot;sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==&quot;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;//unpkg.com/leaflet@1.7.1/dist/leaflet.css&quot;
+	integrity=&quot;sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM&quot;
 	crossorigin=&quot;anonymous&quot;/&gt;
-&lt;script src=&quot;//unpkg.com/leaflet@1.6.0/dist/leaflet.js&quot;
-	integrity=&quot;sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==&quot;
+&lt;script src=&quot;//unpkg.com/leaflet@1.7.1/dist/leaflet.js&quot;
+	integrity=&quot;sha384-RFZC58YeKApoNsIbBxf4z6JJXmh+geBSgkCQXFyh+4tiFSJmJBt+2FbjxW7Ar16M&quot;
 	crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
 &lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/follw.js&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
 &lt;script&gt;
