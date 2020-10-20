@@ -89,6 +89,24 @@ class Follw {
 		}
 	}
 
+	setTextOverlay(text) {
+		if(text) {
+			if(this.textOverlay == null) {
+				this.textOverlay = document.createElement('div');
+				this.textOverlay.id = this.element.id + '_textoverlay';
+				this.textOverlay.style.zIndex = 500;
+				this.textOverlay.style.position = 'relative';
+				this.textOverlay.style.textAlign = 'center';
+				this.textOverlay.style.top = '50%';
+				this.textOverlay.style.transform = 'translate(0%, -50%)';
+				this.element.appendChild(this.textOverlay);
+			}
+			this.textOverlay.innerHTML = text;
+		} else if(!this.textOverlay && this.textOverlay !== null) {
+			this.textOverlay.innerHTML = "";
+		}
+	}
+
 	setMarker(location, accuracy) {
 		if(location === null) {
 			//_this.map.setView([0, 0], 2);
@@ -109,17 +127,7 @@ class Follw {
 				this.accuracy = null;
 			}
 			
-			if(this.textOverlay == null) {
-				this.textOverlay = document.createElement('div');
-				this.textOverlay.id = this.element.id + '_textoverlay';
-				this.textOverlay.style.zIndex = 500;
-				this.textOverlay.style.position = 'relative';
-				this.textOverlay.style.textAlign = 'center';
-				this.textOverlay.style.top = '50%';
-				this.textOverlay.style.transform = 'translate(0%, -50%)';
-				this.element.appendChild(this.textOverlay);
-			}
-			this.textOverlay.innerHTML = "No location is currently being shared";
+			this.setTextOverlay("No location is currently being shared");
 		} else {
 			this.map.zoomControl.enable();;
 			this.map.dragging.enable();
@@ -148,9 +156,7 @@ class Follw {
 				this.accuracy = null;
 			}
 
-			if(this.textOverlay != null) {
-				this.textOverlay.innerHTML = "";
-			}
+			this.setTextOverlay(null);
 		}
 	}
 
@@ -185,6 +191,7 @@ class Follw {
 				_this.onIDDeletedHooks.forEach(function(hook) {
 					hook();
 				});
+				_this.setTextOverlay("Follw ID is deleted");
 			} else {
 				if(typeof _this.lastTimestamp == "undefined" || _this.lastTimestamp != null) {
 					_this.lastTimestamp = null;
