@@ -47,26 +47,26 @@ if($action == 'location') {
 	$location['timestamp'] = $result['timestamp'] + 0;
 	if($result['alias'] != null)
 		$location['alias'] = $result['alias'];
-		else
-			$location['alias'] = "Something";
-			// Calculate the recomended refresh interval based on timestamp
-			if(date_create()->getTimestamp() - $result['timestamp'] < 60)
-				$location['interval'] = 1;
-				else
-					$location['interval'] = 5;
-					
-					switch ($format) {
-						case 'html':
-							require_once(dirname(__DIR__) . '/views/follow.php');
-							break;
-						case 'json':
-							header('Content-Type: application/json');
-							echo(json_encode($location));
-							break;
-							// ToDo Implement other formats
-						default:
-							http_response_code(500);
-					}
-					
-					exit();
+	else
+		$location['alias'] = "Something";
+	// Calculate the recomended refresh interval based on timestamp
+	if(date_create()->getTimestamp() - $result['timestamp'] < 60)
+		$location['interval'] = 1;
+	else
+		$location['interval'] = 5;
+	
+	switch ($format) {
+		case 'html':
+			require_once(dirname(__DIR__) . '/views/follow.php');
+			break;
+		case 'json':
+			header('Content-Type: application/json');
+			echo(json_encode($location));
+			break;
+			// ToDo Implement other formats
+		default:
+			http_response_code(500);
+	}
+	
+	exit();
 }
