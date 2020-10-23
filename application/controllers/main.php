@@ -48,12 +48,12 @@ if($method === 'GET' && $path === '/generatesharingid') {
 		exit();
 	}
 	
-	header('Location: /' . bin2hex($id));
+	header('Location: /' . strtoupper(bin2hex($id)));
 	exit();
 }
 
 $matches = NULL;
-if(preg_match('/^\/([0-9a-f]{16})([\/.].*)?$/', $path, $matches) == TRUE) {
+if(preg_match('/^\/([0-9a-fA-F]{16})([\/.].*)?$/', $path, $matches) == TRUE) {
 	$id = $matches[1];
 	$id = hex2bin(substr($path, 1, 16));
 
@@ -64,7 +64,7 @@ if(preg_match('/^\/([0-9a-f]{16})([\/.].*)?$/', $path, $matches) == TRUE) {
 
 	try {
 		// See if it is a sharing or follow ID
-		$query = 'SELECT `type` FROM `issuedids` WHERE `id` = ?';
+		$query = 'SELECT `type`, `config` FROM `issuedids` WHERE `id` = ?';
 		$statement = $pdo->prepare($query);
 		$result = $statement->execute([$id]);
 		
@@ -78,6 +78,11 @@ if(preg_match('/^\/([0-9a-f]{16})([\/.].*)?$/', $path, $matches) == TRUE) {
 		
 		$result = $statement->fetch();
 		$type = $result['type'];
+		$config = $result['config'];
+		if($config)
+			$config = json_decode($config, TRUE);
+		else
+			$config = [];
 	} catch(PDOException $e) {
 		//ToDo Log error
 		//$e->getCode()
@@ -117,9 +122,9 @@ if(preg_match('/^\/([0-9a-f]{16})([\/.].*)?$/', $path, $matches) == TRUE) {
 		exit();
 	}
 	
-	if($type == 'follow') {
+	if($type === 'follow') {
 		require_once(dirname(__DIR__) . '/controllers/follow.php');
-	} else if($type == 'share') {
+	} else if($type === 'share') {
 		require_once(dirname(__DIR__) . '/controllers/share.php');
 	}
 }
