@@ -21,6 +21,7 @@
 								<li><a class="text-muted" href="/apidoc">API documentation</a></li>
 								<li><a class="text-muted" href="/wordpress">WordPress plugin</a></li>
 								<li><a class="text-muted" href="/htmlsnippet">HTML snippet</a></li>
+								<li><a class="text-muted" href="https://github.com/rrooggiieerr/Follw.web" target="_blank">Python client on GitHub</a></li>
 							</ul>
 						</div>
 					</div>

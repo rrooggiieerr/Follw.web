@@ -3,12 +3,20 @@ $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVE
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Catch all
-if($path === '/') {
-	// If /
-	// Show introduction
-	require_once(dirname(__DIR__) . '/views/intro.php');
-	exit();
+// Static content
+switch($path) {
+	case '/':
+		require_once(dirname(__DIR__) . '/views/intro.php');
+		exit();
+		break;
+	case '/privacy':
+	case '/terms':
+	case '/htmlsnippet':
+	case '/wordpress':
+	case '/osmand':
+		require_once(dirname(__DIR__) . '/views/static.php');
+		exit();
+		break;
 }
 
 try {
