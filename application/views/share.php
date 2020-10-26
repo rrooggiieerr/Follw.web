@@ -2,6 +2,7 @@
 // Fixes false "Variable is not defined" validation errors for variables created in other files
 /* @var String $protocol */
 /* @var Integer $shareid */
+/* @var Object $config */
 ?>
 <!doctype html>
 <html lang="en">
