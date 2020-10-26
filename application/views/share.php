@@ -1,19 +1,33 @@
 <?php
 // Fixes false "Variable is not defined" validation errors for variables created in other files
 /* @var String $protocol */
-/* @var Integer $id */
+/* @var Integer $shareid */
 ?>
 <!doctype html>
 <html lang="en">
 	<head>
-		<title>Follw - Sharing your location with privacy</title>
-		<link rel="manifest" href="/<?=bin2hex($id)?>/manifest.webmanifest">
+		<title>Follw · Sharing your location with privacy</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+		<link rel="manifest" href="/<?=$shareid?>/manifest.webmanifest" />
+<?php // Icons
+/* TODO
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+		<link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+		<link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+		<link rel="icon" href="/favicon.ico">
+		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#563d7c">
+		<meta name="msapplication-config" content="/browserconfig.xml">
+		<meta name="theme-color" content="#563d7c">
+*/
+?>
 <?php // Styles ?>
+		<link rel="stylesheet" href="https://unpkg.com/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+			integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+			crossorigin="anonymous"/>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
 			crossorigin="anonymous"/>
-		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
-			crossorigin="anonymous">
 		<style>
 			#enablegeolocation {
 				display: none;
@@ -23,136 +37,165 @@
 				height: 250px;
 			}
 			
-			#followurls tbody td.followurl {
-				font-family: monospace;
-			}
-
 			code {
 				display: block;
 				white-space: pre;
 				background-color: #F8F8F8;
 			}
 		</style>
+	</head>
+	<body>
+		<main role="main">
+			<div class="container">
+				<div class="jumbotron">
+					<h1>Follw <small class="h4 text-muted">· Sharing your location with privacy</small></h1>
+				</div>
+				<ul class="nav nav-tabs">
+					<li class="nav-item"><a class="nav-link active" id="welcome-tab" data-toggle="tab" href="#welcome" role="tab" aria-controls="welcome" aria-selected="true">Welcome to Follw</a></li>
+					<li class="nav-item"><a class="nav-link" id="sharelocation-tab" data-toggle="tab" href="#sharelocation" role="tab" aria-controls="sharelocation" aria-selected="false">Share your location</a></li>
+					<li class="nav-item"><a class="nav-link" id="followers-tab" data-toggle="tab" href="#followers" role="tab" aria-controls="followers" aria-selected="false">Followers</a></li>
+				</ul>
+				<div class="tab-content">
+					<div class="tab-pane active" id="welcome" role="tabpanel" aria-labelledby="welcome-tab">
+						<p>Your Location Sharing ID: <b><?= $shareid ?></b></p>
+						<p>To share your location generate a Follow ID, <b>don't share this Location
+						Sharing ID with your followers</b>.</p>
+						<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
+						<p>Because Follw doesn't have your contact details this Location Sharing ID can not be recovered if
+						you lose it.</p>
+						<h2>Configuration</h2>
+						<p>You can configure an alias which your Followers see so they know who they are following. This is not
+						required and can be anything, it does not have to be your name or anything that gives away who you
+						are.</p>
+						<form action="#" id="configuration">
+							Alias: <input name="alias" type="text" value="<?= $config['alias'] ?>"/>
+						</form>
+					</div>
+					<div class="tab-pane" id="sharelocation" role="tabpanel" aria-labelledby="sharelocation-tab">
+						<p>Select the location you like to share on the map. <button id="deletelocation" class="btn btn-primary btn-sm">Delete location</button></p>
+						<div id="shareLocationMap"></div>
+						<div class="container">
+							<div class="row">
+								<div class="col-md" id="enablegeolocation">
+									<h4>Get your location from your device</h4>
+									<p>The device you're using is capable to share it's location.</p>
+									<button id="devicelocation" class="btn btn-primary btn-sm">Request device location</button>
+								</div>
+								<div class="col-md">
+									<h4>Text input</h4>
+									<p>Type the latitude and longitude of the location you like to share.</p>
+									<form action="#">
+										<input type="text" id="textlocation"/>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="tab-pane" id="followers" role="tabpanel" aria-labelledby="followers-tab">
+						<table id="followurls" class="table table-striped table-sm">
+							<thead>
+								<tr>
+									<th>Follow ID/Reference</th>
+									<th>Alias Override</th>
+									<th>Delay</th>
+									<th>Expires</th>
+									<th>Enabled</th>
+									<th>Delete</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+						<p>Create a Follow ID and manage who is allowed to see your location.</p>
+						<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#generatefollowid-modal">Create Follow ID</button>
+						<div id="generatefollowid-modal" class="modal">
+							<div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title">Create a Follow ID</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="modal-body">
+										<form action="#" id="generatefollowurl">
+											<span>Reference for your convenience</span><input name="reference" type="text" placeholder="Reference"/><br/>
+											<span>Alias override</span><input name="alias" type="text" placeholder="Alias override"/><br/>
+											<span>Delay</span><input name="delay" type="checkbox"/><br/>
+											<span>Expires</span><input name="expires" type="datetime-local"/><br/>
+											<span>Enabled</span><input name="enabled" type="checkbox"/><br/>
+											<input type="submit" value="Create Follow ID"/><br/>
+										</form>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										<button type="button" class="btn btn-primary">Create Follow ID</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+<?php include_once('footer.php');?>
+			</div>
+		</main>
 <?php // Scripts ?>
-		<script src="https://unpkg.com/jquery@3.5.1/dist/jquery.js"
-			integrity="sha384-/LjQZzcpTzaYn7qWqRIWYC5l8FWEZ2bIHIz0D73Uzba4pShEcdLdZyZkI4Kv676E"
+		<script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"
+			integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2"
 			crossorigin="anonymous"></script>
-		<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"  crossorigin="anonymous"></script>
+		<script src="https://unpkg.com/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+			crossorigin="anonymous"></script>
 		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha384-RFZC58YeKApoNsIbBxf4z6JJXmh+geBSgkCQXFyh+4tiFSJmJBt+2FbjxW7Ar16M"
 			crossorigin="anonymous"></script>
 		<script src="/follw.js" crossorigin="anonymous"></script>
 		<script>
-			function onDelete() {
-				location.reload();
+// 			function onDelete() {
+// 				location.reload();
+// 			}
+
+			// Configuration
+			function submitConfig(config) {
+				console.log(config);
+				$.post("/<?=$shareid?>/config", config, function() {
+					console.log("Yay!");
+				});
 			}
 
- 			var shareLocationMap = new Follw("shareLocationMap", "/<?=bin2hex($id)?>", 12);
- 			shareLocationMap.onIDDeleted(onDelete);
-
 			$(function() {
-				$("#tabs").tabs({
-					activate: function( event, ui ) {
-						switch(ui.newPanel.attr('id')) {
-							case 'sharelocation':
-								shareLocationMap.invalidateSize();
-								break;
-						}
+				$('#configuration input[name="alias"]').on("keydown", function(e) {
+					if(e.keyCode == 13) { // Enter
+						var config = {};
+						config['alias'] = $(this).val();
+						submitConfig(config);
+						event.preventDefault();
 					}
 				});
 			});
-			
-			function setMyLocation(location) {
-				$.post("/<?=bin2hex($id)?>", location, function() {
+
+			// Location sharing
+			// Create the share location map
+			var shareLocationMap = new Follw("shareLocationMap", "/<?=$shareid?>", 12);
+			shareLocationMap.onIDDeleted(function () { location.reload(); });
+
+			function setLocation(location) {
+				$.post("/<?=$shareid?>", location, function() {
 					shareLocationMap.getLocation(true);
 				});
 			}
 		
-			function updateFollowURLs() {
-				$.get("/<?=bin2hex($id)?>/followers.json", function(data) {
-					var rows = $('<tbody></tbody>');
-					data.forEach(function(entry) {
- 						var row = $('<tr></tr>');
-
- 						if(entry['enabled'] && !entry['expired'])
-							$(row).append(`<td class="followurl enabled"><a href="${entry['url']}" target="_blank">${entry['url']}</a></td>`);
- 						else
-							$(row).append(`<td class="followurl disabled">${entry['url']}</td>`);
-
-						if(entry['reference'] != null)
-							$(row).append(`<td class="reference">${entry['reference']}</td>`);
-						else
-							$(row).append('<td class="reference"></td>');
-
-						if(entry['alias'] != null)
-							$(row).append(`<td class="alias">${entry['alias']}</td>`);
-						else
-							$(row).append('<td class="alias"></td>');
-
-						if(entry['enabled'])
-							$(row).append('<td><button class="disablefollowid">Disable</button></td>');
-						else
-							$(row).append('<td><button class="enablefollowid">Enable</button></td>');
-						$('.disablefollowid', row).click(entry['id'], function(event) {
-							disableFollowID(event.data);
-						});
-						$('.enablefollowid', row).click(entry['id'], function(event) {
-							enableFollowID(event.data);
-						});
-
-						if(entry['expired'])
-							$(row).append('<td class="expires">Expired</td>');
-						else if(entry['expires'] != null)
-							$(row).append(`<td class="expires">${entry['expires']}</td>`);
-						else
-							$(row).append('<td class="expires">Never</td>');
-
-						$(row).append(`<td><span class="deletefollowid">&#x1F5D1;</span></td>`);
-						$('.deletefollowid', row).click(entry['id'], function(event) {
-							deleteFollowID(event.data);
-						});
-
- 						$(rows).append(row);
-					});
-					$('table#followurls tbody').replaceWith(rows);
+			$(function() {
+				// Share location map
+				$('a#sharelocation-tab').on('shown.bs.tab', function (e) {
+					shareLocationMap.invalidateSize();
 				});
-			}
-			
-			function generateFollowID(followid) {
-				$.post("/<?=bin2hex($id)?>/generatefollowid", { reference:null }, function() {
-					updateFollowURLs();
-				});
-			}
 
-			function updateFollowID(followid) {
-				$.post("/<?=bin2hex($id)?>/followid/" + follower, { }, function() {
-					updateFollowURLs();
-				});
-			}
-
-			function enableFollowID(followid) {
-				$.get("/<?=bin2hex($id)?>/follower/" + followid + "/enable", function() {
-					updateFollowURLs();
-				});
-			}
-			
-			function disableFollowID(followid) {
-				$.get("/<?=bin2hex($id)?>/follower/" + followid + "/disable", function() {
-					updateFollowURLs();
-				});
-			}
-
-			function deleteFollowID(followid) {
-				$.get("/<?=bin2hex($id)?>/follower/" + followid + "/delete", function() {
-					updateFollowURLs();
-				});
-			}
-			
-			$().ready(function() {
 				shareLocationMap.map.on('click', function(event) {
-					setMyLocation({latitude: event.latlng.lat, longitude: event.latlng.lng});
+					setLocation({latitude: event.latlng.lat, longitude: event.latlng.lng});
 				});
 
+				// Share location Geolocation API
 				// JavaScript Geolocation API can only be used when using SSL
 				if(window.location.protocol == 'https:' && 'geolocation' in navigator) {
 					$('#enablegeolocation').show();
@@ -160,12 +203,13 @@
 					$('#devicelocation').click(function() {
 						$('#devicelocation').prop('disabled', true);
 						navigator.geolocation.getCurrentPosition(function(position) {
-							setMyLocation(position.coords);
+							setLocation(position.coords);
 							$('#devicelocation').prop('disabled', false);
 						});
 					});
 				}
 
+				// Share location text input
 				$('#textlocation').on("keydown", function(e) {
 					if(e.keyCode == 13) { // Enter
 						var numericRegex = /^\s*([0-9]*[\.,]?[0-9]*)\s([0-9]*[\.,]?[0-9]*)\s*$/;
@@ -194,26 +238,101 @@
 						}
 
 						if(latitude != null && longitude != null) {
-							setMyLocation({latitude: latitude, longitude: longitude});
+							setLocation({latitude: latitude, longitude: longitude});
 						}
 
 						event.preventDefault();
 					}
 				});
+			});
+			
+			// Managing followers
+			function updateFollowIDs() {
+				$.get("/<?=$shareid?>/followers.json", function(data) {
+					var rows = $('<tbody></tbody>');
+					data.forEach(function(entry) {
+						var row = $('<tr></tr>');
 
-				// Configuration
-				$('#configuration input[name="alias"]').on("keydown", function(e) {
-					if(e.keyCode == 13) { // Enter
-						var val = $(this).val();
+						var reference = entry['id'];
+						if(entry['reference'] != null)
+							reference = entry['reference'];
 						
-						console.log(val);
+						if(entry['enabled'] && !entry['expired'])
+							$(row).append(`<td class="followurl enabled"><a href="${entry['url']}" target="_blank">${reference}</a></td>`);
+						else
+							$(row).append(`<td class="followurl disabled">${reference}</td>`);
 
-						return false;
-					}
+						if(entry['alias'] != null)
+							$(row).append(`<td class="alias">${entry['alias']}</td>`);
+						else
+							$(row).append('<td class="alias"></td>');
+
+						if(entry['delay'])
+							$(row).append('<td class="delay"></td>');
+						else
+							$(row).append('<td class="delay">Realtime</td>');
+
+						if(entry['expired'])
+							$(row).append('<td class="expires">Expired</td>');
+						else if(entry['expires'] != null)
+							$(row).append(`<td class="expires">${entry['expires']}</td>`);
+						else
+							$(row).append('<td class="expires">Never</td>');
+
+						if(entry['enabled'])
+							$(row).append(`<td><input class="form-check-input" type="checkbox" id="disable${entry['id']}" checked="checked"/></td>`);
+						else
+							$(row).append(`<td><input class="form-check-input" type="checkbox" id="enable${entry['id']}"/></td>`);
+						$(`#disable${entry['id']}`, row).click(entry['id'], function(event) {
+							disableFollowID(event.data);
+						});
+						$(`#enable${entry['id']}`, row).click(entry['id'], function(event) {
+							enableFollowID(event.data);
+						});
+
+						$(row).append(`<td><span class="deletefollowid">&#x1F5D1;</span></td>`);
+						$('.deletefollowid', row).click(entry['id'], function(event) {
+							deleteFollowID(event.data);
+						});
+
+						$(rows).append(row);
+					});
+					$('table#followurls tbody').replaceWith(rows);
 				});
-				
-				// Followers
-				updateFollowURLs();
+			}
+			
+			function generateFollowID(followid) {
+				$.post("/<?=$shareid?>/generatefollowid", { reference:null }, function() {
+					updateFollowIDs();
+				});
+			}
+
+			function updateFollowID(followid) {
+				$.post("/<?=$shareid?>/followid/" + follower, { }, function() {
+					updateFollowIDs();
+				});
+			}
+
+			function enableFollowID(followid) {
+				$.get("/<?=$shareid?>/follower/" + followid + "/enable", function() {
+					updateFollowIDs();
+				});
+			}
+			
+			function disableFollowID(followid) {
+				$.get("/<?=$shareid?>/follower/" + followid + "/disable", function() {
+					updateFollowIDs();
+				});
+			}
+
+			function deleteFollowID(followid) {
+				$.get("/<?=$shareid?>/follower/" + followid + "/delete", function() {
+					updateFollowIDs();
+				});
+			}
+			
+			$(function() {
+				updateFollowIDs();
 
 				$('#generatefollowurl').submit(function() {
 					var reference = $('input[name="reference"]', this).val();
@@ -251,134 +370,12 @@
 						}
 					}
 
-					$.post("/<?=bin2hex($id)?>/generatefollowid", { reference:reference, alias:alias, enabled:enabled, expires:expires }, function() {
-						updateFollowURLs();
+					$.post("/<?=$shareid?>/generatefollowid", { reference:reference, alias:alias, enabled:enabled, expires:expires }, function() {
+						updateFollowIDs();
 					});
 					event.preventDefault();
 				});
 			});
 		</script>
-	</head>
-	<body>
-		<h1>Follw</h1>
-		<h2>Sharing your location with privacy</h2>
-		<div  id="tabs">
-			<ul>
-				<li><a href="#welcome">Welcome to Follw</a></li>
-				<li><a href="#sharelocation">Share your location</a></li>
-				<li><a href="#followers">Followers</a></li>
-				<li><a href="#apps">Use an app</a></li>
-				<li><a href="#integration">Integration</a></li>
-				<li><a href="#privacy">Privacy</a></li>
-			</ul>
-			<div id="welcome">
-				<p>Your Location Sharing URL: <?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?></p>
-				<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
-				<p>Because Follw doesn't have your contact details this Location Sharing URL can not be recovered if
-				you lose it.</p>
-				<p>To share your location with followers generate a Location Follow URL, <b>don't share this Location
-				Sharing URL with your followers</b>.</p>
-				<h2>Configuration</h2>
-				<p>You can configure an alias which your Followers see so they know who they are following. This is not
-				required and can be anything, it does not have to be your name or anything that gives away who you
-				are.</p>
-				<form action="#" id="configuration">
-					Alias: <input name="alias" type="text"/>
-				</form>
-			</div>
-			<div id="sharelocation">
-				<h3>Set your location</h3>
-				<p>Different methods for sharing your location are available.</p>
-				<div id="enablegeolocation">
-					<h4>Get your location from your device</h4>
-					<p>The device you're using to access this Location Sharing URL is capable to share it's
-					location.</p>
-					<button id="devicelocation">Request device location</button>
-				</div>
-				<h4>Select your location on the map</h4>
-				<p>Select a location on the map, just click on the position you like to share the location of.</p>
-				<div id="shareLocationMap"></div>
-				<h4>Text input</h4>
-				<p>You can type the latitude and longitude of the location you like to share.</p>
-				<form action="#">
-					<input type="text" id="textlocation"/>
-				</form>
-			</div>
-			<div id="followers">
-				<h3>Share your location with followers</h3>
-				<p>To have your location followed by others you can generate Follow URLs and manage who is allowed to
-				see your location.</p>
-				<h4>Your Follow URLs</h4>
-				<table id="followurls">
-					<thead>
-						<tr>
-							<td>Follow URL</td>
-							<td>Reference</td>
-							<td>Alias</td>
-							<td>Disabled</td>
-							<td>Expires</td>
-						</tr>
-					</thead>
-					<tbody>
-					</tbody>
-				</table>
-				<p>Create a new unique Follow URL</p>
-				<form action="#" id="generatefollowurl">
-					<input name="reference" type="text" placeholder="Reference for your convenience"/>
-					<input name="alias" type="text" placeholder="Alias override"/>
-					<input name="enabled" type="checkbox"/>
-					<input name="expires" type="datetime-local"/>
-					<input type="submit" value="Create Follow URL"/>
-				</form>
-			</div>
-			<div id="apps">
-				<!--
-				<h4>Install the Follw app</h4>
-				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-				et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-				aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-				dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-				officia deserunt mollit anim id est laborum.</p>
-				<p>Install the <a href="#">Follw app from the Google Play Store</a></p>
-				<p>Install the <a href="#">Follw app from the Apple App Store</a></p>
-				-->
-				<h4>Configure OsmAnd</h4>
-				<p>Install OsmAnd from the Google Play Store or Apple App Store and use the logging functionality to
-				share your location.</p>
-				<p>You can configure OsmAnd to automatically log your current position when you are online</p>
-				<p><?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>?la={0}&amp;lo={1}&amp;hd={3}&amp;al={4}&amp;sp={5}</p>
-				<p>Set the <i>time buffer</i> to the lowest value of 1 minute.</p>
-			</div>
-			<div id="integration">
-				<h4>Integrate Follow URL in your HTML Website</h4>
-				<p>You can embed a map with your location in any website by including the following code in you HTML
-				header.</p>
-<code>&lt;style&gt;
-	#follwMap {
-		height: 250px;
-	}
-&lt;/style&gt;
-&lt;link rel=&quot;stylesheet&quot; href=&quot;//unpkg.com/leaflet@1.7.1/dist/leaflet.css&quot;
-	integrity=&quot;sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM&quot;
-	crossorigin=&quot;anonymous&quot;/&gt;
-&lt;script src=&quot;//unpkg.com/leaflet@1.7.1/dist/leaflet.js&quot;
-	integrity=&quot;sha384-RFZC58YeKApoNsIbBxf4z6JJXmh+geBSgkCQXFyh+4tiFSJmJBt+2FbjxW7Ar16M&quot;
-	crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;//<?= $_SERVER['HTTP_HOST'] ?>/follw.js&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-	new Follw(&quot;follwMap&quot;, &quot;<?= $protocol . $_SERVER['HTTP_HOST'] ?>/followid&quot;, 12);
-&lt;/script&gt;</code>
-				<p>And include <code>&lt;div id=&quot;follwMap&quot;&gt;&lt;/div&gt;</code> wherever you want to show
-				the map with your location.</p>
-				<h4>Integrate Follow URL in your WordPress blog</h4>
-				<p>Follw.app WordPress plugin is yet to be developped.</p>
-				<h4>Share locations from your Python compatible devices</h4>
-				<p>Get the Follw.app Python 3 client on
-				<a href="https://github.com/rrooggiieerr/Follw.py" target="_blank">GitHub</a>.</p>
-			</div>
-			<div id="privacy">
-				<p>Privacy statement goes here.</p>
-			</div>
-		</div>
 	</body>
 </html>
