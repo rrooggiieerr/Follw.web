@@ -1,10 +1,13 @@
+<?php
+// Fixes false "Variable is not defined" validation errors for variables created in other files
+/* @var String $path */
+?>
 <!doctype html>
 <html lang="en">
 	<head>
 		<title>Follw · Sharing your location with privacy</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
-		<link rel="manifest" href="/<?=$shareid?>/manifest.webmanifest" />
 <?php // Icons
 /* TODO
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
@@ -40,7 +43,7 @@
 		<main role="main">
 			<div class="container">
 				<div class="jumbotron">
-					<h1>Follw <small class="h4 text-muted">· Sharing your location with privacy</small></h1>
+					<h1><a href="/">Follw</a> <small class="h4 text-muted">· Sharing your location with privacy</small></h1>
 				</div>
 				<div class="tab-content">
 <?php include_once(dirname(__DIR__) . '/views' . $path. '.php'); ?>

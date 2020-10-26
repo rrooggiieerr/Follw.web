@@ -45,7 +45,7 @@
 								<h2>Privacy focused</h2>
 								<p>Follw doesn't store any credentials other than your Sharing ID, location and configuration
 								parameters.</p>
-								<p><a class="btn btn-secondary" href="#" role="button">Read the Privacy Statement &raquo;</a></p>
+								<p><a class="btn btn-secondary" href="/privacy" role="button">Read the Privacy Statement &raquo;</a></p>
 							</div>
 							<div class="col-md">
 								<h2>Add free</h2>
@@ -60,7 +60,7 @@
 							<div class="col-md">
 								<h2>Documented API</h2>
 								<p>Easy integration with mapping software, tracking hardware and your custom software.</p>
-								<p><a class="btn btn-secondary" href="/api" role="button" target="_blank">Read the documentation &raquo;</a></p>
+								<p><a class="btn btn-secondary" href="/apidoc" role="button" target="_blank">Read the documentation &raquo;</a></p>
 							</div>
 							<div class="col-md">
 								<h2>Open Source</h2>
