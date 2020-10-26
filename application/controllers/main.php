@@ -19,6 +19,8 @@ switch($path) {
 		break;
 }
 
+header('X-Robots-Tag: noindex');
+
 try {
 	$pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password);
 	// set the PDO error mode to exception
@@ -55,7 +57,8 @@ if($method === 'GET' && $path === '/generatesharingid') {
 		http_response_code(500);
 		exit();
 	}
-	
+
+	http_response_code(303);
 	header('Location: /' . strtoupper(bin2hex($id)));
 	exit();
 }
