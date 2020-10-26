@@ -117,6 +117,7 @@ if(preg_match('/^\/([0-9a-fA-F]{16})([\/.].*)?$/', $path, $matches) == TRUE) {
 	}
 
 	if($remainer === '/manifest.webmanifest') {
+		$id = strtoupper(bin2hex($id));
 		header('Content-Type: application/json');
 		require_once(dirname(__DIR__) . '/views/manifest.webmanifest.php');
 		exit();
