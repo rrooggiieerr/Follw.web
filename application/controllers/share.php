@@ -279,6 +279,7 @@ function deleteSharer($shareid) {
 
 function generateFollowID($shareid) {
 	global $pdo;
+	global $idlength;
 	$enabled = FALSE;
 	$expires = NULL;
 	$delay = NULL;
