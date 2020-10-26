@@ -7,6 +7,7 @@
 /* @var Object $pdo */
 /* @var String $protocol */
 /* @var Integer $id */
+/* @var Integer $idlength */
 
 if($action === 'location') {
 	if($_SERVER['REQUEST_METHOD'] === 'POST' || count($_GET) !== 0)
@@ -35,15 +36,15 @@ if($action === 'location') {
 			case '/followers.json':
 				getFollowers($id);
 				break;
-			case (preg_match('/^\/follower\/([0-9a-fA-Z]{16})\/enable$/', $remainer, $matches) ? TRUE : FALSE):
+			case (preg_match('/^\/follower\/([0-9a-fA-Z]{' . (2 * $idlength) . '})\/enable$/', $remainer, $matches) ? TRUE : FALSE):
 				$followid = hex2bin($matches[1]);
 				enableFollower($id, $followid);
 				break;
-			case (preg_match('/^\/follower\/([0-9a-fA-Z]{16})\/disable$/', $remainer, $matches) ? TRUE : FALSE):
+			case (preg_match('/^\/follower\/([0-9a-fA-Z]{' . (2 * $idlength) . '})\/disable$/', $remainer, $matches) ? TRUE : FALSE):
 				$followid = hex2bin($matches[1]);
 				disableFollower($id, $followid);
 				break;
-			case (preg_match('/^\/follower\/([0-9a-fA-Z]{16})\/delete$/', $remainer, $matches) ? TRUE : FALSE):
+			case (preg_match('/^\/follower\/([0-9a-fA-Z]{' . (2 * $idlength) . '})\/delete$/', $remainer, $matches) ? TRUE : FALSE):
 				$followid = hex2bin($matches[1]);
 				deleteFollower($id, $followid);
 				break;
@@ -267,7 +268,7 @@ function deleteSharer($shareid) {
 	} catch(PDOException $e) {
 		//ToDo Log error
 		//$e->getCode()
-		$dbh->rollBack();
+		$pdo->rollBack();
 		http_response_code(500);
 		exit();
 	}
@@ -305,7 +306,7 @@ function generateFollowID($shareid) {
 	$failureconter = 0;
 	do {
 		// Generate unique ID
-		$followid = random_bytes(8);
+		$followid = random_bytes($idlength);
 		
 		$failure = FALSE;
 		try {

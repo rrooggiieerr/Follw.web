@@ -34,7 +34,7 @@ if($method === 'GET' && $path === '/generatesharingid') {
 	$failureconter = 0;
 	do {
 		// Generate unique ID
-		$id = random_bytes(8);
+		$id = random_bytes($idlength);
 		
 		$failure = FALSE;
 		try {
@@ -61,9 +61,9 @@ if($method === 'GET' && $path === '/generatesharingid') {
 }
 
 $matches = NULL;
-if(preg_match('/^\/([0-9a-fA-F]{16})([\/.].*)?$/', $path, $matches) == TRUE) {
+if(preg_match('/^\/([0-9a-fA-F]{' . (2 * $idlength) . '})([\/.].*)?$/', $path, $matches) == TRUE) {
 	$id = $matches[1];
-	$id = hex2bin(substr($path, 1, 16));
+	$id = hex2bin($id);
 
 	$remainer = '';
 	if(count($matches) === 3) {
