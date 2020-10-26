@@ -19,15 +19,16 @@ if($method == 'POST') {
 if($action == 'location') {
 	try {
 		// Get location from database
-		$query = 'SELECT UNIX_TIMESTAMP(l.`timestamp`) AS `timestamp`, l.`location`, IF(fid.`alias` IS NOT NULL, fid.`alias`, sid.`alias`) AS "alias"
-			FROM `locations` l, `followers` f, `issuedids` fid, `issuedids` sid
-			WHERE fid.`id` = f.`followid` AND sid.`id` = f.`id` AND l.`id` = sid.`id` AND f.`enabled` = 1 AND (f.`expires` IS NULL OR f.`expires` <= NOW()) AND f.`followid` = ?';
+		$query = 'SELECT UNIX_TIMESTAMP(l.`timestamp`) AS `timestamp`, l.`location`, sid.`config` AS `sharerConfig`
+			FROM `locations` l, `followers` f, `issuedids` sid
+			WHERE sid.`id` = f.`id` AND l.`id` = sid.`id` AND f.`enabled` = 1 AND (f.`expires` IS NULL OR f.`expires` <= NOW()) AND f.`followid` = ?';
 		$statement = $pdo->prepare($query);
 		$statement->execute([$id]);
 		
 		if($statement->rowCount() != 1) {
 			if($format == 'html') {
 				$location = null;
+				$followid = strtoupper(bin2hex($id));
 				require_once(dirname(__DIR__) . '/views/follow.php');
 			} else
 				http_response_code(204);
@@ -43,10 +44,13 @@ if($action == 'location') {
 		exit();
 	}
 	
+	$sharerConfig = json_decode($result['sharerConfig'], TRUE);
 	$location = json_decode($result['location'], TRUE);
 	$location['timestamp'] = $result['timestamp'] + 0;
-	if($result['alias'] != null)
-		$location['alias'] = $result['alias'];
+	if(array_key_exists('alias', $config) && $config['alias'])
+		$location['alias'] = $config['alias'];
+	else if(array_key_exists('alias', $sharerConfig) && $sharerConfig['alias'])
+		$location['alias'] = $sharerConfig['alias'];
 	else
 		$location['alias'] = "Something";
 	// Calculate the recomended refresh interval based on timestamp
@@ -57,6 +61,7 @@ if($action == 'location') {
 	
 	switch ($format) {
 		case 'html':
+			$followid = strtoupper(bin2hex($id));
 			require_once(dirname(__DIR__) . '/views/follow.php');
 			break;
 		case 'json':

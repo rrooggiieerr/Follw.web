@@ -18,8 +18,20 @@ if(isset($location)) {
 <html lang="en">
 	<head>
 		<title><?= $title ?></title>
-		<link rel="manifest" href="/<?=bin2hex($id)?>/manifest.webmanifest">
+		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<link rel="manifest" href="/<?=$followid?>/manifest.webmanifest" />
+<?php // Icons
+/* TODO
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+		<link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+		<link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+		<link rel="icon" href="/favicon.ico">
+		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#563d7c">
+		<meta name="msapplication-config" content="/browserconfig.xml">
+		<meta name="theme-color" content="#563d7c">
+*/
+?>
 <?php // Styles ?>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
@@ -101,7 +113,7 @@ if(isset($location)) {
 				location.reload();
 			}
 
- 			var follw = new Follw("follwMap", "/<?=bin2hex($id)?>", 12);
+ 			var follw = new Follw("follwMap", "/<?=$followid?>", 12);
  			follw.onLocationChange(onLocationChange);
  			follw.onIDDeleted(onDelete);
  			
