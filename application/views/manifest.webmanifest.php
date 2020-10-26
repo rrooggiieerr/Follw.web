@@ -7,10 +7,10 @@
 	"short_name": "Follw",
 	"name": "Follw - Sharing your location with privacy",
 	"description": "Follw is a privacy focused location sharing service",
-	"start_url": "<?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>/",
+	"start_url": "<?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=$id?>/",
 	"background_color": "#3367D6",
 	"display": "standalone",
-	"scope": "<?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=bin2hex($id)?>/",
+	"scope": "<?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?=$id?>/",
 	"theme_color": "#3367D6",
 	"icons": [
 		{
