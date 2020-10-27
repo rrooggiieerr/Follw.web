@@ -375,23 +375,20 @@ function getFollowers($shareid) {
 				else
 					$followerConfig = [];
 				$entry = [];
-				$entry['created'] = $row['created'] + 0; // Convert to number
+				$entry['created'] = intval($row['created']); // Convert to number
 				$entry['id'] = strtoupper(bin2hex($row['followid']));
 				$entry['url'] = $protocol . $_SERVER['HTTP_HOST'] . "/" . $entry['id'];
-				$entry['reference'] = NULL;
 				if(array_key_exists('reference', $followerConfig) && $followerConfig['reference'])
 					$entry['reference'] = $followerConfig['reference'];
-				$entry['alias'] = NULL;
 				if(array_key_exists('alias', $followerConfig) && $followerConfig['alias'])
 					$entry['alias'] = $followerConfig['alias'];
 				$entry['enabled'] = $row['enabled'] ? TRUE : FALSE;
-				//$expires = date('M j Y g:i A', strtotime($row['expires']));
-				$entry['expires'] = $row['expires'] + 0; // Convert to number
-				$entry['delay'] = $row['delay'];
-				if($entry['expires'])
+				if($row['expires']) {
+					$entry['expires'] = intval($row['expires']); // Convert to number
 					$entry['expired'] = $entry['expires'] < time();
-				//if()
-				//	$entry['expired'] = True;
+				}
+				if($row['delay'])
+					$entry['delay'] = intval($row['delay']);
 				$entry['time'] = time();
 				$followers[] = $entry;
 			}
