@@ -148,6 +148,8 @@ function getLocation($shareid, $format) {
 
 	if($format == 'html') {
 		$shareid = strtoupper(bin2hex($shareid));
+		if(!array_key_exists('alias', $config))
+			$config['alias'] = "";
 		require_once(dirname(__DIR__) . '/views/share.php');
 		exit();
 	}
