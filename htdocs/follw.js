@@ -102,7 +102,7 @@ class Follw {
 				this.element.appendChild(this.textOverlay);
 			}
 			this.textOverlay.innerHTML = text;
-		} else if(!this.textOverlay && this.textOverlay !== null) {
+		} else if(this.textOverlay) {
 			this.textOverlay.innerHTML = "";
 		}
 	}
@@ -171,7 +171,7 @@ class Follw {
 				if(typeof _this.lastTimestamp == "undefined" || _this.lastTimestamp == null || _this.lastTimestamp != data.timestamp) {
 					_this.lastTimestamp = data.timestamp;
 
-					_this.setMarker([data.latitude, data.longitude], data.accuracy);
+_this.setMarker([data.latitude, data.longitude], data.accuracy);
 
 					_this.onLocationChangeHooks.forEach(function(hook) {
 						hook(data);
