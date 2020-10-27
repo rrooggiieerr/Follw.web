@@ -21,7 +21,7 @@ if($action == 'location') {
 		// Get location from database
 		$query = 'SELECT UNIX_TIMESTAMP(l.`timestamp`) AS `timestamp`, l.`location`, sid.`config` AS `sharerConfig`
 			FROM `locations` l, `followers` f, `issuedids` sid
-			WHERE sid.`id` = f.`id` AND l.`id` = sid.`id` AND f.`enabled` = 1 AND (f.`expires` IS NULL OR f.`expires` <= NOW()) AND f.`followid` = ?';
+			WHERE sid.`id` = f.`id` AND l.`id` = sid.`id` AND f.`enabled` = 1 AND (f.`expires` IS NULL OR f.`expires` >= NOW()) AND f.`followid` = ?';
 		$statement = $pdo->prepare($query);
 		$statement->execute([$id]);
 		

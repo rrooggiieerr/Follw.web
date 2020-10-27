@@ -99,7 +99,7 @@
 								<tr>
 									<th>Follow ID/Reference</th>
 									<th>Alias Override</th>
-									<th>Delay</th>
+									<!-- <th>Delay</th> -->
 									<th>Expires</th>
 									<th>Enabled</th>
 									<th>Delete</th>
@@ -113,26 +113,25 @@
 						<div id="generatefollowid-modal" class="modal">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title">Create a Follow ID</h5>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										</button>
-									</div>
-									<div class="modal-body">
-										<form action="#" id="generatefollowurl">
+									<form action="#" id="generatefollowid">
+										<div class="modal-header">
+											<h5 class="modal-title">Create a Follow ID</h5>
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">&times;</span>
+											</button>
+										</div>
+										<div class="modal-body">
 											<span>Reference for your convenience</span><input name="reference" type="text" placeholder="Reference"/><br/>
 											<span>Alias override</span><input name="alias" type="text" placeholder="Alias override"/><br/>
-											<span>Delay</span><input name="delay" type="checkbox"/><br/>
+											<!-- <span>Delay</span><input name="delay" type="checkbox"/><br/> -->
 											<span>Expires</span><input name="expires" type="datetime-local"/><br/>
 											<span>Enabled</span><input name="enabled" type="checkbox"/><br/>
-											<input type="submit" value="Create Follow ID"/><br/>
-										</form>
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-										<button type="button" class="btn btn-primary">Create Follow ID</button>
-									</div>
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+											<button type="submit" class="btn btn-primary">Create Follow ID</button>
+										</div>
+									</form>
 								</div>
 							</div>
 						</div>
@@ -159,9 +158,7 @@
 
 			// Configuration
 			function submitConfig(config) {
-				console.log(config);
 				$.post("/<?=$shareid?>/config", config, function() {
-					console.log("Yay!");
 				});
 			}
 
@@ -269,10 +266,10 @@
 						else
 							$(row).append('<td class="alias"></td>');
 
-						if(entry['delay'])
+						/*if(entry['delay'])
 							$(row).append('<td class="delay"></td>');
 						else
-							$(row).append('<td class="delay">Realtime</td>');
+							$(row).append('<td class="delay">Realtime</td>');*/
 
 						if(entry['expired'])
 							$(row).append('<td class="expires">Expired</td>');
@@ -336,7 +333,7 @@
 			$(function() {
 				updateFollowIDs();
 
-				$('#generatefollowurl').submit(function() {
+				$('#generatefollowid').submit(function() {
 					var reference = $('input[name="reference"]', this).val();
 					if(reference == "")
 						reference = null;
@@ -345,9 +342,10 @@
 						alias = null;
 					var enabled = $('input[name="enabled"]', this).is(':checked');
 					var expires = $('input[name="expires"]', this).val();
-					if(expires == "")
-						expires = null;
-					else {
+					if(expires) {
+						expires = new Date(expires).getTime()/1000;
+						/*console.log(expires);
+						console.log(new Date(expires).getTime()/1000);
 						// Add timezone to expires timestamp
 						var timeOffsetH = Math.floor(new Date().getTimezoneOffset()/60);
 						var timeOffsetM = new Date().getTimezoneOffset() % 60;
@@ -369,11 +367,15 @@
 								expires += ":0" + timeOffsetM
 							else
 								expires += ":00"
-						}
-					}
+						}*/
+						console.log(expires);
+					} else
+						expires = null;
 
 					$.post("/<?=$shareid?>/generatefollowid", { reference:reference, alias:alias, enabled:enabled, expires:expires }, function() {
 						updateFollowIDs();
+						$('#generatefollowid-modal').modal('hide');
+						$('#generatefollowid').get(0).reset();
 					});
 					event.preventDefault();
 				});

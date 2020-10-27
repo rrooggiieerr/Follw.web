@@ -253,7 +253,7 @@ function deleteSharer($shareid) {
 		$statement->execute([$shareid]);
 		
 		// Delete followers
-		$query = 'UPDATE `issuedids` set `type` = \'deleted\', `alias` = NULL WHERE `id` IN (SELECT `followid` FROM `followers` WHERE `id` = ?)';
+		$query = 'UPDATE `issuedids` set `type` = \'deleted\', `config` = NULL WHERE `id` IN (SELECT `followid` FROM `followers` WHERE `id` = ?)';
 		$statement = $pdo->prepare($query);
 		$statement->execute([$shareid]);
 
@@ -262,7 +262,7 @@ function deleteSharer($shareid) {
 		$statement->execute([$shareid]);
 
 		// Delete sharer
-		$query = 'UPDATE `issuedids` set `type` = \'deleted\', `alias` = NULL WHERE `id` = ?';
+		$query = 'UPDATE `issuedids` set `type` = \'deleted\', `config` = NULL WHERE `id` = ?';
 		$statement = $pdo->prepare($query);
 		$statement->execute([$shareid]);
 		
@@ -294,16 +294,24 @@ function generateFollowID($shareid) {
 	
 	$followerConfig = [];
 	
-	if($formValues['reference'] != '')
+	if(!empty($formValues['reference']))
 		$followerConfig['reference'] = $formValues['reference'];
-	if($formValues['alias'] != '')
+	if(!empty($formValues['alias']))
 		$followerConfig['alias'] = $formValues['alias'];
 	if($formValues['enabled'] == 'true')
 		$enabled = TRUE;
-	if($formValues['expires'] != '')
+
+	if(!empty($formValues['expires']) && is_numeric($formValues['expires'])) {
+		$expires = intval($formValues['expires']);
+	} else if(!empty($formValues['expires'])) {
 		$expires = $formValues['expires'];
-	if($formValues['delay'] != '')
-		$delay = $formValues['delay'];
+		// ISO 8601 date time to unix time
+		$expires = strtotime($expires);
+		// Unix time to MySQL timestamps
+		$expires = date('Y-m-d H:i:s', $expires);
+	}
+	if(!empty($formValues['delay']) && is_numeric($formValues['delay']))
+		$delay = intval($formValues['delay']);
 	$json = json_encode($followerConfig);
 
 	$failureconter = 0;
@@ -335,7 +343,7 @@ function generateFollowID($shareid) {
 	
 	try {
 		// Insert ID in database
-		$query = 'INSERT INTO `followers` (`id`, `followid`, `enabled`, `expires`, `delay`) VALUES (?, ?, ?, ?, ?)';
+		$query = 'INSERT INTO `followers` (`id`, `followid`, `enabled`, `expires`, `delay`) VALUES (?, ?, ?, FROM_UNIXTIME(?), ?)';
 		$statement = $pdo->prepare($query);
 		$statement->execute([$shareid, $followid, $enabled, $expires, $delay]);
 	} catch(PDOException $e) {
@@ -355,7 +363,7 @@ function getFollowers($shareid) {
 	$followers = array();;
 	
 	try {
-		$query = 'SELECT UNIX_TIMESTAMP(i.`created`) AS `created`, f.`followid`, i.`config`, f.`enabled`, f.`expires`, f.`delay` FROM `followers` f, `issuedids` i WHERE i.`id` = f.`followid` AND f.`id` = ? ORDER BY i.`created`';
+		$query = 'SELECT UNIX_TIMESTAMP(i.`created`) AS `created`, f.`followid`, i.`config`, f.`enabled`, UNIX_TIMESTAMP(f.`expires`) AS `expires`, f.`delay` FROM `followers` f, `issuedids` i WHERE i.`id` = f.`followid` AND f.`id` = ? ORDER BY i.`created`';
 		$statement = $pdo->prepare($query);
 		
 		if($statement->execute([$shareid])) {
@@ -377,9 +385,14 @@ function getFollowers($shareid) {
 				if(array_key_exists('alias', $followerConfig) && $followerConfig['alias'])
 					$entry['alias'] = $followerConfig['alias'];
 				$entry['enabled'] = $row['enabled'] ? TRUE : FALSE;
-				$entry['expires'] = $row['expires'];
+				//$expires = date('M j Y g:i A', strtotime($row['expires']));
+				$entry['expires'] = $row['expires'] + 0; // Convert to number
 				$entry['delay'] = $row['delay'];
-				$entry['expired'] = FALSE;
+				if($entry['expires'])
+					$entry['expired'] = $entry['expires'] < time();
+				//if()
+				//	$entry['expired'] = True;
+				$entry['time'] = time();
 				$followers[] = $entry;
 			}
 		}
@@ -471,7 +484,7 @@ function deleteFollower($shareid, $followid) {
 			exit();
 		}
 		
-		$query = "UPDATE `issuedids` set `type` = 'deleted', `alias` = NULL WHERE `id` = ?";
+		$query = "UPDATE `issuedids` set `type` = 'deleted', `config` = NULL WHERE `id` = ?";
 		$statement = $pdo->prepare($query);
 		
 		$statement->execute([$followid]);
