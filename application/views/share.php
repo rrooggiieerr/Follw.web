@@ -243,6 +243,14 @@
 						event.preventDefault();
 					}
 				});
+
+				$('#deletelocation').click(function(event) {
+					$.get("/<?=$shareid?>/deletelocation", function(data) {
+						shareLocationMap.getLocation(true);
+					});
+					
+					event.preventDefault();
+				});
 			});
 			
 			// Managing followers
