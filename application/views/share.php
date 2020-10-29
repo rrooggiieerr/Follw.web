@@ -78,6 +78,8 @@ if($showIntro) {
 									<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
 									<p id="bookmarkMac" style="display: none;">Press <b>⌘D</b> to bookmark this Sharing URL.</p>
 									<p id="bookmarkWin" style="display: none;">Press <b>...</b> to bookmark this Sharing URL.</p>
+									<p id="bookmarkAndroid" style="display: none;">Press <b>⋮</b> and then <b>Add to Home screen</b> to add this Sharing URL as a WebApp to your home screen.</p>
+									<p id="bookmarkIos" style="display: none;">Press <b>Action</b> and then <b>Add to Home Screen</b> to add this Sharing URL as a WebApp to your home screen.</p>
 									<p>Because Follw doesn't have your contact details this Location Sharing ID can not be recovered if
 									you lose it.</p>
 								</div>
@@ -443,8 +445,12 @@ if($showIntro) {
 					$('#bookmarkMac').show();
 				else if(navigator.platform.toUpperCase().indexOf('WIN') !== -1)
 					$('#bookmarkWin').show();
-				else
-					alert(navigator.platform);
+				else if(navigator.userAgent.toUpperCase().indexOf('ANDROID') !== -1)
+					$('#bookmarkAndroid').show();
+				else if(navigator.userAgent.toUpperCase().indexOf('IPHONE') !== -1
+					|| navigator.userAgent.toUpperCase().indexOf('IPAD') !== -1
+					|| navigator.userAgent.toUpperCase().indexOf('IPOD') !== -1)
+					$('#bookmarkIos').show();
 				$('#intro-modal').modal('show');
 			});
 <?php } ?>
