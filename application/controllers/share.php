@@ -147,6 +147,11 @@ function getLocation($shareid, $format) {
 	global $config;
 
 	if($format == 'html') {
+		// If a referer is given we assume the page was not bookmarked
+		$showIntro = False;
+		if($_SERVER['HTTP_REFERER'])
+			$showIntro = True;
+
 		$shareid = strtoupper(bin2hex($shareid));
 		if(!array_key_exists('alias', $config))
 			$config['alias'] = "";
