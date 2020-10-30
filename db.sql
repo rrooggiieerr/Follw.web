@@ -11,7 +11,10 @@ CREATE TABLE `followers` (
   `followidraw` binary(8) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0',
   `enabled` tinyint(1) NOT NULL DEFAULT '0',
   `expires` timestamp NULL DEFAULT NULL,
-  `delay` time DEFAULT NULL
+  `delay` time DEFAULT NULL,
+  UNIQUE KEY `followid` (`followid`),
+  KEY `id` (`id`),
+  CONSTRAINT `followers_ibfk_1` FOREIGN KEY (`id`) REFERENCES `issuedids` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Create syntax for TABLE 'issuedids'
@@ -23,7 +26,7 @@ CREATE TABLE `issuedids` (
   `config` text CHARACTER SET utf8 NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `md5` (`md5`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Create syntax for TABLE 'locations'
 CREATE TABLE `locations` (
