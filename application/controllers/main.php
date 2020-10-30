@@ -1,4 +1,10 @@
 <?php
+/* @var String $servername */
+/* @var String $dbname */
+/* @var String $username */
+/* @var String $password */
+/* @var Integer $idlength */
+
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
@@ -36,14 +42,15 @@ if($method === 'GET' && $path === '/generatesharingid') {
 	$failureconter = 0;
 	do {
 		// Generate unique ID
-		$id = random_bytes($idlength);
+		$shareidraw = random_bytes($idlength);
+		$shareidrawstr = strtoupper(bin2hex($shareidraw));
 		
 		$failure = FALSE;
 		try {
 			// Insert ID in database
-			$query = 'INSERT INTO `issuedids` (`id`, `type`) VALUES (?, \'share\')';
+			$query = 'INSERT INTO `issuedids` (`md5`, `type`, `config`) VALUES (?, \'share\', "{}")';
 			$statement = $pdo->prepare($query);
-			$statement->execute([$id]);
+			$statement->execute([md5($shareidraw, TRUE)]);
 		} catch(PDOException $e) {
 			$failure = TRUE;
 			$failureconter++;
@@ -59,48 +66,21 @@ if($method === 'GET' && $path === '/generatesharingid') {
 	}
 
 	http_response_code(303);
-	header('Location: /' . strtoupper(bin2hex($id)));
+	header('Location: /' . $shareidrawstr);
 	exit();
 }
 
 $matches = NULL;
-if(preg_match('/^\/([0-9a-fA-F]{' . (2 * $idlength) . '})([\/.].*)?$/', $path, $matches) == TRUE) {
-	$id = $matches[1];
-	$id = hex2bin($id);
+if(preg_match('/^\/([0-9A-F]{' . (2 * $idlength) . '})([\/.].*)?$/', $path, $matches) == TRUE) {
+	$idrawstr = $matches[1];
+	$idraw = hex2bin($matches[1]);
+	$idrawmd5 = md5($idraw, TRUE);
 
 	$remainer = '';
 	if(count($matches) === 3) {
 		$remainer = $matches[2];
 	}
 
-	try {
-		// See if it is a sharing or follow ID
-		$query = 'SELECT `type`, `config` FROM `issuedids` WHERE `id` = ?';
-		$statement = $pdo->prepare($query);
-		$result = $statement->execute([$id]);
-		
-		if($statement->rowCount() != 1) {
-			// ID does not exist
-			//ToDo Rate limit requests per IP to prevent guessing
-			//http_response_code(429);
-			http_response_code(404);
-			exit();
-		}
-		
-		$result = $statement->fetch();
-		$type = $result['type'];
-		$config = $result['config'];
-		if($config)
-			$config = json_decode($config, TRUE);
-		else
-			$config = [];
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
-		exit();
-	}
-	
 	$action = NULL;
 	$format = NULL;
 	if(in_array($remainer, [ NULL, '', '/'], TRUE)) {
@@ -110,7 +90,70 @@ if(preg_match('/^\/([0-9a-fA-F]{' . (2 * $idlength) . '})([\/.].*)?$/', $path, $
 		$action = 'location';
 		$format = substr($remainer, 1);
 	}
+	
+	/*try {
+		$query = 'SELECT `md5` FROM `deletedids` WHERE `md5` = ?';
+		$statement = $pdo->prepare($query);
+		$result = $statement->execute([$idrawmd5]);
 
+		if($statement->rowCount() > 1) {
+			//TODO Log error
+			//$e->getCode()
+			http_response_code(500);
+			exit();
+		}
+		if($statement->rowCount() > 0) {
+			if($action === 'location') {
+				http_response_code(410);
+				if($format === 'html')
+					require_once(dirname(__DIR__) . '/views/iddeleted.php');
+			} else {
+				http_response_code(404);
+			}
+			exit();
+		}
+	} catch(PDOException $e) {
+		//ToDo Log error
+		//$e->getCode()
+		http_response_code(500);
+		exit();
+	}*/
+
+	try {
+		// See if it is a sharing or follow ID
+		$query = 'SELECT `id`, `type`, `config` FROM `issuedids` WHERE `md5` = ?';
+		$statement = $pdo->prepare($query);
+		$result = $statement->execute([$idrawmd5]);
+		
+		if($statement->rowCount() > 1) {
+			//TODO Log error
+			//$e->getCode()
+			http_response_code(500);
+			exit();
+		}
+		if($statement->rowCount() < 1) {
+			// ID does not exist
+			//TODO Rate limit requests per IP to prevent guessing
+			//http_response_code(429);
+			http_response_code(404);
+			exit();
+		}
+		
+		$result = $statement->fetch();
+		$id = $result['id'];
+		$type = $result['type'];
+		$config = $result['config'];
+		if($config)
+			$config = json_decode($config, TRUE);
+		else
+			$config = [];
+	} catch(PDOException $e) {
+		//TODO Log error
+		//$e->getCode()
+		http_response_code(500);
+		exit();
+	}
+	
 	if(isset($format) && !in_array($format, ['html', 'json'])) {
 		http_response_code(404);
 		exit();
@@ -128,19 +171,22 @@ if(preg_match('/^\/([0-9a-fA-F]{' . (2 * $idlength) . '})([\/.].*)?$/', $path, $
 	}
 
 	if($remainer === '/manifest.webmanifest') {
-		$id = strtoupper(bin2hex($id));
 		header('Content-Type: application/json');
 		require_once(dirname(__DIR__) . '/views/manifest.webmanifest.php');
 		exit();
 	}
 	
 	if($type === 'follow') {
+		$followid = $id;
+		$followidrawstr= $idrawstr;
 		require_once(dirname(__DIR__) . '/controllers/follow.php');
 	} else if($type === 'share') {
+		$shareid = $id;
+		$shareidrawstr= $idrawstr;
 		require_once(dirname(__DIR__) . '/controllers/share.php');
 	}
 }
 
-//ToDo? Limit requests per IP to prevent DOS
+//TODO Limit requests per IP to prevent DOS
 http_response_code(404);
 exit();

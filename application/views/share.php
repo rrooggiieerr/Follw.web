@@ -1,7 +1,7 @@
 <?php
 // Fixes false "Variable is not defined" validation errors for variables created in other files
 /* @var String $protocol */
-/* @var Integer $shareid */
+/* @var Integer $shareidrawstr */
 /* @var Object $config */
 /* @var Boolean $showIntro */
 ?>
@@ -12,7 +12,7 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
 		<meta name="robots" content="noindex" />
-		<link rel="manifest" href="/<?=$shareid?>/manifest.webmanifest" />
+		<link rel="manifest" href="/<?=$shareidrawstr?>/manifest.webmanifest" />
 <?php // Icons
 /* TODO
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
@@ -72,7 +72,7 @@ if($showIntro) {
 									</button>
 								</div>
 								<div class="modal-body">
-									<p>Your Location Sharing ID: <b><?= $shareid ?></b></p>
+									<p>Your Location Sharing ID: <b><?= $shareidrawstr ?></b></p>
 									<p>To share your location generate a Follow ID, <b>don't share this Location
 									Sharing ID with your followers</b>.</p>
 									<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
@@ -169,7 +169,7 @@ if($showIntro) {
 						</div>
 					</div>
 					<div class="tab-pane" id="configuration" role="tabpanel" aria-labelledby="configuration-tab">
-						<p>Your Location Sharing ID: <b><?= $shareid ?></b></p>
+						<p>Your Location Sharing ID: <b><?= $shareidrawstr ?></b></p>
 						<p>To share your location generate a Follow ID, <b>don't share this Location
 						Sharing ID with your followers</b>.</p>
 						<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
@@ -204,7 +204,7 @@ if($showIntro) {
 
 			// Configuration
 			function submitConfig(config) {
-				$.post("/<?=$shareid?>/config", config, function() {
+				$.post("/<?=$shareidrawstr?>/config", config, function() {
 				});
 			}
 
@@ -221,11 +221,11 @@ if($showIntro) {
 
 			// Location sharing
 			// Create the share location map
-			var shareLocationMap = new Follw("shareLocationMap", "/<?=$shareid?>", 12);
+			var shareLocationMap = new Follw("shareLocationMap", "/<?=$shareidrawstr?>", 12);
 			shareLocationMap.onIDDeleted(function () { location.reload(); });
 
 			function setLocation(location) {
-				$.post("/<?=$shareid?>", location, function() {
+				$.post("/<?=$shareidrawstr?>", location, function() {
 					shareLocationMap.getLocation(true);
 				});
 			}
@@ -291,7 +291,7 @@ if($showIntro) {
 				});
 
 				$('#deletelocation').click(function(event) {
-					$.get("/<?=$shareid?>/deletelocation", function(data) {
+					$.get("/<?=$shareidrawstr?>/deletelocation", function(data) {
 						shareLocationMap.getLocation(true);
 					});
 					
@@ -301,7 +301,7 @@ if($showIntro) {
 			
 			// Managing followers
 			function updateFollowIDs() {
-				$.get("/<?=$shareid?>/followers.json", function(data) {
+				$.get("/<?=$shareidrawstr?>/followers.json", function(data) {
 					var rows = $('<tbody></tbody>');
 					data.forEach(function(entry) {
 						var row = $('<tr></tr>');
@@ -357,31 +357,31 @@ if($showIntro) {
 			}
 			
 			function generateFollowID(followid) {
-				$.post("/<?=$shareid?>/generatefollowid", { reference:null }, function() {
+				$.post("/<?=$shareidrawstr?>/generatefollowid", { reference:null }, function() {
 					updateFollowIDs();
 				});
 			}
 
 			function updateFollowID(followid) {
-				$.post("/<?=$shareid?>/followid/" + follower, { }, function() {
+				$.post("/<?=$shareidrawstr?>/followid/" + follower, { }, function() {
 					updateFollowIDs();
 				});
 			}
 
 			function enableFollowID(followid) {
-				$.get("/<?=$shareid?>/follower/" + followid + "/enable", function() {
+				$.get("/<?=$shareidrawstr?>/follower/" + followid + "/enable", function() {
 					updateFollowIDs();
 				});
 			}
 			
 			function disableFollowID(followid) {
-				$.get("/<?=$shareid?>/follower/" + followid + "/disable", function() {
+				$.get("/<?=$shareidrawstr?>/follower/" + followid + "/disable", function() {
 					updateFollowIDs();
 				});
 			}
 
 			function deleteFollowID(followid) {
-				$.get("/<?=$shareid?>/follower/" + followid + "/delete", function() {
+				$.get("/<?=$shareidrawstr?>/follower/" + followid + "/delete", function() {
 					updateFollowIDs();
 				});
 			}
@@ -428,7 +428,7 @@ if($showIntro) {
 					} else
 						expires = null;
 
-					$.post("/<?=$shareid?>/generatefollowid", { reference:reference, alias:alias, enabled:enabled, expires:expires }, function() {
+					$.post("/<?=$shareidrawstr?>/generatefollowid", { reference:reference, alias:alias, enabled:enabled, expires:expires }, function() {
 						updateFollowIDs();
 						$('#generatefollowid-modal').modal('hide');
 						$('#generatefollowid').get(0).reset();

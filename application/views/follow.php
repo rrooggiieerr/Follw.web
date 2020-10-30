@@ -1,6 +1,6 @@
 <?php
 // Fixes false "Variable is not defined" validation errors for variables created in other files
-/* @var Integer $id */
+/* @var Integer $followidrawstr */
 /* @var Integer $location */
 
 $title = "No location is currently being shared";
@@ -21,7 +21,7 @@ if(isset($location)) {
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<meta name="robots" content="noindex" />
-		<link rel="manifest" href="/<?=$followid?>/manifest.webmanifest" />
+		<link rel="manifest" href="/<?=$followidrawstr?>/manifest.webmanifest" />
 <?php // Icons
 /* TODO
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
@@ -114,7 +114,7 @@ if(isset($location)) {
 				location.reload();
 			}
 
- 			var follw = new Follw("follwMap", "/<?=$followid?>", 12);
+ 			var follw = new Follw("follwMap", "/<?=$followidrawstr?>", 12);
  			follw.onLocationChange(onLocationChange);
  			follw.onIDDeleted(onDelete);
  			

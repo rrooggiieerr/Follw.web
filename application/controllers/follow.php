@@ -1,10 +1,11 @@
 <?php
 // Fixes false "Variable is not defined" validation errors for variables created in other files
+/* @var Object $config */
 /* @var String $method */
 /* @var String $action */
 /* @var String $format */
 /* @var Object $pdo */
-/* @var Integer $id */
+/* @var Integer $followid */
 
 if(!isset($action)) {
 	http_response_code(404);
@@ -23,12 +24,11 @@ if($action == 'location') {
 			FROM `locations` l, `followers` f, `issuedids` sid
 			WHERE sid.`id` = f.`id` AND l.`id` = sid.`id` AND f.`enabled` = 1 AND (f.`expires` IS NULL OR f.`expires` >= NOW()) AND f.`followid` = ?';
 		$statement = $pdo->prepare($query);
-		$statement->execute([$id]);
+		$statement->execute([$followid]);
 		
 		if($statement->rowCount() != 1) {
 			if($format == 'html') {
 				$location = null;
-				$followid = strtoupper(bin2hex($id));
 				require_once(dirname(__DIR__) . '/views/follow.php');
 			} else
 				http_response_code(204);
@@ -49,7 +49,7 @@ if($action == 'location') {
 	$location['timestamp'] = $result['timestamp'] + 0;
 	if(array_key_exists('alias', $config) && $config['alias'])
 		$location['alias'] = $config['alias'];
-	else if(array_key_exists('alias', $sharerConfig) && $sharerConfig['alias'])
+	else if($sharerConfig && array_key_exists('alias', $sharerConfig) && $sharerConfig['alias'])
 		$location['alias'] = $sharerConfig['alias'];
 	else
 		$location['alias'] = "Something";
@@ -61,7 +61,6 @@ if($action == 'location') {
 	
 	switch ($format) {
 		case 'html':
-			$followid = strtoupper(bin2hex($id));
 			require_once(dirname(__DIR__) . '/views/follow.php');
 			break;
 		case 'json':
