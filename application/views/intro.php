@@ -48,7 +48,7 @@
 								<p><a class="btn btn-secondary" href="/privacy" role="button">Read the Privacy Statement &raquo;</a></p>
 							</div>
 							<div class="col-md">
-								<h2>Add free</h2>
+								<h2>Ad free</h2>
 								<p>The Follw bussiness model is not based on advertisments and is free for personal and low volume
 								use.</p>
 								<p><a class="btn btn-secondary" href="#" role="button">Read more &raquo;</a></p>
@@ -60,7 +60,7 @@
 							<div class="col-md">
 								<h2>Documented API</h2>
 								<p>Easy integration with mapping software, tracking hardware and your custom software.</p>
-								<p><a class="btn btn-secondary" href="/apidoc" role="button" target="_blank">Read the documentation &raquo;</a></p>
+								<p><a class="btn btn-secondary" href="/apidoc" role="button">Read the documentation &raquo;</a></p>
 							</div>
 							<div class="col-md">
 								<h2>Open Source</h2>
