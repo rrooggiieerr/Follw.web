@@ -103,7 +103,7 @@ if($showIntro) {
 								<div class="col-md">
 									<h4>Text input</h4>
 									<p>Type the latitude and longitude of the location you like to share.</p>
-									<form action="#">
+									<form action="#" autocomplete="off">
 										<input type="text" id="textlocation"/>
 									</form>
 								</div>
@@ -130,7 +130,7 @@ if($showIntro) {
 						<div id="generatefollowid-modal" class="modal">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
-									<form action="#" id="generatefollowid">
+									<form action="#" id="generatefollowid" autocomplete="off">
 										<div class="modal-header">
 											<h5 class="modal-title">Create a Follow ID</h5>
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -178,12 +178,14 @@ if($showIntro) {
 						<p>You can configure an alias which your Followers see so they know who they are following. This is not
 						required and can be anything, it does not have to be your name or anything that gives away who you
 						are.</p>
-						<form action="#" id="configuration">
+						<form action="#" id="configuration" autocomplete="off">
 							Alias: <input name="alias" type="text" value="<?= $config['alias'] ?>"/>
 						</form>
 					</div>
 				</div>
+				<div class="d-none d-sm-block">
 <?php include_once('footer.php');?>
+				</div>
 			</div>
 		</main>
 <?php // Scripts ?>
@@ -327,9 +329,10 @@ if($showIntro) {
 
 						if(entry['expired'])
 							$(row).append('<td class="expires">Expired</td>');
-						else if(entry['expires'] != null)
+						else if(entry['expires'] != null) {
+							entry['expires'] = new Date(entry['expires'] * 1000).toLocaleString();
 							$(row).append(`<td class="expires">${entry['expires']}</td>`);
-						else
+						} else
 							$(row).append('<td class="expires">Never</td>');
 
 						if(entry['expired'])
