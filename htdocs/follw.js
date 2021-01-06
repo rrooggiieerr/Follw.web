@@ -1,12 +1,20 @@
+'use strict';
+
 class Follw {
 	map = null;
 	marker = null;
 	accuracy = null;
 	textOverlay = null;
+
 	onLocationChangeHooks = [];
 	onIDDeletedHooks = [];
+
+	updateMultiplier = 1;
 	stopUpdate = false;
-	timeoutID = null;
+	updateTimeoutID = null;
+	
+	offScreen = false;
+	hidden;
 	
 	constructor(element, followURL, zoom = 12) {
 		this.element = element;
@@ -38,29 +46,76 @@ class Follw {
 		}).addTo(this.map);
 		
 		var _this = this;
-
+		
+		// Decrease update interval if window is not in focus
 		var _onblur = window.onblur;
 		window.onblur = function() {
 			if(_onblur != null)
 				_onblur();
-			console.log("blur");
-			//_this.onInvisible();
+			console.debug("blur");
+			_this.updateMultiplier = 2;
 		}
 
+		// Set update interval back to normal if window is in focus
 		var _onfocus = window.onfocus;
 		window.onfocus = function() {
 			if(_onfocus != null)
 				_onfocus();
-			console.log("focus");
-			//if(_this.element.offsetParent !== null)
-			//	_this.onVisible();
+			console.debug("focus");
+			_this.updateMultiplier = 1;
 		}
 
-		this.observer = new IntersectionObserver((entries) => {
-			entries.forEach(entry => {
-				if(entry.intersectionRatio == 0) {
+		// Set the name of the "hidden" property and the change event for visibility
+		var visibilityChangeEvent; 
+		if (typeof document.hidden !== 'undefined') {
+			this.hidden = 'hidden';
+			visibilityChangeEvent = 'visibilitychange';
+		} else if (typeof document.mozHidden !== 'undefined') { // Firefox up to v17
+			this.hidden = 'mozHidden';
+			visibilityChangeEvent = "mozvisibilitychange";
+		} else if (typeof document.webkitHidden !== 'undefined') { // Chrome up to v32, Android up to v4.4, Blackberry up to v10
+			this.hidden = 'webkitHidden';
+			visibilityChangeEvent = 'webkitvisibilitychange';
+		}
+
+		if(typeof document.addEventListener === 'undefined' || typeof document[this.hidden] === 'undefined') {
+			// If the browser doesn't support addEventListener or the Page Visibility API just act as if object is visible
+			console.error("Browser doesn't support addEventListener or the Page Visibility API");
+			this.hidden = 'hidden';
+			document[this.hidden] = false;
+			this.onVisible();
+		} else {
+			// Handle page visibility change
+			//var _this = this;
+			document.addEventListener(visibilityChangeEvent, function() {
+				// If the page is hidden, pause updating the location;
+				// if the page is shown, continue updating the location
+				if(_this.offScreen) {
+					// Do nothing, visibility is handeled by the Intersection Observer API
+					console.debug("Visibility is handeled by the Intersection Observer API");
+				} else if(document[_this.hidden]) {
 					_this.onInvisible();
 				} else {
+					_this.onVisible();
+				}
+			}, false);
+
+			if(!document[this.hidden]) {
+				this.onVisible();
+			}
+		}
+		
+		// Detect if map is off screen
+		this.observer = new IntersectionObserver((entries) => {
+			entries.forEach(entry => {
+				if(document[_this.hidden]) {
+					// Do nothing, visibility is handeled by the Page Visibility API
+					console.debug("Visibility is handeled by the Page Visibility API");
+				} else if(entry.intersectionRatio == 0) {
+					_this.offScreen = true;
+					_this.onInvisible();
+				} else {
+					_this.offScreen = false;
 					_this.onVisible();
 				}
 			});
@@ -69,23 +124,21 @@ class Follw {
 	}
 
 	onVisible() {
-		console.log("visible");
+		console.debug("visible");
 		//this.invalidateSize();
 		this.stopUpdate = false;
-		if(this.timeoutID === null) {
-			/*this.timeoutID = setInterval(function() {
-				console.log("visible");
-			}, 500);*/
+		if(this.updateTimeoutID === null) {
+			this.updateTimeoutID = -1;
 			this.getLocation();
 		}
 	}
 	
 	onInvisible() {
-		console.log("invisible");
+		console.debug("invisible");
 		this.stopUpdate = true;
-		if(this.timeoutID !== null) {
-			clearTimeout(this.timeoutID);
-			this.timeoutID = null;
+		if(this.updateTimeoutID !== null) {
+			clearTimeout(this.updateTimeoutID);
+			this.updateTimeoutID = null;
 		}
 	}
 
@@ -179,19 +232,22 @@ _this.setMarker([data.latitude, data.longitude], data.accuracy);
 				}
 
 				if(!once && !_this.stopUpdate) {
-					var interval = 1;
-					if(typeof data.interval != "undefined")
-						interval = data.interval;
-					_this.timeoutID = setTimeout(function() {
+					var update = 1;
+					if(typeof data.refresh != "undefined")
+						update = data.refresh;
+					_this.updateTimeoutID = setTimeout(function() {
 						_this.getLocation();
-					}, interval * 1000);
+					}, update * _this.updateMultiplier * 1000);
 				}
 			} else if (this.status == 410) {
+				console.info("ID has been deleted");
 				// Deleted
 				_this.onIDDeletedHooks.forEach(function(hook) {
 					hook();
 				});
 				_this.setTextOverlay("Follw ID is deleted");
+			} else if (this.status == 404) {
+				console.error("ID does not exist");
 			} else {
 				if(typeof _this.lastTimestamp == "undefined" || _this.lastTimestamp != null) {
 					_this.lastTimestamp = null;
@@ -203,9 +259,9 @@ _this.setMarker([data.latitude, data.longitude], data.accuracy);
 					});
 				}
 
-				_this.timeoutID = setTimeout(function() {
+				_this.updateTimeoutID = setTimeout(function() {
 					_this.getLocation(once);
-				}, 1000);
+				}, _this.updateMultiplier * 1000);
 			}
 		};
 
@@ -222,5 +278,20 @@ _this.setMarker([data.latitude, data.longitude], data.accuracy);
 	
 	invalidateSize() {
 		this.map.invalidateSize();
+	}
+	
+	prettyPrintCoordinates(latitude, longitude) {
+		var toDMS = function(coordinate, cardinals) {
+			var absolute = Math.abs(coordinate);
+			var degrees = Math.floor(absolute);
+			var minutesNotTruncated = (absolute - degrees) * 60;
+			var minutes = Math.floor(minutesNotTruncated);
+			var seconds = Math.floor((minutesNotTruncated - minutes) * 60);
+			var cardinal = coordinate >= 0 ? cardinals.charAt(0) : cardinals.charAt(1);
+		
+			return degrees + "° " + minutes + "′ " + seconds + "″ " + cardinal;
+		}
+		
+		return toDMS(latitude, "NS") + " " + toDMS(longitude, "EW");
 	}
 }
