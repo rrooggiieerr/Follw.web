@@ -28,7 +28,7 @@ class ID extends ArrayObject {
 		$binary = Base::decode($s, $configuration['id']['baseEncoding']);
 
 		/*$query = 'SELECT `hash` FROM `deletedids` WHERE `hash` = ?';
-		$statement = DataStore::getInstance()->execute($query, [md5($binary, TRUE)]);
+		$statement = DataStore::getInstance()->execute($query, [(new ID(-1, $binary))->hash()]);
 		 
 		if($statement->rowCount() > 1) {
 			//TODO Log error
@@ -45,7 +45,7 @@ class ID extends ArrayObject {
 				FROM `issuedids` f, `followers` sf
 				WHERE f.`id` = sf.`followid` AND f.`type` = \'follow\' AND f.`hash` = ? AND sf.`shareid` = ?';
 			//$query = 'SELECT `followid`, `enabled`, `expires`, `delay` FROM `followers` WHERE `shareid` = ? AND `followidraw` = ?';
-			$statement = DataStore::getInstance()->execute($query, [md5($binary, TRUE), $shareID->id]);
+			$statement = DataStore::getInstance()->execute($query, [(new ID(-1, $binary))->hash(), $shareID->id]);
 
 			if($statement->rowCount() > 1) {
 				//TODO Log error
@@ -74,7 +74,7 @@ class ID extends ArrayObject {
 				LEFT JOIN `followers` sf ON sf.`followid` = f.`id`
 				LEFT JOIN `issuedids` s ON s.`id` = sf.`shareid`
 				WHERE f.`hash` = ?';
-			$statement = DataStore::getInstance()->execute($query, [md5($binary, TRUE)]);
+			$statement = DataStore::getInstance()->execute($query, [(new ID(-1, $binary))->hash()]);
 
 			if($statement->rowCount() > 1) {
 				//TODO Log error
@@ -160,7 +160,7 @@ class ID extends ArrayObject {
 	}
 
 	/**
-	 * The binary md5 hash is used in the database
+	 * The binary hash is used in the database
 	 * @return object the hash of the ID as a 16 byte binary
 	 */
 	function hash($bytes = NULL) {

@@ -62,8 +62,8 @@ class DataStore {
 						  `type` enum(\'share\',\'follow\',\'deleted\',\'reserved\') NOT NULL DEFAULT \'deleted\',
 						  `config` text CHARACTER SET utf8 NOT NULL,
 						  PRIMARY KEY (`id`),
-						  UNIQUE KEY `md5` (`hash`)
-						) ENGINE=InnoDB AUTO_INCREMENT=119 DEFAULT CHARSET=latin1';
+						  UNIQUE KEY `hash` (`hash`)
+						) ENGINE=InnoDB DEFAULT CHARSET=latin1';
 			$statement = $this->pdo->prepare($query);
 			$statement->execute();
 		}
@@ -76,9 +76,7 @@ class DataStore {
 			$query = 'CREATE TABLE `followers` (
 						  `shareid` int(10) unsigned NOT NULL,
 						  `followid` int(10) unsigned NOT NULL,
-						  `followidraw` binary(8) NOT NULL DEFAULT \'\0\0\0\0\0\0\0\0\',
 						  `followidencrypted` binary(24) NOT NULL DEFAULT \'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\',
-						  `followidxor` binary(8) NOT NULL DEFAULT \'\0\0\0\0\0\0\0\0\',
 						  `enabled` tinyint(1) NOT NULL DEFAULT \'0\',
 						  `expires` timestamp NULL DEFAULT NULL,
 						  `delay` time DEFAULT NULL,
@@ -99,7 +97,7 @@ class DataStore {
 			$query = 'CREATE TABLE `locations` (
 						  `id` int(10) unsigned NOT NULL,
 						  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-						  `location` text NOT NULL,
+						  `location` text CHARACTER SET utf8 NOT NULL,
 						  PRIMARY KEY (`id`),
 						  CONSTRAINT `locations_ibfk_1` FOREIGN KEY (`id`) REFERENCES `issuedids` (`id`)
 						) ENGINE=InnoDB DEFAULT CHARSET=latin1';

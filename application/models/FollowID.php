@@ -63,8 +63,8 @@ class FollowID extends ID implements JsonSerializable {
 			return FALSE;
 		}
 		
-		$query = 'INSERT INTO `followers` (`shareid`, `followid`, `followidraw`, `followidencrypted`, `followidxor`, `enabled`, `expires`, `delay`) VALUES (?, ?, ?, ?, ?, ?, FROM_UNIXTIME(?), ?)';
-		$ds->execute($query, [$this->shareID->id, $this->id, $this->bytes, $this->encrypt(), FollowID::xor($this->bytes, $this->shareID), $this->enabled, $this->expires, $this->delay]);
+		$query = 'INSERT INTO `followers` (`shareid`, `followid`, `followidencrypted`, `enabled`, `expires`, `delay`) VALUES (?, ?, ?, ?, FROM_UNIXTIME(?), ?)';
+		$ds->execute($query, [$this->shareID->id, $this->id, $this->encrypt(), $this->enabled, $this->expires, $this->delay]);
 
 		return $ds->commit();
 	}
@@ -124,7 +124,7 @@ class FollowID extends ID implements JsonSerializable {
 		}
 
 		//$query = 'DELETE FROM `issuedids` WHERE `hash` = ?';
-		//$statement = $ds->execute($query, [$followidmd5]);
+		//$statement = $ds->execute($query, [$this->hash()]);
 		//if($statement->rowCount() == 0) {
 		//	//TODO Log error
 		//	$ds->rollback();
@@ -156,10 +156,6 @@ class FollowID extends ID implements JsonSerializable {
 		$encrypted = substr($bytes, $ivlen);
 
 		return openssl_decrypt($encrypted, $configuration['id']['cipher'], $shareID->bytes, OPENSSL_RAW_DATA, $iv);
-	}
-
-	static function xor($bytes, ShareID $shareID) {
-		return $bytes ^ $shareID->bytes;
 	}
 
 	function jsonSerialize() {

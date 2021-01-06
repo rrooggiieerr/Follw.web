@@ -97,15 +97,12 @@ class ShareID extends ID {
 	function getFollowers() {
 		$followers = [];
 
-		$query = 'SELECT f.`followid`, f.`followidraw`, f.`followidencrypted`, f.`followidxor`, i.`config`, f.`enabled`, UNIX_TIMESTAMP(f.`expires`) AS `expires`, f.`delay`
+		$query = 'SELECT f.`followid`, f.`followidencrypted`, i.`config`, f.`enabled`, UNIX_TIMESTAMP(f.`expires`) AS `expires`, f.`delay`
 					FROM `followers` f, `issuedids` i
 					WHERE i.`id` = f.`followid` AND f.`shareid` = ? ORDER BY i.`created`';
 		if($statement = DataStore::getInstance()->execute($query, [$this->id])) {
 			while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-				//$bytes = $row['followidraw'];
-				//$bytes = FollowID::xor($row['followidxor'], $this);
 				$bytes = FollowID::decrypt($row['followidencrypted'], $this);
-				//print($bytes);
 				$instance = new FollowID($this, $row['followid'], $bytes);
 
 				$config = $row['config'];
