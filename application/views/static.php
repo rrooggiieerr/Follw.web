@@ -1,5 +1,5 @@
 <?php
-// Fixes false "Variable is not defined" validation errors for variables created in other files
+// Fixes false "Variable is undefined" validation errors
 /* @var String $path */
 ?>
 <!doctype html>
@@ -33,7 +33,7 @@
 				background-color: #F8F8F8;
 				margin-bottom: 1rem;
 			}
-			
+
 			p > code {
 				display: inline;
 			}
