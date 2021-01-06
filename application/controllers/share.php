@@ -1,86 +1,81 @@
 <?php
-// Fixes false "Variable is not defined" validation errors for variables created in other files
-/* @var String $method */
+// Fixes false "Variable is undefined" and "Variable is never used" validation errors
+/* @var array $configuration */
 /* @var String $action */
 /* @var String $remainer */
 /* @var String $format */
-/* @var Object $pdo */
 /* @var String $protocol */
-/* @var Integer $shareid */
-/* @var Integer $shareidrawstr */
-/* @var Integer $idlength */
+/* @var ShareID $shareID */
+/* @var boolean $showIntro */
 
 if($action === 'location') {
 	if($_SERVER['REQUEST_METHOD'] === 'POST' || count($_GET) !== 0)
-		shareLocation($shareid);
+		shareLocation($shareID);
 	else
-		getLocation($shareid, $shareidrawstr, $format);
+		getLocation($shareID, $format);
 } else {
-	$matches = NULL;
+	$matches = NULL; // Fixes false "Variable is undefined" validation error
 	if(!isset($action)) {
 		switch($remainer) {
 			case NULL:
 			case '':
 				break;
 			case '/deletelocation':
-				deleteLocation($shareid);
+				deleteLocation($shareID);
 				break;
 			case '/config':
-				configSharer($shareid);
+				configSharer($shareID);
 				break;
 			case '/delete':
-				deleteSharer($shareid);
+				deleteSharer($shareID);
 				break;
 			case '/generatefollowid':
-				generateFollowID($shareid);
+				generateFollowID($shareID);
 				break;
 			case '/followers.json':
-				getFollowers($shareid);
+				getFollowers($shareID);
 				break;
-			case (preg_match('/^\/follower\/([0-9a-fA-Z]{' . (2 * $idlength) . '})\/(enable|disable|delete)$/', $remainer, $matches) ? TRUE : FALSE):
-				$followidraw = hex2bin($matches[1]);
-				try {
-					$query = 'SELECT `followid` FROM `followers` WHERE id = ? AND `followidraw` = ?';
-					$statement = $pdo->prepare($query);
-					$result = $statement->execute([$shareid, $followidraw]);
+			case (preg_match('/^\/follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})\/(enable|disable|delete)$/', $remainer, $matches) ? TRUE : FALSE):
+				$followID = ID::decode($matches[1], $shareID);
 
-					if($statement->rowCount() > 1) {
-						//TODO Log error
-						//$e->getCode()
-						http_response_code(500);
-						exit();
-					}
-					if($statement->rowCount() < 1) {
-						// ID does not exist or is not a Follow ID
-						//TODO Rate limit requests per IP to prevent guessing
-						//http_response_code(429);
-						http_response_code(404);
-						exit();
-					}
-					
-					$result = $statement->fetch();
-					$followid = $result['followid'];
-				} catch(PDOException $e) {
-					//ToDo Log error
-					//$e->getCode()
-					http_response_code(500);
+				if (!$followID) {
+					http_response_code(404);
 					exit();
 				}
+
+				if($followID->type === 'deleted') {
+					http_response_code(410);
+					exit();
+				}
+
 				switch($matches[2]) {
 					case 'enable':
-						enableFollower($shareid, $followid);
+						if ($followID->enable()) {
+							http_response_code(204);
+							exit();
+						}
 						break;
 					case 'disable':
-						disableFollower($shareid, $followid);
+						if ($followID->disable()) {
+							http_response_code(204);
+							exit();
+						}
 						break;
 					case 'delete':
-						deleteFollower($shareid, $followid);
+						if ($followID->delete()) {
+							http_response_code(204);
+							exit();
+						}
 						break;
 					default:
-						http_response_code(404);
+						// This should not happen as the regex only supports the options enable, disable and delete
+						http_response_code(500);
 						exit();
 						break;
-				}	
+				}
+
+				http_response_code(500);
+				exit();
 				break;
 			default:
 				http_response_code(404);
@@ -95,43 +90,44 @@ if(!isset($action)) {
 	exit();
 }
 
-function shareLocation($shareid) {
-	global $pdo;
-	
-	$location = [];
-	
+function shareLocation(ShareID $shareID) {
+	require_once(dirname(__DIR__) . '/models/Location.php');
+
+	$location = new Location($shareID);
+
 	if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$formValues = $_POST;
 	} else {
 		$formValues = $_GET;
 	}
-	
+
 	foreach($formValues as $name => $value) {
-		$value = floatval($value);
-		
+		if(is_numeric($value))
+			$value = floatval($value);
+
 		switch($name) {
 			case (substr($name, 0, 2) == 'la' ? TRUE : FALSE): // latitude
 				if($value === '' || $value < -90 || $value > 90) {
 					http_response_code(500);
 					exit();
 				}
-				$location["latitude"] = $value;
+				$location['latitude'] = $value;
 				break;
 			case (substr($name, 0, 2) == 'lo' ? TRUE : FALSE): // longitude
 				if($value === '' || $value < -180 || $value > 180) {
 					http_response_code(500);
 					exit();
 				}
-				$location["longitude"] = $value;
+				$location['longitude'] = $value;
 				break;
 			case (substr($name, 0, 2) == 'hd' ? TRUE : FALSE): // horizontal dilution of position
 			case (substr($name, 0, 2) == 'ac' ? TRUE : FALSE): // accuracy
 				if($value !== '')
-					$location["accuracy"] = $value;
+					$location['accuracy'] = $value;
 				break;
 			case (substr($name, 0, 2) == 'al' ? TRUE : FALSE): // altitude
 				if($value !== '')
-					$location["altitude"] = $value;
+					$location['altitude'] = $value;
 				break;
 			case (substr($name, 0, 2) == 'be' ? TRUE : FALSE): // bearing
 			case (substr($name, 0, 2) == 'he' ? TRUE : FALSE): // heading
@@ -143,7 +139,7 @@ function shareLocation($shareid) {
 						http_response_code(500);
 						exit();
 					}
-					$location["direction"] = $value;
+					$location['direction'] = $value;
 				}
 				break;
 			case (substr($name, 0, 2) == 'sp' ? TRUE : FALSE): // speed
@@ -152,424 +148,163 @@ function shareLocation($shareid) {
 						http_response_code(500);
 						exit();
 					}
-					$location["speed"] = $value;
+					$location['speed'] = $value;
 				}
 				break;
 		}
 	}
-	
-	try {
-		$json = json_encode($location);
-		// Insert location in database
-		$query = 'INSERT INTO `locations` (`id`, `location`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `location` = ?';
-		$statement = $pdo->prepare($query);
-		$statement->execute([$shareid, $json, $json]);
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
+
+	if (!$location->store()) {
 		http_response_code(500);
 		exit();
 	}
-	
+
 	http_response_code(204);
 	exit();
 }
 
-function getLocation($shareid, $shareidrawstr, $format) {
-	global $pdo;
+function getLocation(ShareID $shareID, $format) {
 	global $protocol;
-	global $config;
 
 	if($format == 'html') {
 		// If a referer is given we assume the page was not bookmarked
-		$showIntro = False;
-		if(array_key_exists('HTTP_REFERER', $_SERVER))
-			$showIntro = True;
+		$showIntro = FALSE;
+		if(array_key_exists('HTTP_REFERER', $_SERVER)) {
+			$showIntro = TRUE;
+		}
 
-		if(!array_key_exists('alias', $config))
-			$config['alias'] = "";
+		if(!array_key_exists('alias', $shareID->config)) {
+			$shareID->config['alias'] = '';
+		}
 		require_once(dirname(__DIR__) . '/views/share.php');
 		exit();
 	}
 
-	try {
-		// Get location from database
-		$query = 'SELECT UNIX_TIMESTAMP(`timestamp`) as `timestamp`, `location` FROM `locations` WHERE `id` = ?';
-		$statement = $pdo->prepare($query);
-		$result = $statement->execute([$shareid]);
-		
-		if($statement->rowCount() != 1) {
-			http_response_code(204);
-			exit();
-		}
-		
-		$result = $statement->fetch();
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
+	require_once(dirname(__DIR__) . '/models/Location.php');
+
+	$location = Location::get($shareID);
+
+	if (!$location) {
+		http_response_code(204);
 		exit();
 	}
 
-	$location = json_decode($result['location'], TRUE);
-	$location['timestamp'] = $result['timestamp'] + 0;
-	
 	switch ($format) {
 		case 'json':
 			header('Content-Type: application/json');
-			echo(json_encode($location));
+			$json = json_encode(array_merge($location->jsonSerialize(), $shareID->jsonSerialize()), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+			print($json);
 			break;
-		// ToDo Implement other formats
+		//TODO Implement other formats
 		default:
 			http_response_code(500);
 	}
-	
+
 	exit();
 }
 
-function configSharer($shareid) {
-	global $pdo;
-	global $config;
-	
+function configSharer(ShareID $shareID) {
 	if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$formValues = $_POST;
 	} else {
 		$formValues = $_GET;
 	}
-	
+
 	foreach($formValues as $name => $value) {
 		switch($name) {
 			case 'alias':
-				$config['alias'] = $value;
+				//TODO Input validation
+				$shareID['alias'] = $value;
 				break;
 		}
 	}
-	
-	try {
-		$json = json_encode($config);
-		// Update configuration in database
-		$query = 'UPDATE `issuedids` SET `config` = ? WHERE `id` = ?';
-		$statement = $pdo->prepare($query);
-		$statement->execute([$json, $shareid]);
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
-		exit();
-	}
-	
-	http_response_code(204);
-	exit();
-}
 
-function deleteLocation($shareid) {
-	global $pdo;
-	
-	try {
-		// Delete location from database
-		$query = 'DELETE FROM `locations` WHERE `id` = ?';
-		$statement = $pdo->prepare($query);
-		$statement->execute([$shareid]);
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-	}
-	
-	http_response_code(204);
-	exit();
-}
-
-function deleteSharer($shareid) {
-	global $pdo;
-	
-	try {
-		$pdo->beginTransaction();
-		
-		// Delete location
-		$query = 'DELETE FROM `locations` WHERE `id` = ?';
-		$statement = $pdo->prepare($query);
-		$statement->execute([$shareid]);
-		
-		// Delete followers
-		//$query = 'INSERT INTO `deletedids` (`md5`) SELECT `md5` FROM `issuedids` WHERE `id` IN (SELECT `followid` FROM `followers` WHERE `id` = ?)';
-		//$statement = $pdo->prepare($query);
-		//$statement->execute([$shareid]);
-
-		$query = 'UPDATE `issuedids` SET `type` = \'deleted\', `config` = \'\' WHERE `id` IN (SELECT `followid` FROM `followers` WHERE `id` = ?)';
-		$statement = $pdo->prepare($query);
-		$statement->execute([$shareid]);
-
-		$query = 'DELETE FROM `followers` WHERE `id` = ?';
-		$statement = $pdo->prepare($query);
-		$statement->execute([$shareid]);
-
-		//$query = 'DELETE FROM `issuedids` WHERE `type` = "follow" AND `id` NOT IN (SELECT `followid` FROM `followers`)';
-		//$statement = $pdo->prepare($query);
-		//$statement->execute();
-		
-		// Delete sharer
-		//$query = 'INSERT INTO `deletedids` (`md5`) SELECT `md5` FROM `issuedids` WHERE `id` = ?';
-		//$statement = $pdo->prepare($query);
-		//$statement->execute([$shareid]);
-		
-		//$query = 'DELETE FROM `issuedids` WHERE `id` = ?';
-		$query = 'UPDATE `issuedids` SET `type` = \'deleted\', `config` = \'\' WHERE `id` = ?';
-		$statement = $pdo->prepare($query);
-		$statement->execute([$shareid]);
-		
-		$pdo->commit();
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		$pdo->rollBack();
-		http_response_code(500);
+	if ($shareID->store()) {
+		http_response_code(204);
 		exit();
 	}
 
-	http_response_code(204);
+	http_response_code(500);
 	exit();
 }
 
-function generateFollowID($shareid) {
-	global $pdo;
-	global $idlength;
-	$enabled = FALSE;
-	$expires = NULL;
-	$delay = NULL;
-	
+function deleteLocation(ShareID $shareID) {
+	require_once(dirname(__DIR__) . '/models/Location.php');
+
+	$location = new Location($shareID);
+
+	if ($location->delete()) {
+		http_response_code(204);
+		exit();
+	}
+
+	http_response_code(500);
+	exit();
+}
+
+function deleteSharer(ShareID $shareID) {
+	if ($shareID->delete()) {
+		http_response_code(204);
+		exit();
+	}
+
+	http_response_code(500);
+	exit();
+}
+
+function generateFollowID(ShareID $shareID) {
 	if($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$formValues = $_POST;
 	} else {
 		$formValues = $_GET;
 	}
-	
-	$followerConfig = [];
-	
-	if(!empty($formValues['reference']))
-		$followerConfig['reference'] = $formValues['reference'];
-	if(!empty($formValues['alias']))
-		$followerConfig['alias'] = $formValues['alias'];
-	if($formValues['enabled'] == 'true')
-		$enabled = TRUE;
+
+	require_once(dirname(__DIR__) . '/models/FollowID.php');
+	$follower = new FollowID($shareID);
+
+	if(!empty($formValues['reference'])) {
+		//TODO Input validation
+		$follower['reference'] = $formValues['reference'];
+	}
+	if(!empty($formValues['alias'])) {
+		//TODO Input validation
+		$follower['alias'] = $formValues['alias'];
+	}
+	if($formValues['enabled'] == 'true') {
+		$follower->enabled = TRUE;
+	}
 
 	if(!empty($formValues['expires']) && is_numeric($formValues['expires'])) {
-		$expires = intval($formValues['expires']);
+		$follower->expires = $formValues['expires'];
 	} else if(!empty($formValues['expires'])) {
 		$expires = $formValues['expires'];
 		// ISO 8601 date time to unix time
 		$expires = strtotime($expires);
 		// Unix time to MySQL timestamps
-		$expires = date('Y-m-d H:i:s', $expires);
+		$follower->expires = date('Y-m-d H:i:s', $expires);
 	}
-	if(!empty($formValues['delay']) && is_numeric($formValues['delay']))
-		$delay = intval($formValues['delay']);
-	$json = json_encode($followerConfig, JSON_FORCE_OBJECT);
+	if(!empty($formValues['delay']) && is_numeric($formValues['delay'])) {
+		$follower->delay = $formValues['delay'];
+	}
 
-	$failureconter = 0;
-	do {
-		// Generate unique ID
-		$followidraw = random_bytes($idlength);
-		$followidrawstr = strtoupper(bin2hex($followidraw));
-		
-		$failure = FALSE;
-		try {
-			$pdo->beginTransaction();
-			
-			// Insert ID in database
-			$query = 'INSERT INTO `issuedids` (`md5`, `type`, `config`) VALUES (?, \'follow\', ?)';
-			$statement = $pdo->prepare($query);
-			$statement->execute([md5($followidraw, TRUE), $json]);
-			$followid = $pdo->lastInsertId();
-
-			$query = 'INSERT INTO `followers` (`id`, `followid`, `followidraw`, `enabled`, `expires`, `delay`) VALUES (?, ?, ?, ?, FROM_UNIXTIME(?), ?)';
-			$statement = $pdo->prepare($query);
-			$statement->execute([$shareid, $followid, $followidraw, $enabled, $expires, $delay]);
-
-			$pdo->commit();
-		} catch(PDOException $e) {
-			$failure = TRUE;
-			$failureconter++;
-			//ToDo Log error
-			//$e->getCode()
-		}
-	} while ($failure && $failureconter < 10);
-	
-	// Check if insert was succesfull
-	if ($failure) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
+	if ($follower->store()) {
+		echo($follower->encode());
 		exit();
 	}
-	
-	echo($followidrawstr);
+
+	http_response_code(500);
 	exit();
 }
 
-function getFollowers($shareid) {
-	global $pdo;
-	global $protocol;
-	$followers = array();;
-	
-	try {
-		$query = 'SELECT UNIX_TIMESTAMP(i.`created`) AS `created`, f.`followidraw`, i.`config`, f.`enabled`, UNIX_TIMESTAMP(f.`expires`) AS `expires`, f.`delay` FROM `followers` f, `issuedids` i WHERE i.`id` = f.`followid` AND f.`id` = ? ORDER BY i.`created`';
-		$statement = $pdo->prepare($query);
-		
-		if($statement->execute([$shareid])) {
-			//echo($statement->rowCount());
-			while($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-				$followerConfig = $row['config'];
-				if($followerConfig)
-					$followerConfig = json_decode($row['config'], TRUE);
-				else
-					$followerConfig = [];
-				$entry = [];
-				$entry['created'] = intval($row['created']); // Convert to number
-				$entry['id'] = strtoupper(bin2hex($row['followidraw']));
-				$entry['url'] = $protocol . $_SERVER['HTTP_HOST'] . "/" . $entry['id'];
-				if(array_key_exists('reference', $followerConfig) && $followerConfig['reference'])
-					$entry['reference'] = $followerConfig['reference'];
-				if(array_key_exists('alias', $followerConfig) && $followerConfig['alias'])
-					$entry['alias'] = $followerConfig['alias'];
-				$entry['enabled'] = $row['enabled'] ? TRUE : FALSE;
-				if($row['expires']) {
-					$entry['expires'] = intval($row['expires']); // Convert to number
-					$entry['expired'] = $entry['expires'] < time();
-				}
-				if($row['delay'])
-					$entry['delay'] = intval($row['delay']);
-				$entry['time'] = time();
-				$followers[] = $entry;
-			}
-		}
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
-		exit();
-	}
-	
-	header('Content-Type: application/json');
-	echo(json_encode($followers));
-	exit();
-}
+function getFollowers(ShareID $shareID) {
+	$followers = $shareID->getFollowers();
 
-function enableFollower($shareid, $followid) {
-	global $pdo;
-
-	try {
-		$query = 'UPDATE `followers` SET `enabled` = 1 WHERE `id` = ? AND `followid` = ?;';
-		$statement = $pdo->prepare($query);
-		
-		$statement->execute([$shareid, $followid]);
-		if($statement->rowCount() == 0) {
-			http_response_code(404);
-			exit();
-		} else if($statement->rowCount() > 1) {
-			//ToDo Log error
-			http_response_code(500);
-			exit();
-		}
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
+	if(is_array($followers)) {
+		header('Content-Type: application/json');
+		echo(json_encode($followers, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 		exit();
 	}
 
-	http_response_code(204);
-	exit();
-}
-
-function disableFollower($shareid, $followid) {
-	global $pdo;
-
-	try {
-		$query = 'UPDATE `followers` SET `enabled` = 0 WHERE `id` = ? AND `followid` = ?;';
-		$statement = $pdo->prepare($query);
-		
-		$statement->execute([$shareid, $followid]);
-		if($statement->rowCount() == 0) {
-			http_response_code(404);
-			exit();
-		} else if($statement->rowCount() > 1) {
-			//ToDo Log error
-			http_response_code(500);
-			exit();
-		}
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
-		exit();
-	}
-	
-	http_response_code(204);
-	exit();
-}
-
-function deleteFollower($shareid, $followid) {
-	global $pdo;
-
-	try {
-		$pdo->beginTransaction();
-		
-		$query = 'DELETE FROM `followers` WHERE `id` = ? AND `followid` = ?;';
-		$statement = $pdo->prepare($query);
-		
-		$statement->execute([$shareid, $followid]);
-		if($statement->rowCount() == 0) {
-			//ToDo Log error
-			$pdo->rollback();
-			http_response_code(404);
-			exit();
-		} else if($statement->rowCount() > 1) {
-			//ToDo Log error
-			$pdo->rollback();
-			http_response_code(500);
-			exit();
-		}
-		
-		//$query = "INSERT INTO `deletedids` (`md5`) VALUES (?)";
-		$query = 'UPDATE `issuedids` SET `type` = \'deleted\', `config` = \'\' WHERE `id` = ?';
-		$statement = $pdo->prepare($query);
-		
-		$statement->execute([$followid]);
-		if($statement->rowCount() == 0) {
-			//ToDo Log error
-			$pdo->rollback();
-			http_response_code(404);
-			exit();
-		} else if($statement->rowCount() > 1) {
-			//ToDo Log error
-			$pdo->rollback();
-			http_response_code(500);
-			exit();
-		}
-		
-		//$query = "DELETE FROM `issuedids` WHERE `md5` = ?";
-		//$statement = $pdo->prepare($query);
-		
-		//$statement->execute([$followidmd5]);
-		//if($statement->rowCount() == 0) {
-		//	//ToDo Log error
-		//	$pdo->rollback();
-		//	http_response_code(404);
-		//	exit();
-		//} else if($statement->rowCount() > 1) {
-		//	//ToDo Log error
-		//	$pdo->rollback();
-		//	http_response_code(500);
-		//	exit();
-		//}
-		$pdo->commit();
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
-		exit();
-	}
-	
-	http_response_code(204);
+	http_response_code(500);
 	exit();
 }

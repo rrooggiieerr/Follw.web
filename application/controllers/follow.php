@@ -1,76 +1,54 @@
 <?php
-// Fixes false "Variable is not defined" validation errors for variables created in other files
-/* @var Object $config */
+// Fixes false "Variable is undefined" validation errors
 /* @var String $method */
 /* @var String $action */
 /* @var String $format */
-/* @var Object $pdo */
-/* @var Integer $followid */
+/* @var FollowID $id */
 
 if(!isset($action)) {
 	http_response_code(404);
 	exit();
 }
 
-if($method == 'POST') {
+if($method === 'POST') {
 	http_response_code(405);
 	exit();
 }
 
-if($action == 'location') {
-	try {
-		// Get location from database
-		$query = 'SELECT UNIX_TIMESTAMP(l.`timestamp`) AS `timestamp`, l.`location`, sid.`config` AS `sharerConfig`
-			FROM `locations` l, `followers` f, `issuedids` sid
-			WHERE sid.`id` = f.`id` AND l.`id` = sid.`id` AND f.`enabled` = 1 AND (f.`expires` IS NULL OR f.`expires` >= NOW()) AND f.`followid` = ?';
-		$statement = $pdo->prepare($query);
-		$statement->execute([$followid]);
-		
-		if($statement->rowCount() != 1) {
-			if($format == 'html') {
-				$location = null;
-				require_once(dirname(__DIR__) . '/views/follow.php');
-			} else
-				http_response_code(204);
-				exit();
-		}
-		
-		$result = $statement->fetch();
-		
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
+if($action === 'location') {
+	if($format === 'html') {
+		require_once(dirname(__DIR__) . '/views/follow.php');
 		exit();
 	}
 	
-	$sharerConfig = json_decode($result['sharerConfig'], TRUE);
-	$location = json_decode($result['location'], TRUE);
-	$location['timestamp'] = $result['timestamp'] + 0;
-	if(array_key_exists('alias', $config) && $config['alias'])
-		$location['alias'] = $config['alias'];
-	else if($sharerConfig && array_key_exists('alias', $sharerConfig) && $sharerConfig['alias'])
-		$location['alias'] = $sharerConfig['alias'];
-	else
-		$location['alias'] = "Something";
-	// Calculate the recomended refresh interval based on timestamp
-	if(date_create()->getTimestamp() - $result['timestamp'] < 60)
-		$location['interval'] = 1;
-	else
-		$location['interval'] = 5;
-	
-	switch ($format) {
-		case 'html':
-			require_once(dirname(__DIR__) . '/views/follow.php');
-			break;
-		case 'json':
-			header('Content-Type: application/json');
-			echo(json_encode($location));
-			break;
-			// ToDo Implement other formats
-		default:
-			http_response_code(500);
+	if(!$id->enabled) {
+		http_response_code(403);
+		exit();
 	}
-	
+
+	if($id->expires > 0 && $id->expires < time()) {
+		http_response_code(403);
+		exit();
+	}
+
+	require_once(dirname(__DIR__) . '/models/Location.php');
+	$location = Location::get($id);
+
+	switch ($format) {
+		case 'json':
+			if (!$location) {
+				http_response_code(204);
+				exit();
+			}
+			header('Content-Type: application/json');
+			$json = json_encode(array_merge($location->jsonSerialize(), $id->jsonSerialize()), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+			header('Content-Length: ' . strlen($json));
+			echo($json);
+			break;
+			//TODO Implement other formats
+		default:
+			http_response_code(404);
+	}
+
 	exit();
 }

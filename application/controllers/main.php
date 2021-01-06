@@ -1,81 +1,49 @@
 <?php
-/* @var String $servername */
-/* @var String $dbname */
-/* @var String $username */
-/* @var String $password */
-/* @var Integer $idlength */
+// Fixes false "Variable is undefined" and "Variable is never used" validation errors
+/* @var array $configuration */
+/* @var string $protocol */
 
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Static content
-switch($path) {
-	case '/':
-		require_once(dirname(__DIR__) . '/views/intro.php');
-		exit();
-		break;
-	case '/privacy':
-	case '/terms':
-	case '/htmlsnippet':
-	case '/wordpress':
-	case '/osmand':
-		require_once(dirname(__DIR__) . '/views/static.php');
-		exit();
-		break;
+require_once(dirname(__DIR__) . '/controllers/StaticContent.php');
+
+if($configuration['mode'] !== 'production') {
+	// Don't let anything be indexed by search engines if not in production mode
+	header('X-Robots-Tag: noindex');
 }
 
-header('X-Robots-Tag: noindex');
-
-try {
-	$pdo = new PDO("mysql:host=$servername;dbname=$dbname;charset=utf8", $username, $password);
-	// set the PDO error mode to exception
-	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-	// Log error
-	echo("Connection failed: " . $e->getMessage());
-	http_response_code(500);
+// Handle static content which doesn't need a database connection
+if ($method === 'GET' && StaticContent::route($path)) {
 	exit();
 }
 
+// Don't let any of the dynamic pages to be indexed by search engines
+header('X-Robots-Tag: noindex');
+
 if($method === 'GET' && $path === '/generatesharingid') {
-	$failureconter = 0;
-	do {
-		// Generate unique ID
-		$shareidraw = random_bytes($idlength);
-		$shareidrawstr = strtoupper(bin2hex($shareidraw));
-		
-		$failure = FALSE;
-		try {
-			// Insert ID in database
-			$query = 'INSERT INTO `issuedids` (`md5`, `type`, `config`) VALUES (?, \'share\', "{}")';
-			$statement = $pdo->prepare($query);
-			$statement->execute([md5($shareidraw, TRUE)]);
-		} catch(PDOException $e) {
-			$failure = TRUE;
-			$failureconter++;
-			//ToDo Log error
-			//$e->getCode()
-		}
-	} while ($failure && $failureconter < 10);
-	
-	// Check if insert was succesfull
-	if ($failure) {
+	require_once(dirname(__DIR__) . '/models/ShareID.php');
+	// Generate unique ID
+	$shareID = new ShareID();
+	$shareID->store();
+
+	if ($shareID == NULL) {
 		http_response_code(500);
 		exit();
 	}
 
 	http_response_code(303);
-	header('Location: /' . $shareidrawstr);
+	header('Location: /' . $shareID->encode());
 	exit();
 }
 
-$matches = NULL;
-if(preg_match('/^\/([0-9A-F]{' . (2 * $idlength) . '})([\/.].*)?$/', $path, $matches) == TRUE) {
-	$idrawstr = $matches[1];
-	$idraw = hex2bin($matches[1]);
-	$idrawmd5 = md5($idraw, TRUE);
+require_once(dirname(__DIR__) . '/libs/Base.php');
+$configuration['id']['encodedLength'] = BASE::length($configuration['id']['nBytes'], $configuration['id']['baseEncoding']);
+$configuration['id']['encodedChars'] = BASE::chars($configuration['id']['baseEncoding']);
 
+$matches = NULL; // Fixes false "Variable is undefined" validation error
+if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})([\/.].*)?$/', $path, $matches) == TRUE) {
 	$remainer = '';
 	if(count($matches) === 3) {
 		$remainer = $matches[2];
@@ -90,83 +58,34 @@ if(preg_match('/^\/([0-9A-F]{' . (2 * $idlength) . '})([\/.].*)?$/', $path, $mat
 		$action = 'location';
 		$format = substr($remainer, 1);
 	}
-	
-	/*try {
-		$query = 'SELECT `md5` FROM `deletedids` WHERE `md5` = ?';
-		$statement = $pdo->prepare($query);
-		$result = $statement->execute([$idrawmd5]);
 
-		if($statement->rowCount() > 1) {
-			//TODO Log error
-			//$e->getCode()
-			http_response_code(500);
-			exit();
-		}
-		if($statement->rowCount() > 0) {
-			if($action === 'location') {
-				http_response_code(410);
-				if($format === 'html')
-					require_once(dirname(__DIR__) . '/views/iddeleted.php');
-			} else {
-				http_response_code(404);
-			}
-			exit();
-		}
-	} catch(PDOException $e) {
-		//ToDo Log error
-		//$e->getCode()
-		http_response_code(500);
-		exit();
-	}*/
+	require_once(dirname(__DIR__) . '/models/ID.php');
+	$id = ID::decode($matches[1]);
 
-	try {
-		// See if it is a sharing or follow ID
-		$query = 'SELECT `id`, `type`, `config` FROM `issuedids` WHERE `md5` = ?';
-		$statement = $pdo->prepare($query);
-		$result = $statement->execute([$idrawmd5]);
-		
-		if($statement->rowCount() > 1) {
-			//TODO Log error
-			//$e->getCode()
-			http_response_code(500);
-			exit();
-		}
-		if($statement->rowCount() < 1) {
-			// ID does not exist
-			//TODO Rate limit requests per IP to prevent guessing
-			//http_response_code(429);
-			http_response_code(404);
-			exit();
-		}
-		
-		$result = $statement->fetch();
-		$id = $result['id'];
-		$type = $result['type'];
-		$config = $result['config'];
-		if($config)
-			$config = json_decode($config, TRUE);
-		else
-			$config = [];
-	} catch(PDOException $e) {
-		//TODO Log error
-		//$e->getCode()
-		http_response_code(500);
+	if (!$id) {
+		http_response_code(404);
 		exit();
 	}
-	
+
 	if(isset($format) && !in_array($format, ['html', 'json'])) {
 		http_response_code(404);
 		exit();
 	}
 
-	if($type === 'deleted') {
+	if($id->type === 'deleted') {
 		if($action === 'location') {
-			if($format === 'html')
-				require_once(dirname(__DIR__) . '/views/iddeleted.php');
 			http_response_code(410);
+			if($format === 'html') {
+				require_once(dirname(__DIR__) . '/views/iddeleted.php');
+			}
 		} else {
 			http_response_code(404);
 		}
+		exit();
+	}
+
+	if($id->type === 'reserved') {
+		http_response_code(404);
 		exit();
 	}
 
@@ -175,14 +94,11 @@ if(preg_match('/^\/([0-9A-F]{' . (2 * $idlength) . '})([\/.].*)?$/', $path, $mat
 		require_once(dirname(__DIR__) . '/views/manifest.webmanifest.php');
 		exit();
 	}
-	
-	if($type === 'follow') {
-		$followid = $id;
-		$followidrawstr= $idrawstr;
+
+	if($id instanceof FollowID) {
 		require_once(dirname(__DIR__) . '/controllers/follow.php');
-	} else if($type === 'share') {
-		$shareid = $id;
-		$shareidrawstr= $idrawstr;
+	} else if($id instanceof ShareID) {
+		$shareID = $id;
 		require_once(dirname(__DIR__) . '/controllers/share.php');
 	}
 }
