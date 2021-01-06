@@ -1,17 +1,18 @@
 <?php
-// Fixes false "Variable is not defined" validation errors for variables created in other files
-/* @var Integer $followidrawstr */
-/* @var Integer $location */
+// Fixes false "Variable is undefined" validation errors
+/* @var FollowID $id */
+/* @var Array $location */
 
-$title = "No location is currently being shared";
+$title = 'No location is currently being shared';
 $_location = 'null';
 $_accuracy = 'null';
 
 if(isset($location)) {
-	$title = $location['alias'] . " is here";
+	$title = htmlspecialchars($id['alias']) . ' is here';
 	$_location = '[' . $location['latitude'] . ', ' . $location['longitude'] . ']';
-	if(array_key_exists('accuracy', $location) && isset($location['accuracy']))
+	if(array_key_exists('accuracy', $location) && isset($location['accuracy'])) {
 		$_accuracy = $location['accuracy'];
+	}
 }
 ?>
 <!doctype html>
@@ -21,7 +22,7 @@ if(isset($location)) {
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<meta name="robots" content="noindex" />
-		<link rel="manifest" href="/<?=$followidrawstr?>/manifest.webmanifest" />
+		<link rel="manifest" href="/<?=$id->encode()?>/manifest.webmanifest" />
 <?php // Icons
 /* TODO
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
@@ -34,7 +35,7 @@ if(isset($location)) {
 */
 ?>
 <?php // Styles ?>
-		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+		<link rel="stylesheet" href="//unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
 			crossorigin="anonymous"/>
 		<style>
@@ -54,7 +55,7 @@ if(isset($location)) {
 			#header, #footer {
 				padding: 8px;
 			}
-			
+
 			#header > *:first-of-type, #footer > *:first-of-type {
 				margin-top: 0;
 			}
@@ -63,36 +64,49 @@ if(isset($location)) {
 				margin-bottom: 0;
 			}
 
+			#coordinates {
+				word-spacing: -0.1em;
+			}
+
 			#follwMap {
 				height: 250px;
 			}
-			
+
 			#navigate {
 				visibility: hidden;
 			}
 		</style>
 <?php // Scripts ?>
 		<script src="//unpkg.com/jquery@3.5.1/dist/jquery.js" crossorigin="anonymous"></script>
-		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+		<script src="//unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha384-RFZC58YeKApoNsIbBxf4z6JJXmh+geBSgkCQXFyh+4tiFSJmJBt+2FbjxW7Ar16M"
 			crossorigin="anonymous"></script>
 		<script src="/follw.js" crossorigin="anonymous"></script>
 		<script>
+			'use strict';
+
 			document.ontouchmove = function(e) {e.preventDefault()};
-			
+
 			function resizeMap() {
-				$("#follwMap").height($("body").innerHeight() - ($("#header").outerHeight() + $("#footer").outerHeight()));
+				//$("#follwMap").height($("body").innerHeight() - ($("#header").outerHeight() + $("#footer").outerHeight()));
+				$("#follwMap").height($("body").innerHeight() - $("#header").outerHeight());
 				follw.invalidateSize();
 			}
-			
+
 			window.addEventListener("resize", resizeMap);
-			
+
 			function onLocationChange(data) {
 				if(data != null) {
-					s = data.alias + " is here";
+					var s = data.alias + " is here";
 					if($("title").text() != s) {
 						$("title").text(s);
 						$("#title").text(s);
+						resizeMap();
+					}
+
+					s = follw.prettyPrintCoordinates(data.latitude, data.longitude);
+					if($("#coordinates").text() != s) {
+						$("#coordinates").text(s);
 						resizeMap();
 					}
 
@@ -109,15 +123,15 @@ if(isset($location)) {
 					}
 				}
 			}
-			
+
 			function onDelete() {
 				location.reload();
 			}
 
- 			var follw = new Follw("follwMap", "/<?=$followidrawstr?>", 12);
+ 			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 12);
  			follw.onLocationChange(onLocationChange);
  			follw.onIDDeleted(onDelete);
- 			
+ 
  			$().ready(function() {
  				resizeMap()
 	 			follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
@@ -127,10 +141,11 @@ if(isset($location)) {
 	<body>
 		<div id="header">
 			<h1 id="title"><?= $title ?></h1>
+			<div id="coordinates"></div>
 		</div>
 		<div id="follwMap"></div>
-		<div id="footer">
+		<!-- div id="footer">
 			<p><a href="#" target="_blank" id="navigate">Navigate to this location</a></p>
-		</div>
+		</div -->
 	</body>
 </html>
