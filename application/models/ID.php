@@ -123,9 +123,9 @@ class ID extends ArrayObject {
 			}
 		}
 
-		if ($instance instanceof FollowID && !key_exists('alias', $instance) && key_exists('sharerConfig', $result)) {
+		if ($instance instanceof FollowID && !isset($instance['alias']) && array_key_exists('sharerConfig', $result)) {
 			$sharerConfig = json_decode($result['sharerConfig'], TRUE);
-			if ($sharerConfig && key_exists('alias', $sharerConfig)) {
+			if ($sharerConfig && array_key_exists('alias', $sharerConfig)) {
 				$instance['alias'] = $sharerConfig['alias'];
 			} else {
 				$instance['alias'] = 'Something';

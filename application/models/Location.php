@@ -38,7 +38,7 @@ class Location extends ArrayObject implements JsonSerializable {
 			$instance[$key] = $value;
 		}
 
-		if (key_exists('latitude', $instance) && key_exists('longitude', $instance)) {
+		if (isset($instance['latitude']) && isset($instance['longitude'])) {
 			$instance->timestamp = $result['timestamp'] + 0;
 			// Calculate the recomended refresh interval based on timestamp
 			if(date_create()->getTimestamp() - $result['timestamp'] < 60) {
