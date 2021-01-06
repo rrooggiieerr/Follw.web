@@ -3,19 +3,25 @@
 /* @var array $configuration */
 /* @var string $protocol */
 
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
-$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = $_SERVER['REQUEST_METHOD'];
-
-require_once(dirname(__DIR__) . '/controllers/StaticContent.php');
+if($configuration['mode'] === 'development') {
+	// Show all errors when in development mode
+	ini_set('display_errors', 1);
+	ini_set('display_startup_errors', 1);
+	error_reporting(E_ALL);
+}
 
 if($configuration['mode'] !== 'production') {
 	// Don't let anything be indexed by search engines if not in production mode
 	header('X-Robots-Tag: noindex');
 }
 
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
+
 // Handle static content which doesn't need a database connection
-if ($method === 'GET' && StaticContent::route($path)) {
+require_once(dirname(__DIR__) . '/controllers/StaticContent.php');
+if ($method === 'GET' && (new StaticContent())->route($path)) {
 	exit();
 }
 
