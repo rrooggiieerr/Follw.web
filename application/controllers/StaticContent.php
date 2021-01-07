@@ -20,6 +20,10 @@ class StaticContent {
 			case '/robots.txt':
 				require_once(dirname(__DIR__) . '/views/robots.txt.php');
 				return TRUE;
+			case '/follw.js':
+				header('Content-Type: text/javascript');
+				print(file_get_contents(dirname(__DIR__) . '/../htdocs/follw.js'));
+				return TRUE;
 		}
 
 		return FALSE;
