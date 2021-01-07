@@ -121,6 +121,11 @@ if(isset($location)) {
 						$("a#navigate").css("visibility", "hidden");
 						resizeMap();
 					}
+					
+					s = "&nbsp;";
+					if($("#coordinates").html() != s) {
+						$("#coordinates").html(s);
+					}
 				}
 			}
 
@@ -141,7 +146,7 @@ if(isset($location)) {
 	<body>
 		<div id="header">
 			<h1 id="title"><?= $title ?></h1>
-			<div id="coordinates"></div>
+			<div id="coordinates">&nbsp;</div>
 		</div>
 		<div id="follwMap"></div>
 		<!-- div id="footer">
