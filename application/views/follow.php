@@ -1,7 +1,7 @@
 <?php
 // Fixes false "Variable is undefined" validation errors
 /* @var FollowID $id */
-/* @var Array $location */
+/* @var Location $location */
 
 $title = 'No location is currently being shared';
 $_location = 'null';
@@ -10,7 +10,7 @@ $_accuracy = 'null';
 if(isset($location)) {
 	$title = htmlspecialchars($id['alias']) . ' is here';
 	$_location = '[' . $location['latitude'] . ', ' . $location['longitude'] . ']';
-	if(array_key_exists('accuracy', $location) && isset($location['accuracy'])) {
+	if(isset($location['accuracy'])) {
 		$_accuracy = $location['accuracy'];
 	}
 }
