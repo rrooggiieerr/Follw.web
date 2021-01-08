@@ -96,7 +96,6 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 	}
 
 	if($remainer === '/manifest.webmanifest') {
-		header('Content-Type: application/json');
 		require_once(dirname(__DIR__) . '/views/manifest.webmanifest.php');
 		exit();
 	}

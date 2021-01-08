@@ -2,6 +2,8 @@
 // Fixes false "Variable is undefined" validation errors
 /* @var String $protocol */
 /* @var ID $id */
+
+header('Content-Type: application/manifest+json');
 ?>
 {
 	"short_name": "Follw",
