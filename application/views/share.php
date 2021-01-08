@@ -40,6 +40,15 @@ global $configuration
 				height: 250px;
 			}
 
+			#sharefollowid-modal .modal-body {
+				text-align: center;
+			}
+
+			#sharefollowid-modal input[type=image] {
+				width: 40px;
+				height: 40px;
+			}
+
 			code {
 				display: block;
 				white-space: pre;
@@ -134,12 +143,41 @@ if($configuration['mode'] == 'development') {
 									<!-- <th>Delay</th> -->
 									<th>Expires</th>
 									<th>Enabled</th>
+									<th>Share</th>
 									<th>Delete</th>
 								</tr>
 							</thead>
 							<tbody>
 							</tbody>
 						</table>
+						<div id="sharefollowid-modal" class="modal">
+							<div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title">Share Follow ID</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="modal-body">
+										<div><input type="text" value="" id="sharefollowid-clipboardtext" readonly="readonly"><button type="button" id="sharefollowid-clipboard">Copy to Clipboard</button></div>
+										&nbsp;
+										<div id="sharefollowid-buttons">
+											<input type="image" src="/email.svg" id="sharefollowid-email"/>
+											<input type="image" src="/whatsapp.png" id="sharefollowid-whatsapp"/>
+											<!--  input type="image" src="/skype.svg" id="sharefollowid-skype"/ -->
+											<input type="image" src="/telegram.svg" id="sharefollowid-telegram"/>
+											<input type="image" src="/twitter.png" id="sharefollowid-twitter"/>
+											<input type="image" src="/facebook.png" id="sharefollowid-facebook"/>
+											<input type="image" src="/linkedin.png" id="sharefollowid-linkedin"/>
+										</div>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									</div>
+								</div>
+							</div>
+						</div>
 						<p>Create a Follow ID and manage who is allowed to see your location.</p>
 						<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#generatefollowid-modal">Create Follow ID</button>
 						<div id="generatefollowid-modal" class="modal">
@@ -363,7 +401,12 @@ if($configuration['mode'] == 'development') {
 							enableFollowID(event.data);
 						});
 
-						$(row).append(`<td><span class="deletefollowid">&#x1F5D1;</span></td>`);
+						$(row).append('<td class="sharefollowid"><img src="/share_macos.png"/></td>');
+						$('.sharefollowid', row).click(entry, function(event) {
+							shareFollowID(event.data);
+						});
+
+						$(row).append('<td><span class="deletefollowid">&#x1F5D1;</span></td>');
 						$('.deletefollowid', row).click(entry['id'], function(event) {
 							deleteFollowID(event.data);
 						});
@@ -396,6 +439,60 @@ if($configuration['mode'] == 'development') {
 				$.get("/<?=$shareID->encode()?>/follower/" + followid + "/disable").always(function() {
 					updateFollowIDs();
 				});
+			}
+
+			function shareFollowID(entry) {
+				console.debug(entry);
+				message = `Follow my location ${entry['url']}`;
+
+				// Twitter
+				$("#sharefollowid-twitter").click(entry, function(event) {
+					event.preventDefault();
+					window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(event.data['url'])}&text=${encodeURIComponent("Follow my location")}`, "_blank", "noopener,noreferrer");
+				});
+
+				// Facebook
+				$("#sharefollowid-facebook").click(entry, function(event) {
+					event.preventDefault();
+					window.open("https://facebook.com/sharer.php?u=" + encodeURIComponent(event.data['url']), "_blank", "noopener,noreferrer");
+				});
+
+				// eMail
+				$("#sharefollowid-email").click(message, function(event) {
+					event.preventDefault();
+					window.open(`mailto:?subject=${encodeURIComponent("Follow my location")}&body=${encodeURIComponent(event.data)}`, "_blank", "noopener,noreferrer");
+				});
+
+				// LinkedIn
+				$("#sharefollowid-linkedin").click(entry, function(event) {
+					event.preventDefault();
+					window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(event.data['url']), "_blank", "noopener,noreferrer");
+				});
+
+				// WhatsApp
+				$("#sharefollowid-whatsapp").click(message, function(event) {
+					event.preventDefault();
+					window.open("whatsapp://send?text=" + encodeURIComponent(event.data), "_blank", "noopener,noreferrer");
+				});
+
+				// Telegram
+				$("#sharefollowid-telegram").click(entry, function(event) {
+					event.preventDefault();
+					window.open(`https://t.me/share/url?url=${encodeURIComponent(event.data['url'])}&text=${encodeURIComponent("Follow my location")}`, "_blank", "noopener,noreferrer");
+				});
+
+				// Clipboard
+				$("#sharefollowid-clipboardtext").val(message);
+				$("#sharefollowid-clipboard").click(function(event) {
+					event.preventDefault();
+					copyText = document.getElementById("sharefollowid-clipboardtext");
+					copyText.select();
+					copyText.setSelectionRange(0, 99999);
+					document.execCommand("copy");
+					alert("Copied the text: " + copyText.value);
+				});
+
+				$("#sharefollowid-modal").modal()
 			}
 
 			function deleteFollowID(followid) {
