@@ -100,6 +100,11 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 		exit();
 	}
 
+	if($remainer === '/qrcode.svg') {
+		require_once(dirname(__DIR__) . '/views/qrcode.svg.php');
+		exit();
+	}
+	
 	if($id instanceof FollowID) {
 		require_once(dirname(__DIR__) . '/controllers/follow.php');
 	} else if($id instanceof ShareID) {

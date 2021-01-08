@@ -44,6 +44,11 @@ global $configuration
 				text-align: center;
 			}
 
+			#sharefollowid-qrcode {
+				width: 222px;
+				height: 222px;
+			}
+
 			#sharefollowid-modal input[type=image] {
 				width: 40px;
 				height: 40px;
@@ -160,6 +165,8 @@ if($configuration['mode'] == 'development') {
 										</button>
 									</div>
 									<div class="modal-body">
+										<img src="" id="sharefollowid-qrcode"/><br/>
+										&nbsp;
 										<div><input type="text" value="" id="sharefollowid-clipboardtext" readonly="readonly"><button type="button" id="sharefollowid-clipboard">Copy to Clipboard</button></div>
 										&nbsp;
 										<div id="sharefollowid-buttons">
@@ -444,6 +451,9 @@ if($configuration['mode'] == 'development') {
 			function shareFollowID(entry) {
 				console.debug(entry);
 				message = `Follow my location ${entry['url']}`;
+
+				// QR code
+				$("#sharefollowid-qrcode").attr("src", entry['url'] + "/qrcode.svg");
 
 				// Twitter
 				$("#sharefollowid-twitter").click(entry, function(event) {
