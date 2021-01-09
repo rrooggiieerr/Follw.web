@@ -2,6 +2,7 @@
 // Fixes false "Variable is undefined" validation errors
 /* @var FollowID $id */
 /* @var Location $location */
+/* @var String $protocol */
 
 $title = 'No location is currently being shared';
 $_location = 'null';
@@ -39,20 +40,17 @@ if(isset($location)) {
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
 			crossorigin="anonymous"/>
 		<style>
-			body {
-				padding: 0;
-				margin: 0;
-				font-family: sans-serif;
-			}
-
 			html, body {
 				height: 100%;
 				width: 100vw;
 				padding: 0;
 				margin: 0;
+				overflow: hidden;
+				font-family: sans-serif;
 			}
 
 			#header, #footer {
+				text-align: center;
 				padding: 8px;
 			}
 
@@ -88,8 +86,7 @@ if(isset($location)) {
 			document.ontouchmove = function(e) {e.preventDefault()};
 
 			function resizeMap() {
-				//$("#follwMap").height($("body").innerHeight() - ($("#header").outerHeight() + $("#footer").outerHeight()));
-				$("#follwMap").height($("body").innerHeight() - $("#header").outerHeight());
+				$("#follwMap").height($("body").innerHeight() - ($("#header").outerHeight() + $("#footer").outerHeight()));
 				follw.invalidateSize();
 			}
 
@@ -133,14 +130,22 @@ if(isset($location)) {
 				location.reload();
 			}
 
- 			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 12);
- 			follw.onLocationChange(onLocationChange);
- 			follw.onIDDeleted(onDelete);
- 
- 			$().ready(function() {
- 				resizeMap()
+			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 12);
+			follw.onLocationChange(onLocationChange);
+			follw.onIDDeleted(onDelete);
+
+			$(window).scroll(function() {
+				try {
+					document.body.requestFullscreen();
+				} catch(error) {
+					console.error(error);
+				}
+			});
+
+			$().ready(function() {
+				resizeMap()
 	 			follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
- 			});
+			});
 		</script>
 	</head>
 	<body>
@@ -149,8 +154,8 @@ if(isset($location)) {
 			<div id="coordinates">&nbsp;</div>
 		</div>
 		<div id="follwMap"></div>
-		<!-- div id="footer">
-			<p><a href="#" target="_blank" id="navigate">Navigate to this location</a></p>
-		</div -->
+		<div id="footer">
+			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank">Location shared with Follw</a> · <a href="/privacy" target="_blank">Privacy statement</a>
+		</div>
 	</body>
 </html>
