@@ -15,7 +15,9 @@ class Follw {
 	
 	offScreen = false;
 	hidden;
-	
+
+	nolocation = "No location is currently being shared";
+
 	constructor(element, followURL, zoom = 12) {
 		this.element = element;
 		this.followURL = followURL + ".json";
@@ -180,7 +182,7 @@ class Follw {
 				this.accuracy = null;
 			}
 			
-			this.setTextOverlay("No location is currently being shared");
+			this.setTextOverlay(this.nolocation);
 		} else {
 			this.map.zoomControl.enable();;
 			this.map.dragging.enable();

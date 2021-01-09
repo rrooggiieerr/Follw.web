@@ -1,0 +1,4 @@
+nolocation = Er wordt momenteel geen locatie gedeeld
+ishere = is hier
+credits = Locatie gedeeld via Follw
+privacystatement = Privacyverklaring

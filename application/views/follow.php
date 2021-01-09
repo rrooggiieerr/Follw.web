@@ -1,15 +1,20 @@
 <?php
+require_once(dirname(__DIR__) . '/libs/Translation.php');
+
 // Fixes false "Variable is undefined" validation errors
 /* @var FollowID $id */
 /* @var Location $location */
 /* @var String $protocol */
 
-$title = 'No location is currently being shared';
+$translation = new Translation('follow');
+header('Content-Language: ' . $translation->language);
+
+$title = htmlspecialchars($translation->translations['nolocation']);
 $_location = 'null';
 $_accuracy = 'null';
 
 if(isset($location)) {
-	$title = htmlspecialchars($id['alias']) . ' is here';
+	$title = htmlspecialchars($id['alias'] . ' ' . $translation->translations['ishere']);
 	$_location = '[' . $location['latitude'] . ', ' . $location['longitude'] . ']';
 	if(isset($location['accuracy'])) {
 		$_accuracy = $location['accuracy'];
@@ -17,7 +22,7 @@ if(isset($location)) {
 }
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="<?= $translation->language ?>">
 	<head>
 		<title><?= $title ?></title>
 		<meta charset="utf-8" />
@@ -95,7 +100,7 @@ if(isset($location)) {
 
 			function onLocationChange(data) {
 				if(data != null) {
-					var s = data.alias + " is here";
+					var s = data.alias + <?= json_encode(' ' . $translation->translations['ishere']) ?>;
 					if($("title").text() != s) {
 						$("title").text(s);
 						$("#title").text(s);
@@ -112,7 +117,7 @@ if(isset($location)) {
 					$("a#navigate").attr("href", "https://www.google.com/maps/dir/?api=1&destination=" + data.latitude + "," + data.longitude);
 					$("a#navigate").css("visibility", "visible");
 				} else {
-					s = "No location is currently being shared";
+					s = follw.nolocation;
 					if($("title").text() != s) {
 						$("title").text(s);
 						$("#title").text(s);
@@ -132,6 +137,7 @@ if(isset($location)) {
 			}
 
 			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 12);
+			follw.nolocation = <?= json_encode($translation->translations['nolocation']) ?>;
 			follw.onLocationChange(onLocationChange);
 			follw.onIDDeleted(onDelete);
 
@@ -156,7 +162,7 @@ if(isset($location)) {
 		</div>
 		<div id="follwMap"></div>
 		<div id="footer">
-			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer">Location shared with Follw</a> · <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy statement</a>
+			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($translation->translations['credits']) ?></a> · <a href="/privacy" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($translation->translations['privacystatement']) ?></a>
 		</div>
 	</body>
 </html>
