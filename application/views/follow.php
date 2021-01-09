@@ -23,6 +23,7 @@ if(isset($location)) {
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<meta name="robots" content="noindex" />
+		<meta name="referrer" content="no-referrer" />
 		<link rel="manifest" href="/<?=$id->encode()?>/manifest.webmanifest" />
 <?php // Icons
 /* TODO
@@ -155,7 +156,7 @@ if(isset($location)) {
 		</div>
 		<div id="follwMap"></div>
 		<div id="footer">
-			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank">Location shared with Follw</a> · <a href="/privacy" target="_blank">Privacy statement</a>
+			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer">Location shared with Follw</a> · <a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy statement</a>
 		</div>
 	</body>
 </html>
