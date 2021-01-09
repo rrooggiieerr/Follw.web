@@ -260,6 +260,8 @@ if($configuration['mode'] == 'development') {
 			crossorigin="anonymous"></script>
 		<script src="/follw.js" crossorigin="anonymous"></script>
 		<script>
+			'use strict';
+
 // 			function onDelete() {
 // 				location.reload();
 // 			}
@@ -450,7 +452,7 @@ if($configuration['mode'] == 'development') {
 
 			function shareFollowID(entry) {
 				console.debug(entry);
-				message = `Follow my location ${entry['url']}`;
+				var message = `Follow my location ${entry['url']}`;
 
 				// QR code
 				$("#sharefollowid-qrcode").attr("src", entry['url'] + "/qrcode.svg");
@@ -495,7 +497,7 @@ if($configuration['mode'] == 'development') {
 				$("#sharefollowid-clipboardtext").val(message);
 				$("#sharefollowid-clipboard").click(function(event) {
 					event.preventDefault();
-					copyText = document.getElementById("sharefollowid-clipboardtext");
+					var copyText = document.getElementById("sharefollowid-clipboardtext");
 					copyText.select();
 					copyText.setSelectionRange(0, 99999);
 					document.execCommand("copy");
