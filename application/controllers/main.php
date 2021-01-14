@@ -50,6 +50,7 @@ $configuration['id']['encodedChars'] = BASE::chars($configuration['id']['baseEnc
 
 $matches = NULL; // Fixes false "Variable is undefined" validation error
 if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})([\/.].*)?$/', $path, $matches) == TRUE) {
+	$id = $matches[1];
 	$remainer = '';
 	if(count($matches) === 3) {
 		$remainer = $matches[2];
@@ -63,7 +64,7 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 	} else if(preg_match('/^\.[a-z]*$/', $remainer)) {
 		$action = 'location';
 		$format = substr($remainer, 1);
-	} else if(preg_match('/^\/qrcode\.([a-z]*)$/', $remainer)) {
+	} else if(preg_match('/^\/qrcode\.([a-z]*)$/', $remainer, $matches)) {
 		$action = 'qrcode';
 		$format = $matches[1];
 	} else {
@@ -76,7 +77,7 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 	}
 
 	require_once(dirname(__DIR__) . '/models/ID.php');
-	$id = ID::decode($matches[1]);
+	$id = ID::decode($id);
 
 	if (!$id) {
 		http_response_code(404);
@@ -106,9 +107,19 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 	}
 
 	if($action === 'qrcode') {
-		switch($matches[1]) {
+		require_once(dirname(__DIR__) . '/libs/phpqrcode.php');
+		switch($format) {
 			case 'svg':
-				require_once(dirname(__DIR__) . '/views/qrcode.svg.php');
+				header('Content-Type: image/svg+xml');
+				QRcode::svg($id->url());
+				exit();
+			case 'png':
+				header('Content-Type: image/png');
+				QRcode::png($id->url());
+				exit();
+			case 'eps':
+				header('Content-Type: application/postscript');
+				QRcode::eps($id->url());
 				exit();
 		}
 
