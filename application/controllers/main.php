@@ -63,17 +63,22 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 	} else if(preg_match('/^\.[a-z]*$/', $remainer)) {
 		$action = 'location';
 		$format = substr($remainer, 1);
+	} else if(preg_match('/^\/qrcode\.([a-z]*)$/', $remainer)) {
+		$action = 'qrcode';
+		$format = $matches[1];
+	} else {
+		$action = substr($remainer, 1);
+	}
+
+	if($action === 'location' && !in_array($format, ['html', 'json'])) {
+		http_response_code(404);
+		exit();
 	}
 
 	require_once(dirname(__DIR__) . '/models/ID.php');
 	$id = ID::decode($matches[1]);
 
 	if (!$id) {
-		http_response_code(404);
-		exit();
-	}
-
-	if(isset($format) && !in_array($format, ['html', 'json'])) {
 		http_response_code(404);
 		exit();
 	}
@@ -95,21 +100,28 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 		exit();
 	}
 
-	if($remainer === '/manifest.webmanifest') {
+	if($action === 'manifest.webmanifest') {
 		require_once(dirname(__DIR__) . '/views/manifest.webmanifest.php');
 		exit();
 	}
 
-	if($remainer === '/qrcode.svg') {
-		require_once(dirname(__DIR__) . '/views/qrcode.svg.php');
+	if($action === 'qrcode') {
+		switch($matches[1]) {
+			case 'svg':
+				require_once(dirname(__DIR__) . '/views/qrcode.svg.php');
+				exit();
+		}
+
+		http_response_code(404);
 		exit();
 	}
-	
+
 	if($id instanceof FollowID) {
-		require_once(dirname(__DIR__) . '/controllers/follow.php');
+		require_once(dirname(__DIR__) . '/controllers/FollowController.php');
+		(new FollowController())->route($id, $action, $format);
 	} else if($id instanceof ShareID) {
-		$shareID = $id;
-		require_once(dirname(__DIR__) . '/controllers/share.php');
+		require_once(dirname(__DIR__) . '/controllers/ShareController.php');
+		(new ShareController())->route($id, $action, $format);
 	}
 }
 
