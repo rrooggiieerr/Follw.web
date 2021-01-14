@@ -28,20 +28,8 @@ if ($method === 'GET' && (new StaticContent())->route($path)) {
 // Don't let any of the dynamic pages to be indexed by search engines
 header('X-Robots-Tag: noindex');
 
-if($method === 'GET' && $path === '/generatesharingid') {
-	require_once(dirname(__DIR__) . '/models/ShareID.php');
-	// Generate unique ID
-	$shareID = new ShareID();
-	$shareID->store();
-
-	if ($shareID == NULL) {
-		http_response_code(500);
-		exit();
-	}
-
-	http_response_code(303);
-	header('Location: /' . $shareID->encode());
-	exit();
+if($path === '/generatesharingid') {
+	(new ShareController())->route(NULL, 'generatesharingid', NULL);
 }
 
 require_once(dirname(__DIR__) . '/libs/Base.php');

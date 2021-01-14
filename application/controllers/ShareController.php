@@ -6,86 +6,97 @@ class ShareController {
 	function route(ShareID $shareID, string $action, $format) {
 		global $configuration;
 
-		if($action === 'location') {
-			if($_SERVER['REQUEST_METHOD'] === 'POST' || count($_GET) !== 0) {
-				$this->shareLocation($shareID);
-			} else {
-				$this->getLocation($shareID, $format);
-			}
-		} else {
-			$matches = NULL; // Fixes false "Variable is undefined" validation error
-			switch($action) {
-				case NULL:
-				case '':
-					break;
-				case 'deletelocation':
-					$this->deleteLocation($shareID);
-					break;
-				case 'config':
-					$this->configSharer($shareID);
-					break;
-				case 'delete':
-					$this->deleteSharer($shareID);
-					break;
-				case 'generatefollowid':
-					$this->generateFollowID($shareID);
-					break;
-				case 'followers.json':
-					$this->getFollowers($shareID);
-					break;
-				case (preg_match('/^follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})\/(enable|disable|delete)$/', $action, $matches) ? TRUE : FALSE):
-					$followID = ID::decode($matches[1], $shareID);
+		$matches = NULL; // Fixes false "Variable is undefined" validation error
+		switch($action) {
+			case NULL:
+			case '':
+				break;
+			case 'generatesharingid':
+				$this->generateSharingID();
+				break;
+			case 'location':
+				if($_SERVER['REQUEST_METHOD'] === 'POST' || count($_GET) !== 0) {
+					$this->shareLocation($shareID);
+				} else {
+					$this->getLocation($shareID, $format);
+				}
+				break;
+			case 'deletelocation':
+				$this->deleteLocation($shareID);
+				break;
+			case 'config':
+				$this->configSharer($shareID);
+				break;
+			case 'delete':
+				$this->deleteSharer($shareID);
+				break;
+			case 'generatefollowid':
+				$this->generateFollowID($shareID);
+				break;
+			case 'followers.json':
+				$this->getFollowers($shareID);
+				break;
+			case (preg_match('/^follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})\/(enable|disable|delete)$/', $action, $matches) ? TRUE : FALSE):
+				$followID = ID::decode($matches[1], $shareID);
 
-					if (!$followID) {
-						http_response_code(404);
-						exit();
-					}
-
-					if($followID->type === 'deleted') {
-						http_response_code(410);
-						exit();
-					}
-
-					switch($matches[2]) {
-						case 'enable':
-							if ($followID->enable()) {
-								http_response_code(204);
-								exit();
-							}
-							break;
-						case 'disable':
-							if ($followID->disable()) {
-								http_response_code(204);
-								exit();
-							}
-							break;
-						case 'delete':
-							if ($followID->delete()) {
-								http_response_code(204);
-								exit();
-							}
-							break;
-						default:
-							// This should not happen as the regex only supports the options enable, disable and delete
-							http_response_code(500);
-							exit();
-							break;
-					}
-
-					http_response_code(500);
-					exit();
-					break;
-				default:
+				if (!$followID) {
 					http_response_code(404);
 					exit();
-					break;
-			}
-		}
+				}
 
-		if(!isset($action)) {
-			http_response_code(404);
+				if($followID->type === 'deleted') {
+					http_response_code(410);
+					exit();
+				}
+
+				switch($matches[2]) {
+					case 'enable':
+						if ($followID->enable()) {
+							http_response_code(204);
+							exit();
+						}
+						break;
+					case 'disable':
+						if ($followID->disable()) {
+							http_response_code(204);
+							exit();
+						}
+						break;
+					case 'delete':
+						if ($followID->delete()) {
+							http_response_code(204);
+							exit();
+						}
+						break;
+					default:
+						// This should not happen as the regex only supports the options enable, disable and delete
+						http_response_code(500);
+						exit();
+						break;
+				}
+
+				http_response_code(500);
+				exit();
+			default:
+				http_response_code(404);
+				exit();
+		}
+	}
+
+	function generateSharingID() {
+		require_once(dirname(__DIR__) . '/models/ShareID.php');
+		// Generate unique ID
+		$shareID = new ShareID();
+		$shareID->store();
+
+		if ($shareID == NULL) {
+			http_response_code(500);
 			exit();
 		}
+
+		http_response_code(303);
+		header('Location: /' . $shareID->encode());
+		exit();
 	}
 
 	function shareLocation(ShareID $shareID) {
