@@ -180,4 +180,10 @@ class ID extends ArrayObject {
 	function json() {
 		return json_encode($this, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 	}
+
+	function url() {
+		global $protocol;
+
+		return $protocol . $_SERVER['HTTP_HOST'] . '/' . $this->encode();
+	}
 }

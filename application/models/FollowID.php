@@ -159,8 +159,6 @@ class FollowID extends ID implements JsonSerializable {
 	}
 
 	function jsonSerialize() {
-		global $protocol;
-
 		$a = array_merge(parent::jsonSerialize(),
 			['expires' => $this->expires,
 			'delay' => $this->delay]);
@@ -169,9 +167,8 @@ class FollowID extends ID implements JsonSerializable {
 			$a = array_merge($a,
 				['enabled' => $this->enabled,
 				'expired' => $this->expired,
-				'url' => $protocol . $_SERVER['HTTP_HOST'] . '/' . $this->encode()]);
+				'url' => $this->url()]);
 		}
-
 
 		return $a;
 	}
