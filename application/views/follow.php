@@ -4,7 +4,8 @@ require_once(dirname(__DIR__) . '/libs/Translation.php');
 // Fixes false "Variable is undefined" validation errors
 /* @var FollowID $id */
 /* @var Location $location */
-/* @var String $protocol */
+
+global $protocol;
 
 $translation = new Translation('follow');
 header('Content-Language: ' . $translation->language);
@@ -42,7 +43,7 @@ if(isset($location)) {
 */
 ?>
 <?php // Styles ?>
-		<link rel="stylesheet" href="//unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
 			crossorigin="anonymous"/>
 		<style>
@@ -81,8 +82,10 @@ if(isset($location)) {
 			}
 		</style>
 <?php // Scripts ?>
-		<script src="//unpkg.com/jquery@3.5.1/dist/jquery.js" crossorigin="anonymous"></script>
-		<script src="//unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+		<script src="https://unpkg.com/jquery@3.5.1/dist/jquery.js"
+			integrity="sha384-/LjQZzcpTzaYn7qWqRIWYC5l8FWEZ2bIHIz0D73Uzba4pShEcdLdZyZkI4Kv676E"
+			crossorigin="anonymous"></script>
+		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha384-RFZC58YeKApoNsIbBxf4z6JJXmh+geBSgkCQXFyh+4tiFSJmJBt+2FbjxW7Ar16M"
 			crossorigin="anonymous"></script>
 		<script src="/follw.js" crossorigin="anonymous"></script>
@@ -98,18 +101,23 @@ if(isset($location)) {
 
 			window.addEventListener("resize", resizeMap);
 
-			function onLocationChange(data) {
+			function onLocationChange(follw, data) {
 				if(data != null) {
 					var s = data.alias + <?= json_encode(' ' . $translation->translations['ishere']) ?>;
+					var resize = false;
 					if($("title").text() != s) {
 						$("title").text(s);
 						$("#title").text(s);
-						resizeMap();
+						resize = true;
 					}
 
 					s = follw.prettyPrintCoordinates(data.latitude, data.longitude);
 					if($("#coordinates").text() != s) {
 						$("#coordinates").text(s);
+						resize = true;
+					}
+
+					if(resize) {
 						resizeMap();
 					}
 

@@ -1,27 +1,26 @@
 'use strict';
 
 class Follw {
-	map = null;
-	marker = null;
-	accuracy = null;
-	textOverlay = null;
-
-	onLocationChangeHooks = [];
-	onIDDeletedHooks = [];
-
-	updateMultiplier = 1;
-	stopUpdate = false;
-	updateTimeoutID = null;
-	
-	offScreen = false;
-	hidden;
-
-	nolocation = "No location is currently being shared";
-
 	constructor(element, followURL, zoom = 12) {
 		this.element = element;
 		this.followURL = followURL + ".json";
 		this.zoom = zoom
+
+		this.marker = null;
+		this.accuracy = null;
+		this.textOverlay = null;
+	
+		this.onLocationChangeHooks = [];
+		this.onIDDeletedHooks = [];
+	
+		this.updateMultiplier = 1;
+		this.stopUpdate = false;
+		this.updateTimeoutID = null;
+		
+		this.offScreen = false;
+		this.hidden = null;
+	
+		this.nolocation = "No location is currently being shared";
 
 		// See if DOM is already available
 		if (document.readyState === 'complete' || document.readyState === 'interactive') {
@@ -226,11 +225,9 @@ class Follw {
 				if(typeof _this.lastTimestamp == "undefined" || _this.lastTimestamp == null || _this.lastTimestamp != data.timestamp) {
 					_this.lastTimestamp = data.timestamp;
 
-_this.setMarker([data.latitude, data.longitude], data.accuracy);
+					_this.setMarker([data.latitude, data.longitude], data.accuracy);
 
-					_this.onLocationChangeHooks.forEach(function(hook) {
-						hook(data);
-					});
+					_this.onLocationChangeHooks.forEach(hook => hook(_this, data));
 				}
 
 				if(!once && !_this.stopUpdate) {
@@ -244,9 +241,7 @@ _this.setMarker([data.latitude, data.longitude], data.accuracy);
 			} else if (this.status == 410) {
 				console.info("ID has been deleted");
 				// Deleted
-				_this.onIDDeletedHooks.forEach(function(hook) {
-					hook();
-				});
+				_this.onIDDeletedHooks.forEach(hook => hook(_this));
 				_this.setTextOverlay("Follw ID is deleted");
 			} else if (this.status == 404) {
 				console.error("ID does not exist");
@@ -256,9 +251,7 @@ _this.setMarker([data.latitude, data.longitude], data.accuracy);
 	
 					_this.setMarker(null, null);
 					
-					_this.onLocationChangeHooks.forEach(function(hook) {
-						hook(null);
-					});
+					_this.onLocationChangeHooks.forEach(hook => hook(_this, null));
 				}
 
 				_this.updateTimeoutID = setTimeout(function() {
