@@ -5,7 +5,7 @@ class Obfuscator extends ArrayObject {
 	var $map = array();
 
 	function obfuscate(string $s) {
-		if(key_exists($s, $this)) {
+		if(isset($this[$s])) {
 			return $this[$s];
 		}
 
