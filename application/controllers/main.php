@@ -3,6 +3,10 @@
 /* @var array $configuration */
 /* @var string $protocol */
 
+ini_set('session.use_cookies', 0);
+ini_set('session.use_only_cookies', 0);
+ini_set('session.use_strict_mode', 1);
+
 if($configuration['mode'] === 'development') {
 	// Show all errors when in development mode
 	ini_set('display_errors', 1);
@@ -28,8 +32,9 @@ if ($method === 'GET' && (new StaticContent())->route($path)) {
 // Don't let any of the dynamic pages to be indexed by search engines
 header('X-Robots-Tag: noindex');
 
-if($path === '/generatesharingid') {
-	(new ShareController())->route(NULL, 'generatesharingid', NULL);
+if($path === '/generateshareid') {
+	require_once(dirname(__DIR__) . '/controllers/ShareController.php');
+	(new ShareController())->route(NULL, 'generateshareid', NULL);
 }
 
 require_once(dirname(__DIR__) . '/libs/Base.php');

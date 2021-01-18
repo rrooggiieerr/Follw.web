@@ -20,6 +20,10 @@ $configuration = [
 		'baseEncoding' => 62,
 		'hashAlgorithm' => 'md5',
 		'cipher' => 'bf'
+	],
+	'captcha' => [
+		'enabled' => FALSE,
+		'id' => $_SERVER['HTTP_HOST']
 	]
 ];
 
