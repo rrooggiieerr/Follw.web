@@ -205,14 +205,14 @@ class ShareController {
 
 				switch($name) {
 					case (substr($name, 0, 2) == 'la' ? TRUE : FALSE): // latitude
-						if($value === '' || $value < -90 || $value > 90) {
+						if(empty($value) || $value < -90 || $value > 90) {
 							http_response_code(500);
 							exit();
 						}
 						$location['latitude'] = $value;
 						break;
 					case (substr($name, 0, 2) == 'lo' ? TRUE : FALSE): // longitude
-						if($value === '' || $value < -180 || $value > 180) {
+						if(empty($value) || $value < -180 || $value > 180) {
 							http_response_code(500);
 							exit();
 						}
@@ -220,19 +220,22 @@ class ShareController {
 						break;
 					case (substr($name, 0, 2) == 'hd' ? TRUE : FALSE): // horizontal dilution of position
 					case (substr($name, 0, 2) == 'ac' ? TRUE : FALSE): // accuracy
-						if($value !== '')
+						if(!empty($value)) {
 							$location['accuracy'] = $value;
-							break;
+						}
+						break;
 					case (substr($name, 0, 2) == 'al' ? TRUE : FALSE): // altitude
-						if($value !== '')
+					case (substr($name, 0, 2) == 'el' ? TRUE : FALSE): // elevation
+						if(!empty($value)) {
 							$location['altitude'] = $value;
-							break;
+						}
+						break;
 					case (substr($name, 0, 2) == 'be' ? TRUE : FALSE): // bearing
 					case (substr($name, 0, 2) == 'he' ? TRUE : FALSE): // heading
 					case (substr($name, 0, 2) == 'di' ? TRUE : FALSE): // direction
 					case (substr($name, 0, 2) == 'az' ? TRUE : FALSE): // azimuth
 					case (substr($name, 0, 2) == 'co' ? TRUE : FALSE): // course
-						if($value !== '') {
+						if(!empty($value)) {
 							if($value < 0 || $value > 360) {
 								http_response_code(500);
 								exit();
@@ -241,7 +244,7 @@ class ShareController {
 						}
 						break;
 					case (substr($name, 0, 2) == 'sp' ? TRUE : FALSE): // speed
-						if($value !== '') {
+						if(!empty($value)) {
 							if($value < 0) {
 								http_response_code(500);
 								exit();
