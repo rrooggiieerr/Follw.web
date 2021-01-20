@@ -54,17 +54,17 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 	if(in_array($remainer, [ NULL, '', '/'], TRUE)) {
 		$action = 'location';
 		$format = 'html';
-	} else if(preg_match('/^\.[a-z]*$/', $remainer)) {
+	} else if(preg_match('/^\.[a-z]+\.?[a-z]+$/', $remainer)) {
 		$action = 'location';
 		$format = substr($remainer, 1);
-	} else if(preg_match('/^\/qrcode\.([a-z]*)$/', $remainer, $matches)) {
+	} else if(preg_match('/^\/qrcode\.([a-z]+)$/', $remainer, $matches)) {
 		$action = 'qrcode';
 		$format = $matches[1];
 	} else {
 		$action = substr($remainer, 1);
 	}
 
-	if($action === 'location' && !in_array($format, ['html', 'json'])) {
+	if($action === 'location' && !in_array($format, ['html', 'json', 'kml', 'update.kml', 'kmz', 'update.kmz', 'gpx'])) {
 		http_response_code(404);
 		exit();
 	}

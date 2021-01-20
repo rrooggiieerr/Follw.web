@@ -1,6 +1,6 @@
 <?php
 class FollowController {
-	function route(FollowID $id, string $action, string $format) {
+	function route(FollowID $id, string $action, string $format = NULL) {
 		if(!isset($action)) {
 			http_response_code(404);
 			exit();
@@ -45,7 +45,21 @@ class FollowController {
 					header('Content-Length: ' . strlen($json));
 					echo($json);
 					break;
-					//TODO Implement other formats
+				//case 'kmz':
+					//TODO KMZ is zipped KML
+				case 'kml':
+					require_once(dirname(__DIR__) . '/views/location.kml.php');
+					break;
+				//case 'update.kmz':
+					//TODO KMZ is zipped KML
+				case 'update.kml':
+					require_once(dirname(__DIR__) . '/views/location.update.kml.php');
+					break;
+				case 'gpx':
+					require_once(dirname(__DIR__) . '/views/location.gpx.php');
+					break;
+					break;
+				//TODO Implement other formats
 				default:
 					http_response_code(404);
 			}
