@@ -7,6 +7,16 @@ require_once(dirname(__DIR__) . '/libs/Translation.php');
 
 global $protocol;
 
+// Preconnect to third party domains to improve page loading speed
+header('Link: <https://unpkg.com/>; rel=preconnect');
+header('Link: <https://a.tile.openstreetmap.org/>; rel=preconnect');
+header('Link: <https://b.tile.openstreetmap.org/>; rel=preconnect');
+header('Link: <https://c.tile.openstreetmap.org/>; rel=preconnect');
+header('Link: <https://unpkg.com/>; rel=dns-prefetch');
+header('Link: <https://a.tile.openstreetmap.org/>; rel=dns-prefetch');
+header('Link: <https://b.tile.openstreetmap.org/>; rel=dns-prefetch');
+header('Link: <https://c.tile.openstreetmap.org/>; rel=dns-prefetch');
+
 $translation = new Translation('follow');
 header('Content-Language: ' . $translation->language);
 
