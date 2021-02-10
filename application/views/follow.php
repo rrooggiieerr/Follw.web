@@ -33,20 +33,17 @@ if(isset($location)) {
 		<link rel="manifest" href="/<?=$id->encode()?>/manifest.webmanifest" />
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-title" content="Follw <?= htmlspecialchars($id['alias']) ?>">
-<?php // Icons
-/* TODO
-		<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
-		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#563d7c">
-		<meta name="msapplication-config" content="/browserconfig.xml">
-		<meta name="theme-color" content="#563d7c">
-*/
-?>
-		<link rel="shortcut icon" href="/favicon-96x96.png" sizes="96x96" type="image/png">
-		<link rel="shortcut icon" href="/favicon-64x64.png" sizes="64x64" type="image/png">
-		<link rel="shortcut icon" href="/favicon-48x48.png" sizes="48x48" type="image/png">
-		<link rel="shortcut icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
-		<link rel="shortcut icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
-		<link rel="shortcut icon" href="/favicon.svg" sizes="any" type="image/svg+xml">
+<?php // Icons ?>
+		<link rel="icon" href="/favicon-96x96.png" sizes="96x96" type="image/png">
+		<link rel="icon" href="/favicon-64x64.png" sizes="64x64" type="image/png">
+		<link rel="icon" href="/favicon-48x48.png" sizes="48x48" type="image/png">
+		<link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+		<link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+		<link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml">
+		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#006400">
+		<meta name="msapplication-config" content="/<?=$id->encode()?>/browserconfig.xml">
+		<meta name="msapplication-TileColor" content="#006400">
+		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
 <?php // Styles ?>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
