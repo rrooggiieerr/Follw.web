@@ -24,7 +24,9 @@ $configuration = [
 	'captcha' => [
 		'enabled' => FALSE,
 		'id' => $_SERVER['HTTP_HOST']
-	]
+	],
+	// Links to the app store for native app
+    'app' =>  NULL
 ];
 
 // The above configuration parameters can be overridden in 

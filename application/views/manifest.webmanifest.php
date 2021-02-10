@@ -3,60 +3,72 @@
 /* @var String $protocol */
 /* @var ID $id */
 
-$name = 'Follw';
-$shortname = 'Follw';
-if($id instanceof ShareID) {
-	$name = 'Follw' . $id['alias'];
-	$shortname = $id['alias'];
-}
+global $configuration;
 
 header('Content-Type: application/manifest+json');
-?>
-{
-	"name": "<?= htmlspecialchars($name) ?>",
-	"short_name": "<?= htmlspecialchars($shortname) ?>",
+
+$manifest = json_decode('{
+	"name": "Follw",
+	"short_name": "Follw",
+	"start_url": "",
+	"scope": "",
 	"description": "Follw is a privacy focused location sharing service",
-	"start_url": "<?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?= $id->encode() ?>/",
-	"background_color": "#1d9016",
 	"display": "standalone",
-	"scope": "<?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?= $id->encode() ?>/",
 	"theme_color": "#ffffff",
+	"background_color": "#006400",
 	"icons": [
 		{
 			"src": "\/android-icon-36x36.png",
 			"sizes": "36x36",
-			"type": "image\/png",
-			"density": "0.75"
+			"type": "image\/png"
 		},
 		{
 			"src": "\/android-icon-48x48.png",
 			"sizes": "48x48",
-			"type": "image\/png",
-			"density": "1.0"
+			"type": "image\/png"
 		},
 		{
 			"src": "\/android-icon-72x72.png",
 			"sizes": "72x72",
-			"type": "image\/png",
-			"density": "1.5"
+			"type": "image\/png"
 		},
 		{
 			"src": "\/android-icon-96x96.png",
 			"sizes": "96x96",
-			"type": "image\/png",
-			"density": "2.0"
+			"type": "image\/png"
 		},
 		{
 			"src": "\/android-icon-144x144.png",
 			"sizes": "144x144",
-			"type": "image\/png",
-			"density": "3.0"
+			"type": "image\/png"
 		},
 		{
 			"src": "\/android-icon-192x192.png",
 			"sizes": "192x192",
-			"type": "image\/png",
-			"density": "4.0"
+			"type": "image\/png"
+		},
+		{
+			"src": "\/android-icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image\/png"
 		}
 	]
+}');
+
+if($id instanceof FollowID) {
+	$manifest->name = 'Follw ' . $id['alias'];
+	$manifest->short_name = $id['alias'];
 }
+$manifest->start_url = $protocol . $_SERVER['HTTP_HOST'] . '/' . $id->encode() . '/';
+$manifest->scope = $protocol . $_SERVER['HTTP_HOST'] . '/' . $id->encode() . '/';
+
+// Add links to native apps
+if($id instanceof ShareID && isset($configuration['app'])) {
+	$manifest->prefer_related_applications = TRUE;
+	$manifest->related_applications = [];
+	foreach($configuration['app'] as $app) {
+		$manifest->related_applications[] = $app;
+	}
+}
+
+print(json_encode($manifest, JSON_PRETTY_PRINT));
