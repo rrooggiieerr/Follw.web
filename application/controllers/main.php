@@ -99,6 +99,11 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 		exit();
 	}
 
+	if($action === 'browserconfig.xml') {
+		require_once(dirname(__DIR__) . '/views/browserconfig.xml.php');
+		exit();
+	}
+
 	if($action === 'qrcode') {
 		require_once(dirname(__DIR__) . '/libs/phpqrcode.php');
 		switch($format) {
