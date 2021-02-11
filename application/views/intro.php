@@ -34,7 +34,7 @@
 					<p>Start sharing any location, it doesn't have to be where you currently are, by generating a Sharing ID.
 					Configure who can follow you when, prospone or retract following permission anytime and limit the follow
 					duration. You are in control.</p>
-					<p><a class="btn btn-primary btn-lg" href="/generatesharingid" role="button" rel="nofollow">Start sharing any location &raquo;</a></p>
+					<p><a class="btn btn-primary btn-lg" href="/generateshareid" role="button" rel="nofollow">Start sharing any location &raquo;</a></p>
 				</div>
 			</div>
 			<div class="container">

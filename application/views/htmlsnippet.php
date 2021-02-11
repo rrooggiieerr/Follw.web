@@ -1,3 +1,6 @@
+<?php
+global $protocol;
+?>
 					<h4>Integrate Follow URL in your Website</h4>
 					<p>You can embed a map with your location in any website by including the following code in you HTML
 					header.</p>
