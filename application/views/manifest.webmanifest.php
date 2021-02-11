@@ -71,4 +71,6 @@ if($id instanceof ShareID && isset($configuration['app'])) {
 	}
 }
 
-print(json_encode($manifest, JSON_PRETTY_PRINT));
+$json = json_encode($manifest, $configuration['jsonoptions']);
+header('Content-Length: ' . strlen($json));
+print($json);
