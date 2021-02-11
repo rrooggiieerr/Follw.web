@@ -23,6 +23,11 @@ $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVE
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Enable HTTP Strict Transport Security when using HTTPS
+if($protocol === 'https://') {
+	header('Strict-Transport-Security: max-age=63072000; preload');
+}
+
 // Handle static content which doesn't need a database connection
 require_once(dirname(__DIR__) . '/controllers/StaticContent.php');
 if ($method === 'GET' && (new StaticContent())->route($path)) {
