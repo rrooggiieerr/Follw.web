@@ -290,8 +290,10 @@ class ShareController {
 
 		switch ($format) {
 			case 'json':
+				global $configuration;
 				header('Content-Type: application/json');
-				$json = json_encode(array_merge($location->jsonSerialize(), $shareID->jsonSerialize()), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+				$json = json_encode(array_merge($location->jsonSerialize(), $shareID->jsonSerialize()), $configuration['jsonoptions']);
+				header('Content-Length: ' . strlen($json));
 				print($json);
 				break;
 				//TODO Implement other formats
@@ -399,8 +401,11 @@ class ShareController {
 		$followers = $shareID->getFollowers();
 
 		if(is_array($followers)) {
+			global $configuration;
 			header('Content-Type: application/json');
-			echo(json_encode($followers, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+			$json = json_encode($followers, $configuration['jsonoptions']);
+			header('Content-Length: ' . strlen($json));
+			print($json);
 			exit();
 		}
 

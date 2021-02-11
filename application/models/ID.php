@@ -178,7 +178,8 @@ class ID extends ArrayObject {
 	}
 
 	function json() {
-		return json_encode($this, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+		global $configuration;
+		return json_encode($this, $configuration['jsonoptions']);
 	}
 
 	function url() {

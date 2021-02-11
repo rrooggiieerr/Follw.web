@@ -115,7 +115,7 @@ if(isset($location)) {
 
 			function onLocationChange(follw, data) {
 				if(data != null) {
-					var s = data.alias + <?= json_encode(' ' . $translation->translations['ishere']) ?>;
+					var s = data.alias + <?= json_encode(' ' . $translation->translations['ishere'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 					var resize = false;
 					if($("title").text() != s) {
 						$("title").text(s);
@@ -144,7 +144,7 @@ if(isset($location)) {
 						$("a#navigate").css("visibility", "hidden");
 						resizeMap();
 					}
-					
+
 					s = "&nbsp;";
 					if($("#coordinates").html() != s) {
 						$("#coordinates").html(s);
@@ -157,7 +157,7 @@ if(isset($location)) {
 			}
 
 			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 12);
-			follw.nolocation = <?= json_encode($translation->translations['nolocation']) ?>;
+			follw.nolocation = <?= json_encode($translation->translations['nolocation'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 			follw.onLocationChange(onLocationChange);
 			follw.onIDDeleted(onDelete);
 

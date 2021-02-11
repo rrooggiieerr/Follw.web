@@ -27,12 +27,14 @@ class FollowID extends ID implements JsonSerializable {
 			return FALSE;
 		}
 
+		global $configuration;
+
 		$ds = DataStore::getInstance();
 		
 		if ($this->id > -1) {
 			// Update configuration in database
 			$query = 'UPDATE `issuedids` SET `config` = ? WHERE `id` = ?';
-			return $ds->execute($query, [json_encode($this->getArrayCopy(), JSON_UNESCAPED_UNICODE), $this->id]) !== FALSE;
+			return $ds->execute($query, [json_encode($this->getArrayCopy(), $configuration['jsonoptions']), $this->id]) !== FALSE;
 		}
 
 		$ds->beginTransaction();
@@ -45,7 +47,7 @@ class FollowID extends ID implements JsonSerializable {
 			try {
 				// Insert ID in database
 				$query = 'INSERT INTO `issuedids` (`hash`, `type`, `config`) VALUES (?, \'follow\', ?)';
-				$ds->execute($query, [$this->hash($bytes), json_encode($this->getArrayCopy(), JSON_UNESCAPED_UNICODE)]);
+				$ds->execute($query, [$this->hash($bytes), json_encode($this->getArrayCopy(), $configuration['jsonoptions'])]);
 				$this->id = $ds->lastInsertId();
 				$this->bytes = $bytes;
 				$success = TRUE;

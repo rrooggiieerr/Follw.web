@@ -40,10 +40,11 @@ class FollowController {
 
 			switch ($format) {
 				case 'json':
+					global $configuration;
 					header('Content-Type: application/json');
-					$json = json_encode(array_merge($location->jsonSerialize(), $id->jsonSerialize()), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+					$json = json_encode(array_merge($location->jsonSerialize(), $id->jsonSerialize()), $configuration['jsonoptions']);
 					header('Content-Length: ' . strlen($json));
-					echo($json);
+					print($json);
 					break;
 				//case 'kmz':
 					//TODO KMZ is zipped KML

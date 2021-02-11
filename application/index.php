@@ -26,7 +26,8 @@ $configuration = [
 		'id' => $_SERVER['HTTP_HOST']
 	],
 	// Links to the app store for native app
-    'app' =>  NULL
+    'app' =>  NULL,
+	'jsonoptions' => JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
 ];
 
 // The above configuration parameters can be overridden in 
