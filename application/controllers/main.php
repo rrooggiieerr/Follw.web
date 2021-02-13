@@ -25,7 +25,11 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Enable HTTP Strict Transport Security when using HTTPS
 if($protocol === 'https://') {
-	header('Strict-Transport-Security: max-age=63072000; preload');
+	if($configuration['mode'] === 'production') {
+		header('Strict-Transport-Security: max-age=63072000; preload');
+	} else {
+		header('Strict-Transport-Security: max-age=63072000');
+	}
 }
 
 // Handle static content which doesn't need a database connection
