@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__DIR__) . '/libs/Translation.php');
+require_once(dirname(__DIR__) . '/models/Translation.php');
 
 // Fixes false "Variable is undefined" validation errors
 /* @var FollowID $id */
@@ -20,12 +20,12 @@ header('Link: <https://c.tile.openstreetmap.org/>; rel=dns-prefetch');
 $translation = new Translation('follow');
 header('Content-Language: ' . $translation->language);
 
-$title = htmlspecialchars($translation->translations['nolocation']);
+$title = htmlspecialchars($translation['nolocation']);
 $_location = 'null';
 $_accuracy = 'null';
 
 if(isset($location)) {
-	$title = htmlspecialchars($id['alias'] . ' ' . $translation->translations['ishere']);
+	$title = htmlspecialchars($id['alias'] . ' ' . $translation['ishere']);
 	$_location = '[' . $location['latitude'] . ', ' . $location['longitude'] . ']';
 	if(isset($location['accuracy'])) {
 		$_accuracy = $location['accuracy'];
@@ -115,7 +115,7 @@ if(isset($location)) {
 
 			function onLocationChange(follw, data) {
 				if(data != null) {
-					var s = data.alias + <?= json_encode(' ' . $translation->translations['ishere'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+					var s = data.alias + <?= json_encode(' ' . $translation['ishere'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 					var resize = false;
 					if($("title").text() != s) {
 						$("title").text(s);
@@ -157,7 +157,7 @@ if(isset($location)) {
 			}
 
 			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 12);
-			follw.nolocation = <?= json_encode($translation->translations['nolocation'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+			follw.nolocation = <?= json_encode($translation['nolocation'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 			follw.onLocationChange(onLocationChange);
 			follw.onIDDeleted(onDelete);
 
@@ -188,7 +188,7 @@ if(isset($location)) {
 		</div>
 		<div id="follwMap"></div>
 		<div id="footer">
-			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($translation->translations['credits']) ?></a> · <a href="/privacy" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($translation->translations['privacystatement']) ?></a>
+			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($translation['credits']) ?></a> · <a href="/privacy" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($translation['privacystatement']) ?></a>
 		</div>
 	</body>
 </html>

@@ -1,5 +1,5 @@
 <?php
-class Translation {
+class Translation extends ArrayObject {
 	var $language = NULL;
 	var $translations = [];
 
@@ -38,12 +38,12 @@ class Translation {
 			$line = explode('=', $line, 2);
 			$line[0] = trim($line[0]);
 			$line[1] = trim($line[1]);
-			$this->translations[$line[0]] = $line[1];
+			$this[$line[0]] = $line[1];
 		}
 		fclose($file);
 	}
 
 	function get($key) {
-		return $this->translations[$key];
+		return $this[$key];
 	}
 }
