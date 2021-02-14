@@ -6,7 +6,8 @@ class StaticContent {
 	 * @return boolean TRUE if succesfully handled else FALSE
 	 */
 	function route(string $path) {
-		$matches = NULL; // Fixes false "Variable is undefined" validation error
+		global $configuration;
+
 		switch($path) {
 			case '/':
 				require_once(dirname(__DIR__) . '/views/intro.php');
@@ -15,11 +16,13 @@ class StaticContent {
 			case '/terms':
 			case '/htmlsnippet':
 			case '/wordpress':
-			case '/osmand':
 				require_once(dirname(__DIR__) . '/views/static.php');
 				return TRUE;
 			case '/robots.txt':
 				require_once(dirname(__DIR__) . '/views/robots.txt.php');
+				return TRUE;
+			case $path === '/phpinfo' && $configuration['mode'] !== 'production':
+				phpinfo();
 				return TRUE;
 		}
 
