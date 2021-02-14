@@ -1,4 +1,6 @@
 nolocation = No location is currently being shared
+iddeleted = The location you have requested has been deleted
+offline = You are currently not connected to the internet
 ishere = is here
 credits = Location shared with Follw
 privacystatement = Privacy statement

@@ -88,10 +88,6 @@ if(isset($location)) {
 			#follwMap {
 				height: 250px;
 			}
-
-			#navigate {
-				visibility: hidden;
-			}
 		</style>
 <?php // Scripts ?>
 		<script src="https://unpkg.com/jquery@3.5.1/dist/jquery.js"
@@ -113,7 +109,7 @@ if(isset($location)) {
 
 			window.addEventListener("resize", resizeMap);
 
-			function onLocationChange(follw, data) {
+			function onLocationChanged(follw, data) {
 				if(data != null) {
 					var s = data.alias + <?= json_encode(' ' . $translation['ishere'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 					var resize = false;
@@ -132,16 +128,11 @@ if(isset($location)) {
 					if(resize) {
 						resizeMap();
 					}
-
-					// Update links
-					$("a#navigate").attr("href", "https://www.google.com/maps/dir/?api=1&destination=" + data.latitude + "," + data.longitude);
-					$("a#navigate").css("visibility", "visible");
 				} else {
-					s = follw.nolocation;
+					s = follw.translations['nolocation'];
 					if($("title").text() != s) {
 						$("title").text(s);
 						$("#title").text(s);
-						$("a#navigate").css("visibility", "hidden");
 						resizeMap();
 					}
 
@@ -152,14 +143,21 @@ if(isset($location)) {
 				}
 			}
 
-			function onDelete() {
+			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 14);
+			follw.translations["nolocation"] = <?= json_encode($translation['nolocation'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+			follw.translations["offline"] = <?= json_encode($translation['offline'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+			follw.translations["iddeleted"] = <?= json_encode($translation['iddeleted'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+			follw.addEventListener("locationchanged", onLocationChanged);
+			follw.addEventListener("offline", function() {
+					$("title").text(follw.translations["offline"]);
+					$("#title").text(follw.translations["offline"]);
+					resizeMap();
+					$("#coordinates").html("&nbsp;");
+			});
+			follw.addEventListener("iddeleted", function() {
 				location.reload();
-			}
-
-			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 12);
-			follw.nolocation = <?= json_encode($translation['nolocation'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
-			follw.onLocationChange(onLocationChange);
-			follw.onIDDeleted(onDelete);
+			});
+			follw.startUpdate();
 
 			$(window).scroll(function() {
 				try {
