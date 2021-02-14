@@ -41,10 +41,12 @@ class Translation extends ArrayObject {
 		// Read the translation file
 		$file = fopen($filename, 'r');
 		while(($line = fgets($file)) !== FALSE) {
-			$line = explode('=', $line, 2);
-			$line[0] = trim($line[0]);
-			$line[1] = trim($line[1]);
-			$this[$line[0]] = $line[1];
+			if(trim($line) !== '' && !str_starts_with($line, '#')) {
+				$line = explode('=', $line, 2);
+				$line[0] = trim($line[0]);
+				$line[1] = trim($line[1]);
+				$this[$line[0]] = $line[1];
+			}
 		}
 		fclose($file);
 	}
