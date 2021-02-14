@@ -4,7 +4,13 @@ class Translation extends ArrayObject {
 	var $translations = [];
 
 	function __construct($page) {
-		$acceptedLanguages = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+		$acceptedLanguages = [];
+
+		if(isset($_GET['lang']) && preg_match('/[a-z]+/', $_GET['lang'])) {
+			$acceptedLanguages[] = $_GET['lang'];
+		}
+
+		$acceptedLanguages = array_merge($acceptedLanguages, explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']));
 		foreach($acceptedLanguages as $i => $language) {
 			$language = explode(';', $language);
 			if(count($language) == 1) {
