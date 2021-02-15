@@ -51,7 +51,21 @@ class Translation extends ArrayObject {
 		fclose($file);
 	}
 
-	function get($key) {
+	function get($key, $escaping = NULL) {
+		if(!isset($this[$key]))
+			return '';
+
+		switch($escaping) {
+			case 'xml':
+			case 'html':
+				return htmlspecialchars($this[$key]);
+			case 'js':
+				return json_encode($this[$key], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+			case 'json':
+				global $configuration;
+				return json_encode($this[$key], $configuration['jsonoptions']);
+		}
+
 		return $this[$key];
 	}
 }
