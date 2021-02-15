@@ -41,7 +41,9 @@ class Translation extends ArrayObject {
 		// Read the translation file
 		$file = fopen($filename, 'r');
 		while(($line = fgets($file)) !== FALSE) {
-			if(trim($line) !== '' && !str_starts_with($line, '#')) {
+			$line = trim($line);
+			// Empty strings and strings starting with # are ignored
+			if($line !== '' && !str_starts_with($line, '#')) {
 				$line = explode('=', $line, 2);
 				$line[0] = trim($line[0]);
 				$line[1] = trim($line[1]);
@@ -51,21 +53,31 @@ class Translation extends ArrayObject {
 		fclose($file);
 	}
 
-	function get($key, $escaping = NULL) {
-		if(!isset($this[$key]))
+	function get(string $key, string $escaping = NULL, ...$values) {
+		if(!isset($this[$key])) {
 			return '';
+		}
+
+		$s = $this[$key];
+
+		if($values) {
+			$s = sprintf($s, ...$values);
+		}
 
 		switch($escaping) {
 			case 'xml':
 			case 'html':
-				return htmlspecialchars($this[$key]);
+				$s = htmlspecialchars($s);
+				break;
 			case 'js':
-				return json_encode($this[$key], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+				$s = json_encode($s, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+				break;
 			case 'json':
 				global $configuration;
-				return json_encode($this[$key], $configuration['jsonoptions']);
+				$s = json_encode($s, $configuration['jsonoptions']);
+				break;
 		}
 
-		return $this[$key];
+		return $s;
 	}
 }
