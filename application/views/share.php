@@ -1,17 +1,24 @@
 <?php
+require_once(dirname(__DIR__) . '/models/Translation.php');
+
 // Fixes false "Variable is undefined" validation errors
 /* @var ShareID $shareID */
 /* @var Boolean $showIntro */
 
-global $configuration
+global $protocol;
+global $configuration;
+
+$tl = new Translation('share');
+header('Content-Language: ' . $tl->language);
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="<?= $tl->language ?>">
 	<head>
-		<title>Follw · Sharing your location with privacy</title>
+		<title>Follw · <?= $tl->get('follwslogan', 'html') ?></title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
 		<meta name="robots" content="noindex" />
+		<meta name="referrer" content="no-referrer" />
 		<link rel="manifest" href="/<?=$shareID->encode()?>/manifest.webmanifest" />
 <?php // Icons
 /* TODO
@@ -32,7 +39,7 @@ global $configuration
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
 			crossorigin="anonymous"/>
 		<style>
-			#enablegeolocation {
+			.geolocationenabled, .geolocationdisabled {
 				display: none;
 			}
 
@@ -64,13 +71,13 @@ global $configuration
 	<body>
 		<main role="main">
 			<div class="container">
-				<div class="jumbotron">
-					<h1>Follw <small class="h4 text-muted">· Sharing your location with privacy</small></h1>
+				<div class="navbar">
+					<div class="navbar-brand">Follw <span class="text-muted">· <?= $tl->get('follwslogan', 'html') ?></span></div>
 				</div>
 				<ul class="nav nav-tabs">
-					<li class="nav-item"><a class="nav-link active" id="sharelocation-tab" data-toggle="tab" href="#sharelocation" role="tab" aria-controls="sharelocation" aria-selected="true">Share your location</a></li>
-					<li class="nav-item"><a class="nav-link" id="followers-tab" data-toggle="tab" href="#followers" role="tab" aria-controls="followers" aria-selected="false">Manage Followers</a></li>
-					<li class="nav-item"><a class="nav-link" id="configuration-tab" data-toggle="tab" href="#configuration" role="tab" aria-controls="configuration" aria-selected="false">Configuration</a></li>
+					<li class="nav-item"><a class="nav-link active" id="sharelocation-tab" data-toggle="tab" href="#sharelocation" role="tab" aria-controls="sharelocation" aria-selected="true"><?= $tl->get('sharelocationtab', 'html') ?></a></li>
+					<li class="nav-item"><a class="nav-link" id="followers-tab" data-toggle="tab" href="#followers" role="tab" aria-controls="followers" aria-selected="false"><?= $tl->get('managefollowerstab', 'html') ?></a></li>
+					<li class="nav-item"><a class="nav-link" id="configuration-tab" data-toggle="tab" href="#configuration" role="tab" aria-controls="configuration" aria-selected="false"><?= $tl->get('configurationtab', 'html') ?></a></li>
 				</ul>
 				<div class="tab-content">
 <?php
@@ -80,22 +87,20 @@ if($showIntro) {
 						<div class="modal-dialog" role="document">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h5 class="modal-title">Welcome to Follw</h5>
+									<h5 class="modal-title"><?= $tl->get('welcometofollw', 'html') ?></h5>
 									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 										<span aria-hidden="true">&times;</span>
 									</button>
 								</div>
 								<div class="modal-body">
-									<p>Your Location Sharing ID: <b><?= $shareID->encode() ?></b></p>
-									<p>To share your location generate a Follow ID, <b>don't share this Location
-									Sharing ID with your followers</b>.</p>
-									<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
-									<p id="bookmarkMac" style="display: none;">Press <b>⌘D</b> to bookmark this Sharing URL.</p>
-									<p id="bookmarkWin" style="display: none;">Press <b>...</b> to bookmark this Sharing URL.</p>
-									<p id="bookmarkAndroid" style="display: none;">Press <b>⋮</b> and then <b>Add to Home screen</b> to add this Sharing URL as a WebApp to your home screen.</p>
-									<p id="bookmarkIos" style="display: none;">Press <b>Action</b> and then <b>Add to Home Screen</b> to add this Sharing URL as a WebApp to your home screen.</p>
-									<p>Because Follw doesn't have your contact details this Location Sharing ID can not be recovered if
-									you lose it.</p>
+									<p><?= $tl->get('yoursharingid', NULL, $shareID->encode()) ?></p>
+									<p><?= $tl->get('dontsharesharingid') ?></p>
+									<p><?= $tl->get('bookmarkthissharingurl', 'html') ?></p>
+									<p id="bookmarkMac" style="display: none;"><?= $tl->get('bookmarkmacos') ?></p>
+									<p id="bookmarkWin" style="display: none;"><?= $tl->get('bookmarkwindows') ?></p>
+									<p id="bookmarkAndroid" style="display: none;"><?= $tl->get('bookmarkandroid') ?></p>
+									<p id="bookmarkIos" style="display: none;"><?= $tl->get('bookmarkios') ?></p>
+									<p><?= $tl->get('sharingidcantberecoveredwarning', 'html') ?></p>
 								</div>
 								<div class="modal-footer">
 									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -105,18 +110,19 @@ if($showIntro) {
 					</div>
 <?php } ?>
 					<div class="tab-pane active" id="sharelocation" role="tabpanel" aria-labelledby="sharelocation-tab">
-						<p>Select the location you like to share on the map. <button id="deletelocation" class="btn btn-primary btn-sm">Delete location</button></p>
+						<div class="col-md" class="geolocationenabled">
+							<p><?= $tl->get('usedevicelocation', 'html') ?></p>
+							<button id="start_pause_devicelocation" class="btn btn-primary btn-sm"><?= $tl->get('startsharing', 'html') ?></button>
+							<button id="deletelocation" class="btn btn-primary btn-sm"><?= $tl->get('deletelocation', 'html') ?></button>
+						</div>
+						<p class="geolocationenabled"><?= $tl->get('orselectlocationonmap', 'html') ?></p>
+						<p class="geolocationdisabled"><?= $tl->get('selectlocationonmap', 'html') ?></p>
 						<div id="shareLocationMap"></div>
-						<div class="container">
-							<div class="row">
-								<div class="col-md" id="enablegeolocation">
-									<h4>Get your location from your device</h4>
-									<p>The device you're using is capable to share it's location.</p>
-									<button id="devicelocation" class="btn btn-primary btn-sm">Request device location</button>
-								</div>
 <?php
 if($configuration['mode'] == 'development') {
 ?>
+						<div class="container">
+							<div class="row">
 								<div class="col-md">
 									<h4>Text input</h4>
 									<p>Type the latitude and longitude of the location you like to share.</p>
@@ -124,10 +130,6 @@ if($configuration['mode'] == 'development') {
 										<input type="text" id="textlocation"/>
 									</form>
 								</div>
-<?php } ?>
-<?php
-if($configuration['mode'] == 'development') {
-?>
 								<div class="col-md">
 									<h4>Google real-time location URL</h4>
 									<p>Paste the Google real-time location URL you like to share.</p>
@@ -135,21 +137,21 @@ if($configuration['mode'] == 'development') {
 										<input type="text" id="googlelocation"/>
 									</form>
 								</div>
-<?php } ?>
 							</div>
 						</div>
+<?php } ?>
 					</div>
 					<div class="tab-pane" id="followers" role="tabpanel" aria-labelledby="followers-tab">
 						<table id="followurls" class="table table-striped table-sm">
 							<thead>
 								<tr>
-									<th>Follow ID/Reference</th>
-									<th>Alias Override</th>
-									<!-- <th>Delay</th> -->
-									<th>Expires</th>
-									<th>Enabled</th>
-									<th>Share</th>
-									<th>Delete</th>
+									<th><?= $tl->get('followidheader', 'html') ?></th>
+									<th><?= $tl->get('aliasheader', 'html') ?></th>
+									<!-- <th><?= $tl->get('delayheader', 'html') ?></th> -->
+									<th><?= $tl->get('expiresheader', 'html') ?></th>
+									<th><?= $tl->get('enabledheader', 'html') ?></th>
+									<th><?= $tl->get('shareheader', 'html') ?></th>
+									<th><?= $tl->get('deleteheader', 'html') ?></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -159,7 +161,7 @@ if($configuration['mode'] == 'development') {
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<div class="modal-header">
-										<h5 class="modal-title">Share Follow ID</h5>
+										<h5 class="modal-title"><?= $tl->get('sharefollowidtitle', 'html') ?></h5>
 										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 											<span aria-hidden="true">&times;</span>
 										</button>
@@ -185,43 +187,43 @@ if($configuration['mode'] == 'development') {
 								</div>
 							</div>
 						</div>
-						<p>Create a Follow ID and manage who is allowed to see your location.</p>
-						<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#generatefollowid-modal">Create Follow ID</button>
+						<p><?= $tl->get('managefollowersintro', 'html') ?></p>
+						<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#generatefollowid-modal"><?= $tl->get('addfollowerbutton', 'html') ?></button>
 						<div id="generatefollowid-modal" class="modal">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
 									<form action="#" id="generatefollowid" autocomplete="off">
 										<div class="modal-header">
-											<h5 class="modal-title">Create a Follow ID</h5>
+											<h5 class="modal-title"><?= $tl->get('addfollowertitle', 'html') ?></h5>
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">&times;</span>
 											</button>
 										</div>
 										<div class="modal-body">
 											<div class="row">
-												<div class="col">Reference for your convenience</div>
-												<div class="col"><input name="reference" type="text" placeholder="Reference"/></div>
+												<div class="col"><?= $tl->get('addfollowerreference', 'html') ?></div>
+												<div class="col"><input name="reference" type="text" placeholder="<?= $tl->get('addfollowerreferenceplaceholder', 'htmlattr') ?>"/></div>
 											</div>
 											<div class="row">
-												<div class="col">Alias override</div>
-												<div class="col"><input name="alias" type="text" placeholder="Alias override"/></div>
+												<div class="col"><?= $tl->get('addfolloweralias', 'html') ?></div>
+												<div class="col"><input name="alias" type="text" placeholder="<?= $tl->get('addfolloweraliasplaceholder', 'htmlattr') ?>"/></div>
 											</div>
 											<!-- <div class="row">
-												<div class="col">Delay</div>
+												<div class="col"><?= $tl->get('addfollowerdelay', 'html') ?></div>
 												<div class="col"><input name="delay" type="time"/></div>
 											</div> -->
 											<div class="row">
-												<div class="col">Expires</div>
+												<div class="col"><?= $tl->get('addfollowerexpires', 'html') ?></div>
 												<div class="col"><input name="expires" type="datetime-local"/></div>
 											</div>
 											<div class="row">
-												<div class="col">Enabled</div>
+												<div class="col"><?= $tl->get('addfollowerenable', 'html') ?></div>
 												<div class="col"><input name="enabled" type="checkbox"/></div>
 											</div>
 										</div>
 										<div class="modal-footer">
-											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-											<button type="submit" class="btn btn-primary">Create Follow ID</button>
+											<button type="button" class="btn btn-secondary" data-dismiss="modal"><?= $tl->get('addfollowerclosebutton', 'html') ?></button>
+											<button type="submit" class="btn btn-primary"><?= $tl->get('addfollowercreatebutton', 'html') ?></button>
 										</div>
 									</form>
 								</div>
@@ -229,22 +231,61 @@ if($configuration['mode'] == 'development') {
 						</div>
 					</div>
 					<div class="tab-pane" id="configuration" role="tabpanel" aria-labelledby="configuration-tab">
-						<p>Your Location Sharing ID: <b><?= $shareID->encode() ?></b></p>
-						<p>To share your location generate a Follow ID, <b>don't share this Location
-						Sharing ID with your followers</b>.</p>
-						<p>Bookmark this Location Sharing URL to always get back to your location sharing environment.</p>
-						<p>Because Follw doesn't have your contact details this Location Sharing ID can not be recovered if
-						you lose it.</p>
-						<p>You can configure an alias which your Followers see so they know who they are following. This is not
-						required and can be anything, it does not have to be your name or anything that gives away who you
-						are.</p>
+						<p><?= $tl->get('yoursharingid', NULL, $shareID->encode()) ?></p>
+						<p><?= $tl->get('dontsharesharingid') ?></p>
+						<p><?= $tl->get('bookmarkthissharingurl', 'html') ?></p>
+						<p><?= $tl->get('sharingidcantberecoveredwarning', 'html') ?></p>
+						<p><?= $tl->get('configurealiasintro', 'html') ?></p>
 						<form action="#" id="configuration" autocomplete="off">
-							Alias: <input name="alias" type="text" value="<?= htmlspecialchars(@$shareID['alias']) ?>"/>
+							<?= $tl->get('configurealias', 'html') ?> <input name="alias" type="text" value="<?= htmlspecialchars(@$shareID['alias']) ?>"/>
 						</form>
+						<h3><?= $tl->get('integration', 'html') ?></h3>
+						<h4><?= $tl->get('integrationapiosmand', 'html') ?></h4>
+						<div>
+							<p><?= $tl->get('integrationosmandintroduction') ?></p>
+							<p><?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?= $shareID->encode() ?>?la={0}&amp;lo={1}&amp;hd={3}&amp;al={4}&amp;sp={5}</p>
+						</div>
+						<h4><?= $tl->get('integrationapi', 'html') ?></h4>
+						<div><a href="/apidoc" rel="noopener noreferrer"><?= $tl->get('integrationapidocumentation', 'html') ?></a></div>
 					</div>
 				</div>
 				<div class="d-none d-sm-block">
-<?php include_once('footer.php');?>
+					<footer class="pt-4 my-md-5 pt-md-5 border-top">
+						<div class="row">
+							<div class="col-md">
+								<div class="row">
+									<div class="col">
+										<h5><?= $tl->get('footerabout', 'html') ?></h5>
+										<ul class="list-unstyled text-small">
+											<li><a class="text-muted" href="/credits" rel="noopener noreferrer"><?= $tl->get('credits', 'html') ?></a></li>
+											<li><a class="text-muted" href="https://blog.follw.app/" target="_blank" rel="noopener noreferrer"><?= $tl->get('blog', 'html') ?></a></li>
+										</ul>
+									</div>
+									<div class="col">
+										<h5><?= $tl->get('footerprivacy', 'html') ?></h5>
+										<ul class="list-unstyled text-small">
+											<li><a class="text-muted" href="/privacy" rel="noopener noreferrer"><?= $tl->get('privacystatement', 'html') ?></a></li>
+											<li><a class="text-muted" href="/terms" rel="noopener noreferrer"><?= $tl->get('termsconditions', 'html') ?></a></li>
+										</ul>
+									</div>
+<?php if(isset($configuration['app'])) {
+	$platforms = [ 'play' => 'Android',
+		'itunes' => 'iOS'
+	];
+?>
+									<div class="col">
+										<h5><?= $tl->get('footerapps', 'html') ?></h5>
+										<ul class="list-unstyled text-small">
+<?php	foreach($configuration['app'] as $app) { ?>
+											<li><a class="text-muted" href="<?= $app['url'] ?>" target="_blank" rel="noopener noreferrer"><?= $tl->get('appfor', 'html') ?> <?= $platforms[$app['platform']] ?></a></li>
+<?php	} ?>
+										</ul>
+									</div>
+<?php } ?>
+								</div>
+							</div>
+						</div>
+					</footer>
 				</div>
 			</div>
 		</main>
@@ -261,10 +302,6 @@ if($configuration['mode'] == 'development') {
 		<script src="/follw.js" crossorigin="anonymous"></script>
 		<script>
 			'use strict';
-
-// 			function onDelete() {
-// 				location.reload();
-// 			}
 
 			// Configuration
 			function submitConfig(config) {
@@ -284,37 +321,152 @@ if($configuration['mode'] == 'development') {
 			});
 
 			// Location sharing
-			// Create the share location map
-			var shareLocationMap = new Follw("shareLocationMap", "/<?=$shareID->encode()?>", 12);
-			shareLocationMap.onIDDeleted(function () { location.reload(); });
+			function onLocationChange(follw, data) {
+				if(data != null) {
+					$("#deletelocation").prop("disabled", false);
 
-			function setLocation(location) {
-				$.post("/<?=$shareID->encode()?>", location, function() {
-					shareLocationMap.getLocation(true);
-				});
+					var s = follw.prettyPrintCoordinates(data.latitude, data.longitude);
+					if($("#coordinates").text() != s) {
+						$("#coordinates").text(s);
+					}
+					$("#deletelocation").prop("disabled", false);
+				} else {
+					$("#deletelocation").prop("disabled", true);
+					follw.map.zoomControl.enable();;
+					follw.map.dragging.enable();
+					follw.map.touchZoom.enable();
+					follw.map.doubleClickZoom.enable();
+					follw.map.scrollWheelZoom.enable();
+				}
+			}
+			
+			class ShareLocation {
+				constructor() {
+					this.isSharing = false;
+					this.watchLocationID = null;
+					this.previousLocation = null;
+					this.lastShare = null;
+					
+					// Create the share location map
+					this.map = new Follw("shareLocationMap", "/<?=$shareID->encode()?>", 12);
+					this.map.nolocation = <?= $tl->get('nolocation', 'js') ?>;
+					this.map.addEventListener('locationchanged', onLocationChange);
+					this.map.addEventListener('iddeleted', function () { location.reload(); });
+					this.map.startUpdate();
+
+					// See if DOM is already available
+					if (document.readyState === 'complete' || document.readyState === 'interactive') {
+						// call on next available tick
+						var _this = this;
+						setTimeout(function() {
+							_this.init();
+						}, 1);
+					} else {
+						var _this = this;
+						document.addEventListener('DOMContentLoaded', function() {
+							_this.init();
+						});
+					}
+
+				}
+
+				init() {
+					var _this = this;
+					this.map.map.on('click', function(event) {
+						if(!_this.isSharing) { 
+							_this.updateLocation({latitude: event.latlng.lat, longitude: event.latlng.lng});
+						}
+					});
+				}
+
+				startSharing() {
+					if(!this.isSharing) {
+						this.isSharing = true;
+						this.map.pauseUpdate();
+
+						var _this = this;
+						this.watchLocationID = navigator.geolocation.watchPosition(function(position) {
+							_this.updateLocation(position.coords);
+						});
+
+						$('#start_pause_devicelocation').text(<?= $tl->get('pausesharing', 'js') ?>);
+						$('#deletelocation').text(<?= $tl->get('stopsharing', 'js') ?>);
+						$("#deletelocation").prop("disabled", false);
+					}
+				}
+				
+				stopSharing() {
+					this.isSharing = false;
+					this.map.resumeUpdate();
+					navigator.geolocation.clearWatch(this.watchLocationID);
+					$('#start_pause_devicelocation').text(<?= $tl->get('startsharing', 'js') ?>);
+					$('#deletelocation').text(<?= $tl->get('deletelocation', 'js') ?>);
+				}
+
+				deleteLocation() {
+					var _this = this;
+					_this.stopSharing();
+					$.get("/<?=$shareID->encode()?>/deletelocation", function(data) {
+						_this.map.getLocation(true);
+						$("#deletelocation").prop("disabled", true);
+					});
+				}
+
+				equals(location1, location2) {
+					if(location1 === null && location2 === null) return true;
+					if(location1 === null) return false;
+					if(location2 === null) return false;
+					if(location1.latitude !== location2.latitude) return false;
+					if(location1.longitude !== location2.longitude) return false;
+					if(location1.accuracy !== location2.accuracy) return false;
+					if(location1.altitude !== location2.altitude) return false;
+					if(location1.altitudeAccuracy !== location2.altitudeAccuracy) return false;
+					if(location1.heading !== location2.heading) return false;
+					if(location1.speed !== location2.speed) return false;
+					return true;
+				}
+
+				updateLocation(location) {
+					console.log(location);
+					var _this = this;
+					$.post("/<?=$shareID->encode()?>", location, function() {
+						_this.map.setMarker([location.latitude, location.longitude], location.accuracy);
+						_this.previousLocation = location;
+						_this.lastShare = Date.now();
+					});
+				}
+
+				prettyPrintCoordinates(latitude, longitude) {
+					if(this.map != null) {
+						return map.prettyPrintCoordinates(latitude, longitude);
+					}
+
+					return '';
+				}
 			}
 
+			var shareLocation = null;
+
 			$(function() {
+				var shareLocation = new ShareLocation();
+
 				// Share location map
 				$('a#sharelocation-tab').on('shown.bs.tab', function (e) {
-					shareLocationMap.invalidateSize();
-				});
-
-				shareLocationMap.map.on('click', function(event) {
-					setLocation({latitude: event.latlng.lat, longitude: event.latlng.lng});
+					shareLocation.map.invalidateSize();
 				});
 
 				// Share location Geolocation API
 				// JavaScript Geolocation API can only be used when using SSL
 				if(window.location.protocol == 'https:' && 'geolocation' in navigator) {
-					$('#enablegeolocation').show();
+					$('.geolocationenabled').show();
+					$('.geolocationdisabled').hide();
 
-					$('#devicelocation').click(function() {
-						$('#devicelocation').prop('disabled', true);
-						navigator.geolocation.getCurrentPosition(function(position) {
-							setLocation(position.coords);
-							$('#devicelocation').prop('disabled', false);
-						});
+					$('#start_pause_devicelocation').click(function() {
+						if(shareLocation.isSharing) {
+							shareLocation.stopSharing();
+						} else {
+							shareLocation.startSharing();
+						}
 					});
 				}
 
@@ -349,17 +501,14 @@ if($configuration['mode'] == 'development') {
 						}
 
 						if(latitude != null && longitude != null) {
-							setLocation({latitude: latitude, longitude: longitude});
+							shareLocation.updateLocation({latitude: latitude, longitude: longitude});
 						}
 					}
 				});
 
 				$('#deletelocation').click(function(event) {
 					event.preventDefault();
-
-					$.get("/<?=$shareID->encode()?>/deletelocation", function(data) {
-						shareLocationMap.getLocation(true);
-					});
+					shareLocation.deleteLocation();
 				});
 			});
 
@@ -375,7 +524,7 @@ if($configuration['mode'] == 'development') {
 							reference = entry['reference'];
 
 						if(entry['enabled'] && !entry['expired'])
-							$(row).append(`<td class="followurl enabled"><a href="${entry['url']}" target="_blank">${reference}</a></td>`);
+							$(row).append(`<td class="followurl enabled"><a href="${entry['url']}" target="_blank" rel="noopener noreferrer">${reference}</a></td>`);
 						else
 							$(row).append(`<td class="followurl disabled">${reference}</td>`);
 
