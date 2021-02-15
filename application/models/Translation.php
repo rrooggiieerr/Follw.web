@@ -67,7 +67,11 @@ class Translation extends ArrayObject {
 		switch($escaping) {
 			case 'xml':
 			case 'html':
-				$s = htmlspecialchars($s);
+				$s = htmlspecialchars($s, ENT_NOQUOTES);
+				break;
+			case 'xmlattr':
+			case 'htmlattr':
+				$s = htmlspecialchars($s, ENT_COMPAT);
 				break;
 			case 'js':
 				$s = json_encode($s, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
