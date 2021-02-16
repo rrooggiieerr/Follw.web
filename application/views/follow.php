@@ -17,15 +17,15 @@ header('Link: <https://a.tile.openstreetmap.org/>; rel=dns-prefetch');
 header('Link: <https://b.tile.openstreetmap.org/>; rel=dns-prefetch');
 header('Link: <https://c.tile.openstreetmap.org/>; rel=dns-prefetch');
 
-$translation = new Translation('follow');
-header('Content-Language: ' . $translation->language);
+$tl = new Translation('follow');
+header('Content-Language: ' . $tl->language);
 
-$title = htmlspecialchars($translation['nolocation']);
+$title = $tl->get('nolocation', 'html');
 $_location = 'null';
 $_accuracy = 'null';
 
 if(isset($location)) {
-	$title = htmlspecialchars($id['alias'] . ' ' . $translation['ishere']);
+	$title = $tl->get('ishere', 'html', $id['alias']);
 	$_location = '[' . $location['latitude'] . ', ' . $location['longitude'] . ']';
 	if(isset($location['accuracy'])) {
 		$_accuracy = $location['accuracy'];
@@ -33,7 +33,7 @@ if(isset($location)) {
 }
 ?>
 <!doctype html>
-<html lang="<?= $translation->language ?>">
+<html lang="<?= $tl->language ?>">
 	<head>
 		<title><?= $title ?></title>
 		<meta charset="utf-8" />
@@ -111,7 +111,7 @@ if(isset($location)) {
 
 			function onLocationChanged(follw, data) {
 				if(data != null) {
-					var s = data.alias + <?= json_encode(' ' . $translation['ishere'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+					var s = data.alias + <?= $tl->get('ishere', 'json', '') ?>;
 					var resize = false;
 					if($("title").text() != s) {
 						$("title").text(s);
@@ -144,9 +144,9 @@ if(isset($location)) {
 			}
 
 			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 14);
-			follw.translations["nolocation"] = <?= json_encode($translation['nolocation'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
-			follw.translations["offline"] = <?= json_encode($translation['offline'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
-			follw.translations["iddeleted"] = <?= json_encode($translation['iddeleted'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+			follw.translations["nolocation"] = <?= $tl->get('nolocation', 'json') ?>;
+			follw.translations["offline"] = <?= $tl->get('offline', 'json') ?>;
+			follw.translations["iddeleted"] = <?= $tl->get('iddeleted', 'json') ?>;
 			follw.addEventListener("locationchanged", onLocationChanged);
 			follw.addEventListener("offline", function() {
 					$("title").text(follw.translations["offline"]);
@@ -186,7 +186,7 @@ if(isset($location)) {
 		</div>
 		<div id="follwMap"></div>
 		<div id="footer">
-			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($translation['credits']) ?></a> · <a href="/privacy" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($translation['privacystatement']) ?></a>
+			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= $tl->get('credits', 'html') ?></a> · <a href="/privacy" target="_blank" rel="noopener noreferrer"><?= $tl->get('privacystatement', 'html') ?></a>
 		</div>
 	</body>
 </html>

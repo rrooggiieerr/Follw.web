@@ -1,6 +1,6 @@
 nolocation = Er wordt momenteel geen locatie gedeeld
 iddeleted = De door u opgevraagde locatie is verwijderd
 offline = U bent momenteel niet verbonden met het internet
-ishere = is hier
+ishere = %s is hier
 credits = Locatie gedeeld via Follw
 privacystatement = Privacyverklaring
