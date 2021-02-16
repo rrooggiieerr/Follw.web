@@ -278,10 +278,11 @@ class Follw {
 		if(this.updateTimeoutID !== null)
 			return
 
-		console.debug('Starting location update');
 		var _this = this;
 
-		document.addEventListener('DOMContentLoaded', function() {
+		if (document.readyState === "complete" || document.readyState === "loaded" || document.readyState === "interactive") {
+			console.debug('Starting location update');
+
 			var onVisible = function() {
 				console.debug("visible");
 				//this.invalidateSize();
@@ -358,9 +359,7 @@ class Follw {
 				});
 			}, { root: document.documentElement });
 			observer.observe(_this.element);
-		});
 		
-		window.addEventListener('load', function() {
 			window.addEventListener('online', function() {
 				console.debug('Browser might be online');
 				_this.resumeUpdate();
@@ -372,7 +371,11 @@ class Follw {
 				_this.offline = true;
 				_this.trigerEvent('offline');
 			});
-		});
+		} else {
+			document.addEventListener('DOMContentLoaded', function() {
+				_this.startUpdate();
+			});
+		};
 	}
 
 	pauseUpdate() {
