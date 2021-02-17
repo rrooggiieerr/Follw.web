@@ -43,7 +43,7 @@ class Translation extends ArrayObject {
 		while(($line = fgets($file)) !== FALSE) {
 			$line = trim($line);
 			// Empty strings and strings starting with # are ignored
-			if($line !== '' && !str_starts_with($line, '#')) {
+			if($line !== '' && $line[0] !== '#') {
 				$line = explode('=', $line, 2);
 				$line[0] = trim($line[0]);
 				$line[1] = trim($line[1]);
