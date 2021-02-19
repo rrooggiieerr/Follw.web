@@ -43,6 +43,12 @@ class ShareController {
 			case 'followers.json':
 				$this->getFollowers($shareID);
 				break;
+			case 'serviceworker.js':
+				require_once(dirname(__DIR__) . '/views/share.serviceworker.js.php');
+				exit();
+			case 'manifest.webmanifest':
+				require_once(dirname(__DIR__) . '/views/share.manifest.webmanifest.php');
+				exit();
 			case (preg_match('/^follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})\/(enable|disable|delete)$/', $action, $matches) ? TRUE : FALSE):
 				$followID = ID::decode($matches[1], $shareID);
 
