@@ -103,6 +103,12 @@ if(isset($location)) {
 		<meta property="og:image" content="http://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314">
 		<meta property="og:image:width" content="600">
 		<meta property="og:image:height" content="314">
+<?php // Twitter ?>
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="<?= $protocol . $_SERVER['HTTP_HOST'] . '/' . $id->encode() . '/'?>">
+		<meta name="twitter:title" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
+		<meta name="twitter:description" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
+		<meta name="twitter:image" content="http://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314">
 <?php // Styles ?>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
