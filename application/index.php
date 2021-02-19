@@ -25,9 +25,21 @@ $configuration = [
 		'enabled' => FALSE,
 		'id' => $_SERVER['HTTP_HOST']
 	],
-	// Links to the app store for native app
-    'app' =>  NULL,
-	'jsonoptions' => JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+	'jsonoptions' => JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
+	'features' => [
+		'share' => [
+			// Progressive Web App
+			'pwa' => FALSE,
+			// Links to the app store for native app
+			'app' =>  NULL
+		],
+		'follow' => [
+			// Progressive Web App
+			'pwa' => FALSE,
+			// Links to the app store for native app
+			'app' =>  NULL
+		]
+	]
 ];
 
 // The above configuration parameters can be overridden in 
