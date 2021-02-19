@@ -6,7 +6,23 @@ if($configuration['mode'] === 'production') {
 	print('User-agent: *
 Disallow: /generatesharingid');
 } else {
-	// Don't let anything be indexed by search engines
-	print('User-agent: *
+	// Allow social media sites and deny everyone else
+	print('User-agent: facebookexternalhit
+Allow: /
+Disallow:
+
+User-agent: Twitterbot
+Allow: /
+Disallow:
+
+User-agent: WhatsApp
+Allow: /
+Disallow:
+
+User-agent: SkypeUriPreview Preview
+Allow: /
+Disallow:
+
+User-agent: *
 Disallow: /');
 }

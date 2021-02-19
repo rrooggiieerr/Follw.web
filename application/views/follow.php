@@ -9,14 +9,14 @@ global $configuration;
 global $protocol;
 
 // Preconnect to third party domains to improve page loading speed
-header('Link: <https://unpkg.com/>; rel=preconnect');
-header('Link: <https://a.tile.openstreetmap.org/>; rel=preconnect');
-header('Link: <https://b.tile.openstreetmap.org/>; rel=preconnect');
-header('Link: <https://c.tile.openstreetmap.org/>; rel=preconnect');
-header('Link: <https://unpkg.com/>; rel=dns-prefetch');
-header('Link: <https://a.tile.openstreetmap.org/>; rel=dns-prefetch');
-header('Link: <https://b.tile.openstreetmap.org/>; rel=dns-prefetch');
-header('Link: <https://c.tile.openstreetmap.org/>; rel=dns-prefetch');
+header('Link: <https://unpkg.com/>; rel=preconnect', FALSE);
+header('Link: <https://a.tile.openstreetmap.org/>; rel=preconnect', FALSE);
+header('Link: <https://b.tile.openstreetmap.org/>; rel=preconnect', FALSE);
+header('Link: <https://c.tile.openstreetmap.org/>; rel=preconnect', FALSE);
+header('Link: <https://unpkg.com/>; rel=dns-prefetch', FALSE);
+header('Link: <https://a.tile.openstreetmap.org/>; rel=dns-prefetch', FALSE);
+header('Link: <https://b.tile.openstreetmap.org/>; rel=dns-prefetch', FALSE);
+header('Link: <https://c.tile.openstreetmap.org/>; rel=dns-prefetch', FALSE);
 
 // Only allow Service Worker for this scope
 header('Service-Worker-Allowed: /' . $id->encode() . '/');
@@ -99,8 +99,9 @@ if(isset($location)) {
 		<meta property="og:title" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
 		<meta property="og:type" content="website">
 		<meta property="og:description" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
-		<meta property="og:image" content="http://osm-static-maps.herokuapp.com/?geojson=<?= urlencode(json_encode([ 'type' => 'Point', 'coordinates'=> [ $location['longitude'], $location['latitude'] ]])) ?>&zoom=14&width=600&height=314">
-		<meta property="og:image" content="http://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314">
+		<!-- meta property="og:image" content="https://osm-static-maps.herokuapp.com/?geojson=<?= urlencode(json_encode([ 'type' => 'Point', 'coordinates'=> [ $location['longitude'], $location['latitude'] ]])) ?>&zoom=14&width=600&height=314&imagemin=true" -->
+		<meta property="og:image" content="https://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314&imagemin=true">
+		<meta property="og:image:secure_url" content="https://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314&imagemin=true">
 		<meta property="og:image:width" content="600">
 		<meta property="og:image:height" content="314">
 <?php // Twitter ?>
@@ -108,7 +109,8 @@ if(isset($location)) {
 		<meta name="twitter:site" content="<?= $protocol . $_SERVER['HTTP_HOST'] . '/' . $id->encode() . '/'?>">
 		<meta name="twitter:title" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
 		<meta name="twitter:description" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
-		<meta name="twitter:image" content="http://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314">
+		<meta name="twitter:image" content="https://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314&imagemin=true">
+		<meta property="og:locale" content="<?= $tl->language ?>">
 <?php // Styles ?>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"

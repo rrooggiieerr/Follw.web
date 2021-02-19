@@ -185,6 +185,6 @@ class ID extends ArrayObject {
 	function url() {
 		global $protocol;
 
-		return $protocol . $_SERVER['HTTP_HOST'] . '/' . $this->encode();
+		return $protocol . $_SERVER['HTTP_HOST'] . '/' . $this->encode() . '/';
 	}
 }

@@ -14,11 +14,6 @@ if($configuration['mode'] === 'development') {
 	error_reporting(E_ALL);
 }
 
-if($configuration['mode'] !== 'production') {
-	// Don't let anything be indexed by search engines if not in production mode
-	header('X-Robots-Tag: noindex');
-}
-
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
@@ -27,10 +22,15 @@ $method = $_SERVER['REQUEST_METHOD'];
 // Enable HTTP Strict Transport Security when using HTTPS
 if($protocol === 'https://') {
 	if($configuration['mode'] === 'production') {
-		header('Strict-Transport-Security: max-age=63072000; preload');
+		header('Strict-Transport-Security: max-age=63072000; preload', TRUE);
 	} else {
-		header('Strict-Transport-Security: max-age=63072000');
+		header('Strict-Transport-Security: max-age=63072000', TRUE);
 	}
+}
+
+// Don't let anything be indexed by search engines if not in production mode
+if($configuration['mode'] !== 'production') {
+	header('X-Robots-Tag: noindex');
 }
 
 // Handle static content which doesn't need a database connection
@@ -136,6 +136,12 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 	}
 
 	if($id instanceof FollowID) {
+		// Allow social media sites to index the follow view
+		if(isset($_SERVER['HTTP_USER_AGENT']) &&
+				preg_match('/facebookexternalhit|twitterbot|whatsapp|skypeuripreview preview/', strtolower($_SERVER['HTTP_USER_AGENT']))) {
+			header('X-Robots-Tag: ' . $_SERVER['HTTP_USER_AGENT'] . ': nofollow', FALSE);
+		}
+				
 		require_once(dirname(__DIR__) . '/controllers/FollowController.php');
 		(new FollowController())->route($id, $action, $format);
 	} else if($id instanceof ShareID) {

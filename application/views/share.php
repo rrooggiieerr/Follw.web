@@ -640,7 +640,7 @@ if($configuration['mode'] == 'development') {
 				var message = `Follow my location ${entry['url']}`;
 
 				// QR code
-				$("#sharefollowid-qrcode").attr("src", entry['url'] + "/qrcode.svg");
+				$("#sharefollowid-qrcode").attr("src", entry['url'] + "qrcode.svg");
 
 				// Twitter
 				$("#sharefollowid-twitter").click(entry, function(event) {
