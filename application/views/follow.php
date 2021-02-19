@@ -24,12 +24,12 @@ header('Service-Worker-Allowed: /' . $id->encode() . '/');
 $tl = new Translation('follow');
 header('Content-Language: ' . $tl->language);
 
-$title = $tl->get('nolocation', 'html');
+$title = $tl->get('nolocation');
 $_location = 'null';
 $_accuracy = 'null';
 
 if(isset($location)) {
-	$title = $tl->get('ishere', 'html', $id['alias']);
+	$title = $tl->get('ishere', NULL, $id['alias']);
 	$_location = '[' . $location['latitude'] . ', ' . $location['longitude'] . ']';
 	if(isset($location['accuracy'])) {
 		$_accuracy = $location['accuracy'];
@@ -39,7 +39,7 @@ if(isset($location)) {
 <!doctype html>
 <html lang="<?= $tl->language ?>">
 	<head>
-		<title><?= $title ?></title>
+		<title><?= htmlspecialchars($title, ENT_NOQUOTES) ?></title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<meta name="robots" content="noindex" />
@@ -94,6 +94,15 @@ if(isset($location)) {
 		<meta name="msapplication-config" content="/<?=$id->encode()?>/browserconfig.xml">
 		<meta name="msapplication-TileColor" content="#006400">
 		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+<?php // Facebook Open Graph ?>
+		<meta property="og:url" content="<?= $protocol . $_SERVER['HTTP_HOST'] . '/' . $id->encode() . '/'?>">
+		<meta property="og:title" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
+		<meta property="og:type" content="website">
+		<meta property="og:description" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
+		<meta property="og:image" content="http://osm-static-maps.herokuapp.com/?geojson=<?= urlencode(json_encode([ 'type' => 'Point', 'coordinates'=> [ $location['longitude'], $location['latitude'] ]])) ?>&zoom=14&width=600&height=314">
+		<meta property="og:image" content="http://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314">
+		<meta property="og:image:width" content="600">
+		<meta property="og:image:height" content="314">
 <?php // Styles ?>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
@@ -216,7 +225,7 @@ if(isset($location)) {
 	</head>
 	<body>
 		<div id="header">
-			<h1 id="title"><?= $title ?></h1>
+			<h1 id="title"><?= htmlspecialchars($title, ENT_NOQUOTES) ?></h1>
 			<div id="coordinates">&nbsp;</div>
 		</div>
 		<div id="follwMap"></div>
