@@ -56,17 +56,17 @@ header('Content-Language: ' . $tl->language);
 		</script>
 <?php } ?>
 		<link rel="manifest" href="/<?=$shareID->encode()?>/manifest.webmanifest" />
-<?php // Icons
-/* TODO
-		<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
+<?php // Icons ?>
+		<link rel="icon" href="/favicon-96x96.png" sizes="96x96" type="image/png">
+		<link rel="icon" href="/favicon-64x64.png" sizes="64x64" type="image/png">
+		<link rel="icon" href="/favicon-48x48.png" sizes="48x48" type="image/png">
 		<link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
 		<link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
-		<link rel="icon" href="/favicon.ico">
-		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#563d7c">
-		<meta name="msapplication-config" content="/browserconfig.xml">
-		<meta name="theme-color" content="#563d7c">
-*/
-?>
+		<link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml">
+		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#006400">
+		<meta name="msapplication-config" content="/<?=$shareID->encode()?>/browserconfig.xml">
+		<meta name="msapplication-TileColor" content="#006400">
+		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
 <?php // Styles ?>
 		<link rel="stylesheet" href="https://unpkg.com/bootstrap@4.5.3/dist/css/bootstrap.min.css"
 			integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
