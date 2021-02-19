@@ -22,6 +22,7 @@ if($configuration['mode'] !== 'production') {
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
+//TODO Check if the HTTP header Service-Worker is present
 
 // Enable HTTP Strict Transport Security when using HTTPS
 if($protocol === 'https://') {
@@ -58,9 +59,14 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 		$remainer = $matches[2];
 	}
 
+	if($remainer === '') {
+		header('Location: /' . $id . '/');
+		exit();
+	}
+
 	$action = NULL;
 	$format = NULL;
-	if(in_array($remainer, [ NULL, '', '/'], TRUE)) {
+	if($remainer === '/') {
 		$action = 'location';
 		$format = 'html';
 	} else if(preg_match('/^\.[a-z]+\.?[a-z]+$/', $remainer)) {
@@ -100,11 +106,6 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 
 	if($id->type === 'reserved') {
 		http_response_code(404);
-		exit();
-	}
-
-	if($action === 'manifest.webmanifest') {
-		require_once(dirname(__DIR__) . '/views/manifest.webmanifest.php');
 		exit();
 	}
 

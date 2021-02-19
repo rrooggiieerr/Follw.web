@@ -5,6 +5,7 @@ require_once(dirname(__DIR__) . '/models/Translation.php');
 /* @var FollowID $id */
 /* @var Location $location */
 
+global $configuration;
 global $protocol;
 
 // Preconnect to third party domains to improve page loading speed
@@ -16,6 +17,9 @@ header('Link: <https://unpkg.com/>; rel=dns-prefetch');
 header('Link: <https://a.tile.openstreetmap.org/>; rel=dns-prefetch');
 header('Link: <https://b.tile.openstreetmap.org/>; rel=dns-prefetch');
 header('Link: <https://c.tile.openstreetmap.org/>; rel=dns-prefetch');
+
+// Only allow Service Worker for this scope
+header('Service-Worker-Allowed: /' . $id->encode() . '/');
 
 $tl = new Translation('follow');
 header('Content-Language: ' . $tl->language);
@@ -40,9 +44,45 @@ if(isset($location)) {
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<meta name="robots" content="noindex" />
 		<meta name="referrer" content="no-referrer" />
-		<link rel="manifest" href="/<?=$id->encode()?>/manifest.webmanifest" />
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-title" content="Follw <?= htmlspecialchars($id['alias']) ?>">
+<?php if(isset($configuration['features']['follow']['pwa']) &&
+		$configuration['features']['follow']['pwa'] == TRUE) { ?>
+		<script>
+			// Start Service Worker as soon as possible to also cache icons and other resource files for offline usage
+			if(window.navigator && navigator.serviceWorker) {
+				navigator.serviceWorker.register("/<?=$id->encode()?>/serviceworker.js", { scope: "/<?=$id->encode()?>/" }).then(function() {
+					console.debug("Registered Service Worker");
+					//TODO Try to unregister Service Worker and Cache?
+				}).catch(function(error) {
+					console.error("Failed to register Service Worker:", error);
+				});
+			} else {
+				console.info("Service Worker not available");
+			}
+		</script>
+<?php } else { ?>
+		<script>
+			if(window.navigator && navigator.serviceWorker) {
+				navigator.serviceWorker.getRegistration("/<?= $id->encode() ?>/").then(function(registration) {
+					if(registration){
+						console.debug("Unregistering Service Worker");
+						registration.unregister()
+					} else {
+						console.debug("No Service Worker to unregister");
+					}
+				});
+			}
+	
+			if(window.caches) {
+				caches.open("<?= $id->encode() ?>").then((cache) => {
+					console.log(cache);
+					//TODO caches.delete("<?= $id->encode() ?>");
+				});
+			}
+		</script>
+<?php } ?>
+		<link rel="manifest" href="/<?=$id->encode()?>/manifest.webmanifest" />
 <?php // Icons ?>
 		<link rel="icon" href="/favicon-96x96.png" sizes="96x96" type="image/png">
 		<link rel="icon" href="/favicon-64x64.png" sizes="64x64" type="image/png">
@@ -157,7 +197,6 @@ if(isset($location)) {
 			follw.addEventListener("iddeleted", function() {
 				location.reload();
 			});
-			follw.startUpdate();
 
 			$(window).scroll(function() {
 				try {
@@ -167,15 +206,11 @@ if(isset($location)) {
 				}
 			});
 
-            window.addEventListener("load", () => {
-                if("serviceWorker" in navigator) {
-                	navigator.serviceWorker.register("service-worker.js");
-            	}
-            });
-
 			$().ready(function() {
 				resizeMap()
 	 			follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
+	 			$("#coordinates").text(follw.prettyPrintCoordinates(<?= $location['latitude'] ?>, <?= $location['longitude'] ?>))
+				follw.startUpdate();
 			});
 		</script>
 	</head>

@@ -19,6 +19,42 @@ header('Content-Language: ' . $tl->language);
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
 		<meta name="robots" content="noindex" />
 		<meta name="referrer" content="no-referrer" />
+<?php if(isset($configuration['features']['share']['pwa']) &&
+		$configuration['features']['share']['pwa'] == TRUE) { ?>
+		<script>
+			// Start Service Worker as soon as possible to also cache icons and other resource files for offline usage
+			if(window.navigator && navigator.serviceWorker) {
+				navigator.serviceWorker.register("/<?=$shareID->encode()?>/serviceworker.js", { scope: "/<?=$shareID->encode()?>/" }).then(function() {
+					console.debug("Registered Service Worker");
+					//TODO Try to unregister Service Worker and Cache?
+				}).catch(function(error) {
+					console.error("Failed to register Service Worker:", error);
+				});
+			} else {
+				console.info("Service Worker not available");
+			}
+		</script>
+<?php } else { ?>
+		<script>
+			if(window.navigator && navigator.serviceWorker) {
+				navigator.serviceWorker.getRegistration("/<?= $shareID->encode() ?>/").then(function(registration) {
+					if(registration){
+						console.debug("Unregistering Service Worker");
+						registration.unregister()
+					} else {
+						console.debug("No Service Worker to unregister");
+					}
+				});
+			}
+	
+			if(window.caches) {
+				caches.open("<?= $shareID->encode() ?>").then((cache) => {
+					console.log(cache);
+					//TODO caches.delete("<?= $shareID->encode() ?>");
+				});
+			}
+		</script>
+<?php } ?>
 		<link rel="manifest" href="/<?=$shareID->encode()?>/manifest.webmanifest" />
 <?php // Icons
 /* TODO
@@ -662,7 +698,7 @@ if($configuration['mode'] == 'development') {
 				});
 			}
 
-			$(function() {
+			$().ready(function() {
 				updateFollowIDs();
 
 				$('#generatefollowid').submit(function() {

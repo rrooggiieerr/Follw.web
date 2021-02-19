@@ -67,5 +67,15 @@ class FollowController {
 
 			exit();
 		}
+
+		if($action === 'serviceworker.js') {
+			require_once(dirname(__DIR__) . '/views/follow.serviceworker.js.php');
+			exit();
+		}
+
+		if($action === 'manifest.webmanifest') {
+			require_once(dirname(__DIR__) . '/views/follow.manifest.webmanifest.php');
+			exit();
+		}
 	}
 }
