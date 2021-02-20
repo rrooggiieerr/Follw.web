@@ -280,7 +280,7 @@ class Follw {
 
 		var _this = this;
 
-		if (document.readyState === "complete" || document.readyState === "loaded" || document.readyState === "interactive") {
+		if (document.readyState === "complete" || document.readyState === "loaded") {
 			console.debug('Starting location update');
 
 			var onVisible = function() {
@@ -371,6 +371,10 @@ class Follw {
 				_this.offline = true;
 				_this.trigerEvent('offline');
 			});
+		} else if(document.readyState === "interactive") {
+			setTimeout(function() {
+				_this.startUpdate();
+			}, 100);
 		} else {
 			document.addEventListener('DOMContentLoaded', function() {
 				_this.startUpdate();
