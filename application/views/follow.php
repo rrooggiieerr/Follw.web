@@ -99,18 +99,29 @@ if(isset($location)) {
 		<meta property="og:title" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
 		<meta property="og:type" content="website">
 		<meta property="og:description" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
+		<meta property="og:locale" content="<?= $tl->language ?>">
+<?php if(isset($location)) { ?>
 		<!-- meta property="og:image" content="https://osm-static-maps.herokuapp.com/?geojson=<?= urlencode(json_encode([ 'type' => 'Point', 'coordinates'=> [ $location['longitude'], $location['latitude'] ]])) ?>&zoom=14&width=600&height=314&imagemin=true" -->
 		<meta property="og:image" content="https://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314&imagemin=true">
 		<meta property="og:image:secure_url" content="https://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314&imagemin=true">
 		<meta property="og:image:width" content="600">
 		<meta property="og:image:height" content="314">
+<?php } else { ?>
+		<meta property="og:image" content="/apple-touch-icon-180x180.png">
+		<meta property="og:image:width" content="180">
+		<meta property="og:image:height" content="180">
+<?php } ?>
 <?php // Twitter ?>
-		<meta name="twitter:card" content="summary_large_image">
-		<meta name="twitter:site" content="<?= $protocol . $_SERVER['HTTP_HOST'] . '/' . $id->encode() . '/'?>">
+		<meta name="twitter:site" content="@follw_app?>">
 		<meta name="twitter:title" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
 		<meta name="twitter:description" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
+<?php if(isset($location)) { ?>
+		<meta name="twitter:card" content="summary_large_image">
 		<meta name="twitter:image" content="https://osm-static-maps.herokuapp.com/?center=<?= $location['longitude'] ?>,<?= $location['latitude'] ?>&zoom=14&width=600&height=314&imagemin=true">
-		<meta property="og:locale" content="<?= $tl->language ?>">
+<?php } else { ?>
+		<meta name="twitter:card" content="summary">
+		<meta name="twitter:image" content="/apple-touch-icon-180x180.png">
+<?php } ?>
 <?php // Styles ?>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
@@ -168,7 +179,7 @@ if(isset($location)) {
 
 			function onLocationChanged(follw, data) {
 				if(data != null) {
-					var s = data.alias + <?= $tl->get('ishere', 'json', '') ?>;
+					var s = data.alias + <?= $tl->get('ishere', 'js', '') ?>;
 					var resize = false;
 					if($("title").text() != s) {
 						$("title").text(s);
@@ -201,9 +212,9 @@ if(isset($location)) {
 			}
 
 			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 14);
-			follw.translations["nolocation"] = <?= $tl->get('nolocation', 'json') ?>;
-			follw.translations["offline"] = <?= $tl->get('offline', 'json') ?>;
-			follw.translations["iddeleted"] = <?= $tl->get('iddeleted', 'json') ?>;
+			follw.translations["nolocation"] = <?= $tl->get('nolocation', 'js') ?>;
+			follw.translations["offline"] = <?= $tl->get('offline', 'js') ?>;
+			follw.translations["iddeleted"] = <?= $tl->get('iddeleted', 'js') ?>;
 			follw.addEventListener("locationchanged", onLocationChanged);
 			follw.addEventListener("offline", function() {
 					$("title").text(follw.translations["offline"]);
@@ -225,8 +236,10 @@ if(isset($location)) {
 
 			$().ready(function() {
 				resizeMap()
-	 			follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
-	 			$("#coordinates").text(follw.prettyPrintCoordinates(<?= $location['latitude'] ?>, <?= $location['longitude'] ?>))
+				follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
+<?php if(isset($location))  { ?>
+				$("#coordinates").text(follw.prettyPrintCoordinates(<?= $location['latitude'] ?>, <?= $location['longitude'] ?>))
+<?php } ?>
 				follw.startUpdate();
 			});
 		</script>
