@@ -12,14 +12,16 @@ class FollowController {
 		}
 
 		if($action === 'location') {
-			if(!$id->enabled || ($id->expires > 0 && $id->expires < time())) {
+			if(!$id->enabled || ($id->starts > 0 && $id->starts > time()) || ($id->expires > 0 && $id->expires < time())) {
 				// If Follow ID has not been enabled or has expired
-				// HTTP Response 403 Forbidden
-				http_response_code(403);
 				if($format === 'html') {
 					$location = NULL;
 					require_once(dirname(__DIR__) . '/views/follow.php');
+					exit();
 				}
+
+				// HTTP Response 403 Forbidden
+				http_response_code(403);
 				exit();
 			}
 

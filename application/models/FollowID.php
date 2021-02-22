@@ -6,6 +6,7 @@ class FollowID extends ID implements JsonSerializable {
 
 	var $shareID = NULL;
 	var $enabled = FALSE;
+	var $starts = NULL;
 	var $expires = NULL;
 	var $delay = NULL;
 
@@ -65,8 +66,8 @@ class FollowID extends ID implements JsonSerializable {
 			return FALSE;
 		}
 		
-		$query = 'INSERT INTO `followers` (`shareid`, `followid`, `followidencrypted`, `enabled`, `expires`, `delay`) VALUES (?, ?, ?, ?, FROM_UNIXTIME(?), ?)';
-		$ds->execute($query, [$this->shareID->id, $this->id, $this->encrypt(), $this->enabled, $this->expires, $this->delay]);
+		$query = 'INSERT INTO `followers` (`shareid`, `followid`, `followidencrypted`, `enabled`, `starts`, `expires`, `delay`) VALUES (?, ?, ?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?), ?)';
+		$ds->execute($query, [$this->shareID->id, $this->id, $this->encrypt(), $this->enabled, $this->starts, $this->expires, $this->delay]);
 
 		return $ds->commit();
 	}
@@ -162,12 +163,14 @@ class FollowID extends ID implements JsonSerializable {
 
 	function jsonSerialize() {
 		$a = array_merge(parent::jsonSerialize(),
-			['expires' => $this->expires,
+			['starts' => $this->starts,
+			'expires' => $this->expires,
 			'delay' => $this->delay]);
 
 		if ($this->shareID) {
 			$a = array_merge($a,
 				['enabled' => $this->enabled,
+				'started' => $this->started,
 				'expired' => $this->expired,
 				'url' => $this->url()]);
 		}

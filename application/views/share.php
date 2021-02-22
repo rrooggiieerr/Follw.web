@@ -184,6 +184,7 @@ if($configuration['mode'] == 'development') {
 									<th><?= $tl->get('followidheader', 'html') ?></th>
 									<th><?= $tl->get('aliasheader', 'html') ?></th>
 									<!-- <th><?= $tl->get('delayheader', 'html') ?></th> -->
+									<th><?= $tl->get('startsheader', 'html') ?></th>
 									<th><?= $tl->get('expiresheader', 'html') ?></th>
 									<th><?= $tl->get('enabledheader', 'html') ?></th>
 									<th><?= $tl->get('shareheader', 'html') ?></th>
@@ -249,6 +250,10 @@ if($configuration['mode'] == 'development') {
 												<div class="col"><input name="delay" type="time"/></div>
 											</div> -->
 											<div class="row">
+												<div class="col"><?= $tl->get('addfollowerstarts', 'html') ?></div>
+												<div class="col"><input name="starts" type="datetime-local"/></div>
+											</div>
+											<div class="row">
 												<div class="col"><?= $tl->get('addfollowerexpires', 'html') ?></div>
 												<div class="col"><input name="expires" type="datetime-local"/></div>
 											</div>
@@ -285,35 +290,33 @@ if($configuration['mode'] == 'development') {
 						<div><a href="/apidoc" rel="noopener noreferrer"><?= $tl->get('integrationapidocumentation', 'html') ?></a></div>
 					</div>
 				</div>
+<?php $footertl = new Translation('footer'); ?>
 				<div class="d-none d-sm-block">
 					<footer class="pt-4 my-md-5 pt-md-5 border-top">
 						<div class="row">
 							<div class="col-md">
 								<div class="row">
 									<div class="col">
-										<h5><?= $tl->get('footerabout', 'html') ?></h5>
+										<h5><?= $footertl->get('footeraboutheader', 'html') ?></h5>
 										<ul class="list-unstyled text-small">
-											<li><a class="text-muted" href="/credits" rel="noopener noreferrer"><?= $tl->get('credits', 'html') ?></a></li>
-											<li><a class="text-muted" href="https://blog.follw.app/" target="_blank" rel="noopener noreferrer"><?= $tl->get('blog', 'html') ?></a></li>
+											<li><a class="text-muted" href="/credits" rel="noopener noreferrer"><?= $footertl->get('credits', 'html') ?></a></li>
+											<li><a class="text-muted" href="https://blog.follw.app/" target="_blank" rel="noopener noreferrer"><?= $footertl->get('blog', 'html') ?></a></li>
 										</ul>
 									</div>
 									<div class="col">
-										<h5><?= $tl->get('footerprivacy', 'html') ?></h5>
+										<h5><?= $footertl->get('footerprivacyheader', 'html') ?></h5>
+										<p><?= $footertl->get('footerprivacyintro') ?></p>
 										<ul class="list-unstyled text-small">
-											<li><a class="text-muted" href="/privacy" rel="noopener noreferrer"><?= $tl->get('privacystatement', 'html') ?></a></li>
-											<li><a class="text-muted" href="/terms" rel="noopener noreferrer"><?= $tl->get('termsconditions', 'html') ?></a></li>
+											<li><a class="text-muted" href="/terms" rel="noopener noreferrer"><?= $footertl->get('termsconditions', 'html') ?></a></li>
 										</ul>
 									</div>
-<?php if(isset($configuration['app'])) {
-	$platforms = [ 'play' => 'Android',
-		'itunes' => 'iOS'
-	];
-?>
+<?php if(isset($configuration['features']['share']['app'])) { ?>
 									<div class="col">
-										<h5><?= $tl->get('footerapps', 'html') ?></h5>
+										<h5><?= $footertl->get('footerappsheader', 'html') ?></h5>
+										<p><?= $footertl->get('footerappsintro', 'html') ?></p>
 										<ul class="list-unstyled text-small">
-<?php	foreach($configuration['app'] as $app) { ?>
-											<li><a class="text-muted" href="<?= $app['url'] ?>" target="_blank" rel="noopener noreferrer"><?= $tl->get('appfor', 'html') ?> <?= $platforms[$app['platform']] ?></a></li>
+<?php	foreach($configuration['features']['share']['app'] as $app) { ?>
+											<li><a class="text-muted" href="<?= $app['url'] ?>" target="_blank" rel="noopener noreferrer"><?= $footertl->get('appfor', 'html', $footertl->get('appplatform' . $app['platform'])) ?></a></li>
 <?php	} ?>
 										</ul>
 									</div>
@@ -465,7 +468,7 @@ if($configuration['mode'] == 'development') {
 				updateLocation(location) {
 					console.log(location);
 					var _this = this;
-					$.post("/<?=$shareID->encode()?>", location, function() {
+					$.post("/<?=$shareID->encode()?>/", location, function() {
 						_this.map.setMarker([location.latitude, location.longitude], location.accuracy);
 						_this.previousLocation = location;
 						_this.lastShare = Date.now();
@@ -559,7 +562,7 @@ if($configuration['mode'] == 'development') {
 						if(entry['reference'] != null)
 							reference = entry['reference'];
 
-						if(entry['enabled'] && !entry['expired'])
+						if(entry['enabled'] && entry['started'] && !entry['expired'])
 							$(row).append(`<td class="followurl enabled"><a href="${entry['url']}" target="_blank" rel="noopener noreferrer">${reference}</a></td>`);
 						else
 							$(row).append(`<td class="followurl disabled">${reference}</td>`);
@@ -573,6 +576,17 @@ if($configuration['mode'] == 'development') {
 							$(row).append('<td class="delay"></td>');
 						else
 							$(row).append('<td class="delay">Realtime</td>');*/
+
+						console.log(entry['started']);
+						if(entry['started'])
+							$(row).append('<td class="starts">Active</td>');
+						else if(entry['starts'] != null) {
+							console.debug(entry['starts']);
+							entry['starts'] = new Date(entry['starts'] * 1000).toLocaleString();
+							$(row).append(`<td class="starts">${entry['starts']}</td>`);
+						} else
+							$(row).append('<td class="starts"></td>');
+							
 
 						if(entry['expired'])
 							$(row).append('<td class="expires">Expired</td>');
@@ -680,7 +694,7 @@ if($configuration['mode'] == 'development') {
 
 				// Clipboard
 				$("#sharefollowid-clipboardtext").val(message);
-				$("#sharefollowid-clipboard").click(function(event) {
+				$("#sharefollowid-clipboard").off('click').click(function(event) {
 					event.preventDefault();
 					var copyText = document.getElementById("sharefollowid-clipboardtext");
 					copyText.select();
@@ -711,6 +725,12 @@ if($configuration['mode'] == 'development') {
 					if(alias == "")
 						alias = null;
 					var enabled = $('input[name="enabled"]', this).is(':checked');
+					var starts = $('input[name="starts"]', this).val();
+					if(starts) {
+						starts = new Date(starts).getTime()/1000;
+						console.log(starts);
+					} else
+						starts = null;
 					var expires = $('input[name="expires"]', this).val();
 					if(expires) {
 						expires = new Date(expires).getTime()/1000;
@@ -742,7 +762,7 @@ if($configuration['mode'] == 'development') {
 					} else
 						expires = null;
 
-					$.post("/<?=$shareID->encode()?>/generatefollowid", { reference:reference, alias:alias, enabled:enabled, expires:expires }, function() {
+					$.post("/<?=$shareID->encode()?>/generatefollowid", { reference:reference, alias:alias, enabled:enabled, starts:starts, expires:expires }, function() {
 						updateFollowIDs();
 						$('#generatefollowid-modal').modal('hide');
 						$('#generatefollowid').get(0).reset();

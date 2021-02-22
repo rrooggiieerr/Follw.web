@@ -78,6 +78,7 @@ class DataStore {
 						  `followid` int(10) unsigned NOT NULL,
 						  `followidencrypted` binary(24) NOT NULL DEFAULT \'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\',
 						  `enabled` tinyint(1) NOT NULL DEFAULT \'0\',
+						  `starts` timestamp NULL DEFAULT NULL,
 						  `expires` timestamp NULL DEFAULT NULL,
 						  `delay` time DEFAULT NULL,
 						  UNIQUE KEY `followid` (`followid`),

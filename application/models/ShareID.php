@@ -97,7 +97,7 @@ class ShareID extends ID {
 	function getFollowers() {
 		$followers = [];
 
-		$query = 'SELECT f.`followid`, f.`followidencrypted`, i.`config`, f.`enabled`, UNIX_TIMESTAMP(f.`expires`) AS `expires`, f.`delay`
+		$query = 'SELECT f.`followid`, f.`followidencrypted`, i.`config`, f.`enabled`, UNIX_TIMESTAMP(f.`starts`) AS `starts`, UNIX_TIMESTAMP(f.`expires`) AS `expires`, f.`delay`
 					FROM `followers` f, `issuedids` i
 					WHERE i.`id` = f.`followid` AND f.`shareid` = ? ORDER BY i.`created`';
 		if($statement = DataStore::getInstance()->execute($query, [$this->id])) {
@@ -114,12 +114,21 @@ class ShareID extends ID {
 				}
 
 				$instance->enabled = $row['enabled'] ? TRUE : FALSE;
+
+				if($row['starts']) {
+					$instance->starts = $row['starts'];
+					$instance->started = $instance->starts < time();
+				} else {
+					$instance->started = TRUE;
+				}
+
 				if($row['expires']) {
 					$instance->expires = $row['expires'];
 					$instance->expired = $instance->expires < time();
 				} else {
 					$instance->expired = FALSE;
 				}
+
 				if($row['delay']) {
 					$instance->delay = $row['delay'];
 				}

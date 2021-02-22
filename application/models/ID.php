@@ -41,10 +41,10 @@ class ID extends ArrayObject {
 		}*/
 
 		if ($shareID) {
-			$query = 'SELECT f.`id`, f.`type`, f.`type`, f.`config`, sf.`enabled`, sf.`expires`, sf.`delay`
+			$query = 'SELECT f.`id`, f.`type`, f.`type`, f.`config`, sf.`enabled`, sf.`starts`, sf.`expires`, sf.`delay`
 				FROM `issuedids` f, `followers` sf
 				WHERE f.`id` = sf.`followid` AND f.`type` = \'follow\' AND f.`hash` = ? AND sf.`shareid` = ?';
-			//$query = 'SELECT `followid`, `enabled`, `expires`, `delay` FROM `followers` WHERE `shareid` = ? AND `followidraw` = ?';
+			//$query = 'SELECT `followid`, `enabled`, `starts`, `expires`, `delay` FROM `followers` WHERE `shareid` = ? AND `followidraw` = ?';
 			$statement = DataStore::getInstance()->execute($query, [(new ID(-1, $binary))->hash(), $shareID->id]);
 
 			if($statement->rowCount() > 1) {
@@ -66,10 +66,11 @@ class ID extends ArrayObject {
 			$id = $result['id'];
 			$instance = new FollowID($shareID, $id, $binary);
 			$instance->enabled = $result['enabled'] === 1; // TRUE if 1 else FALSE
+			$instance->starts = $result['starts'];
 			$instance->expires = $result['expires'];
 			$instance->delay = $result['delay'];
 		} else {
-			$query = 'SELECT f.`id`, f.`type`, f.`config`, sf.`enabled`, UNIX_TIMESTAMP(sf.`expires`) AS \'expires\', TIME_TO_SEC(sf.`delay`) AS \'delay\', s.`config` AS \'sharerConfig\'
+			$query = 'SELECT f.`id`, f.`type`, f.`config`, sf.`enabled`, UNIX_TIMESTAMP(sf.`starts`) AS \'starts\', UNIX_TIMESTAMP(sf.`expires`) AS \'expires\', TIME_TO_SEC(sf.`delay`) AS \'delay\', s.`config` AS \'sharerConfig\'
 				FROM `issuedids` f
 				LEFT JOIN `followers` sf ON sf.`followid` = f.`id`
 				LEFT JOIN `issuedids` s ON s.`id` = sf.`shareid`
@@ -101,6 +102,7 @@ class ID extends ArrayObject {
 				case 'follow':
 					$instance = new FollowID(NULL, $id, $binary);
 					$instance->enabled = $result['enabled'] === 1; // TRUE if 1 else FALSE
+					$instance->starts = $result['starts'];
 					$instance->expires = $result['expires'];
 					$instance->delay = $result['delay'];
 					break;

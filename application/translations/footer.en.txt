@@ -1,0 +1,19 @@
+footeraboutheader = About
+footeraboutintro =
+creditsintro = Credits
+blog = Blog
+onsocialmedia = Follw on %s
+
+footerprivacyheader = Privacy
+footerprivacyintro = We don't use cookies nor store your IP address. Read more on how Follw respects your privacy in the <a href="/privacy" rel="noopener noreferrer">Privacy statement</a>.
+privacystatement = Privacy statement
+termsconditions = Terms & conditions
+
+footerappsheader = Apps
+footerappsintro = To share your location from your mobile device you need one of the native apps.
+appfor = Follw for %s
+appplatformplay = Android
+appplatformitunes = iOS
+
+footerintegrationheader = Apps
+footerintegrationintro = You can integrate Follw in your own software, check out the <a href="/apidoc" rel="noopener noreferrer">API documentation</a>.

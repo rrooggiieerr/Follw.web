@@ -381,6 +381,16 @@ class ShareController {
 			$follower->enabled = TRUE;
 		}
 
+		if(!empty($formValues['starts']) && is_numeric($formValues['starts'])) {
+			$follower->starts = $formValues['starts'];
+		} else if(!empty($formValues['starts'])) {
+			$starts = $formValues['starts'];
+			// ISO 8601 date time to unix time
+			$starts = strtotime($starts);
+			// Unix time to MySQL timestamps
+			$follower->starts = date('Y-m-d H:i:s', $starts);
+		}
+
 		if(!empty($formValues['expires']) && is_numeric($formValues['expires'])) {
 			$follower->expires = $formValues['expires'];
 		} else if(!empty($formValues['expires'])) {
@@ -390,6 +400,7 @@ class ShareController {
 			// Unix time to MySQL timestamps
 			$follower->expires = date('Y-m-d H:i:s', $expires);
 		}
+
 		if(!empty($formValues['delay']) && is_numeric($formValues['delay'])) {
 			$follower->delay = $formValues['delay'];
 		}
