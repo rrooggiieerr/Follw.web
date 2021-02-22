@@ -182,13 +182,6 @@ if($configuration['mode'] == 'development') {
 										<input type="text" id="textlocation"/>
 									</form>
 								</div>
-								<div class="col-md">
-									<h4>Google real-time location URL</h4>
-									<p>Paste the Google real-time location URL you like to share.</p>
-									<form action="#" autocomplete="off">
-										<input type="text" id="googlelocation"/>
-									</form>
-								</div>
 							</div>
 						</div>
 <?php } ?>
