@@ -19,7 +19,10 @@ header('Link: <https://b.tile.openstreetmap.org/>; rel=dns-prefetch', FALSE);
 header('Link: <https://c.tile.openstreetmap.org/>; rel=dns-prefetch', FALSE);
 
 // Only allow Service Worker for this scope
-header('Service-Worker-Allowed: /' . $id->encode() . '/');
+if(isset($configuration['features']['follow']['pwa']) &&
+		$configuration['features']['follow']['pwa'] == TRUE) {
+	header('Service-Worker-Allowed: /' . $id->encode() . '/');
+}
 
 $tl = new Translation('follow');
 header('Content-Language: ' . $tl->language);
