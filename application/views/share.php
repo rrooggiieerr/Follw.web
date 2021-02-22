@@ -8,6 +8,22 @@ require_once(dirname(__DIR__) . '/models/Translation.php');
 global $protocol;
 global $configuration;
 
+// Preconnect to third party domains to improve page loading speed
+header('Link: <https://unpkg.com/>; rel=preconnect', FALSE);
+header('Link: <https://a.tile.openstreetmap.org/>; rel=preconnect', FALSE);
+header('Link: <https://b.tile.openstreetmap.org/>; rel=preconnect', FALSE);
+header('Link: <https://c.tile.openstreetmap.org/>; rel=preconnect', FALSE);
+header('Link: <https://unpkg.com/>; rel=dns-prefetch', FALSE);
+header('Link: <https://a.tile.openstreetmap.org/>; rel=dns-prefetch', FALSE);
+header('Link: <https://b.tile.openstreetmap.org/>; rel=dns-prefetch', FALSE);
+header('Link: <https://c.tile.openstreetmap.org/>; rel=dns-prefetch', FALSE);
+
+// Only allow Service Worker for this scope
+if(isset($configuration['features']['share']['pwa']) &&
+		$configuration['features']['share']['pwa'] == TRUE) {
+	header('Service-Worker-Allowed: /' . $shareID->encode() . '/');
+}
+
 $tl = new Translation('share');
 header('Content-Language: ' . $tl->language);
 ?>
@@ -68,8 +84,8 @@ header('Content-Language: ' . $tl->language);
 		<meta name="msapplication-TileColor" content="#006400">
 		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
 <?php // Styles ?>
-		<link rel="stylesheet" href="https://unpkg.com/bootstrap@4.5.3/dist/css/bootstrap.min.css"
-			integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2"
+		<link rel="stylesheet" href="https://unpkg.com/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+			integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
 			crossorigin="anonymous"/>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
@@ -332,8 +348,8 @@ if($configuration['mode'] == 'development') {
 		<script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"
 			integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2"
 			crossorigin="anonymous"></script>
-		<script src="https://unpkg.com/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
-			integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+		<script src="https://unpkg.com/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
 			crossorigin="anonymous"></script>
 		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha384-RFZC58YeKApoNsIbBxf4z6JJXmh+geBSgkCQXFyh+4tiFSJmJBt+2FbjxW7Ar16M"
