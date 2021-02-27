@@ -32,7 +32,7 @@ header('Content-Language: ' . $tl->language);
 	<head>
 		<title>Follw · <?= $tl->get('follwslogan', 'html') ?></title>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="robots" content="noindex" />
 		<meta name="referrer" content="no-referrer" />
 <?php if(isset($configuration['features']['share']['pwa']) &&
@@ -40,10 +40,10 @@ header('Content-Language: ' . $tl->language);
 		<script>
 			// Start Service Worker as soon as possible to also cache icons and other resource files for offline usage
 			if(window.navigator && navigator.serviceWorker) {
-				navigator.serviceWorker.register("/<?=$shareID->encode()?>/serviceworker.js", { scope: "/<?=$shareID->encode()?>/" }).then(function() {
+				navigator.serviceWorker.register("/<?=$shareID->encode()?>/serviceworker.js", { scope: "/<?=$shareID->encode()?>/" }).then(() => {
 					console.debug("Registered Service Worker");
 					//TODO Try to unregister Service Worker and Cache?
-				}).catch(function(error) {
+				}).catch((error) => {
 					console.error("Failed to register Service Worker:", error);
 				});
 			} else {
@@ -53,7 +53,7 @@ header('Content-Language: ' . $tl->language);
 <?php } else { ?>
 		<script>
 			if(window.navigator && navigator.serviceWorker) {
-				navigator.serviceWorker.getRegistration("/<?= $shareID->encode() ?>/").then(function(registration) {
+				navigator.serviceWorker.getRegistration("/<?= $shareID->encode() ?>/").then((registration) => {
 					if(registration){
 						console.debug("Unregistering Service Worker");
 						registration.unregister()
@@ -62,7 +62,7 @@ header('Content-Language: ' . $tl->language);
 					}
 				});
 			}
-	
+
 			if(window.caches) {
 				caches.open("<?= $shareID->encode() ?>").then((cache) => {
 					console.log(cache);
@@ -90,13 +90,90 @@ header('Content-Language: ' . $tl->language);
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
 			crossorigin="anonymous"/>
+		<link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.css"
+			integrity="sha384-FckWOBo7yuyMS7In0aXZ0aoVvnInlnFMwCv77x9sZpFgOonQgnBj1uLwenWVtsEj"
+			crossorigin="anonymous"/>
 		<style>
+			html, body {
+				height: 100%;
+				width: 100vw;
+				padding: 0;
+				margin: 0;
+				overflow: hidden;
+			}
+
+			.container {
+				padding: 0;
+				overflow: hidden;
+			}
+
+			@media (max-width: 575px) {
+				.navbar-brand {
+					font-size: 1rem;
+				}
+
+				.modal-dialog {
+					max-width: 100%;
+					width: 100%;
+					height: 100%;
+					margin: 0;
+					padding: 0;
+				}
+
+				.modal-content {
+					height: auto;
+					min-height: 100%;
+					height: auto;
+					border: 0;
+					border-radius: 0;
+				}
+
+				header, footer {
+					text-align: center;
+					padding: 4px;
+				}
+
+			}
+
+			@media (max-width: 991px) {
+				.container {
+					max-width: 960px;
+				}
+			}
+
+			.tab-pane {
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+
+			.nav-link {
+				padding: .5rem;
+			}
+
 			.geolocationenabled, .geolocationdisabled {
 				display: none;
 			}
 
+			#sharelocationbuttons {
+				text-align: center;
+			}
+
+			#sharelocationbuttons button {
+				width: 4rem;
+				height: 4rem;
+				border-radius: 50%;
+			}
+
 			#shareLocationMap {
 				height: 250px;
+			}
+
+			#textlocation {
+				width: 100%;
+			}
+
+			.createfollower, .updatefollower {
+				display: none;
 			}
 
 			#sharefollowid-modal .modal-body {
@@ -113,23 +190,25 @@ header('Content-Language: ' . $tl->language);
 				height: 40px;
 			}
 
-			code {
-				display: block;
-				white-space: pre;
-				background-color: #F8F8F8;
+			footer {
+				font-size: 0.8rem;
+			}
+
+			footer h5 {
+				font-size: 1rem;
 			}
 		</style>
 	</head>
 	<body>
 		<main role="main">
 			<div class="container">
-				<div class="navbar">
+				<header class="navbar">
 					<div class="navbar-brand">Follw <span class="text-muted">· <?= $tl->get('follwslogan', 'html') ?></span></div>
-				</div>
+				</header>
 				<ul class="nav nav-tabs">
 					<li class="nav-item"><a class="nav-link active" id="sharelocation-tab" data-toggle="tab" href="#sharelocation" role="tab" aria-controls="sharelocation" aria-selected="true"><?= $tl->get('sharelocationtab', 'html') ?></a></li>
 					<li class="nav-item"><a class="nav-link" id="followers-tab" data-toggle="tab" href="#followers" role="tab" aria-controls="followers" aria-selected="false"><?= $tl->get('managefollowerstab', 'html') ?></a></li>
-					<li class="nav-item"><a class="nav-link" id="configuration-tab" data-toggle="tab" href="#configuration" role="tab" aria-controls="configuration" aria-selected="false"><?= $tl->get('configurationtab', 'html') ?></a></li>
+					<li class="nav-item"><a class="nav-link" id="configuration-tab" data-toggle="tab" href="#configuration" role="tab" aria-controls="configuration" aria-selected="false"><span class="d-inline d-sm-none fa fa-cog" title="<?= $tl->get('configurationtab', 'htmlattr') ?>"></span> <span class="d-none d-sm-inline"><?= $tl->get('configurationtab', 'htmlattr') ?></span></a></li>
 				</ul>
 				<div class="tab-content">
 <?php
@@ -162,12 +241,14 @@ if($showIntro) {
 					</div>
 <?php } ?>
 					<div class="tab-pane active" id="sharelocation" role="tabpanel" aria-labelledby="sharelocation-tab">
-						<div class="col-md" class="geolocationenabled">
+						<div class="geolocationenabled">
 							<p><?= $tl->get('usedevicelocation', 'html') ?></p>
-							<button id="start_pause_devicelocation" class="btn btn-primary btn-sm"><?= $tl->get('startsharing', 'html') ?></button>
-							<button id="deletelocation" class="btn btn-primary btn-sm"><?= $tl->get('deletelocation', 'html') ?></button>
+							<div id="sharelocationbuttons">
+								<button id="start_pause_devicelocation" class="btn btn-primary btn-sm"><span class="fa fa-play fa-2x" title="<?= $tl->get('startsharing', 'htmlattr') ?>"></span></button>
+								<button id="deletelocation" class="btn btn-primary btn-sm"><span class="fa fa-trash fa-2x" title="<?= $tl->get('deletelocation', 'htmlattr') ?>"></span></button>
+							</div>
+							<p><?= $tl->get('orselectlocationonmap', 'html') ?></p>
 						</div>
-						<p class="geolocationenabled"><?= $tl->get('orselectlocationonmap', 'html') ?></p>
 						<p class="geolocationdisabled"><?= $tl->get('selectlocationonmap', 'html') ?></p>
 						<div id="shareLocationMap"></div>
 <?php
@@ -176,10 +257,8 @@ if($configuration['mode'] == 'development') {
 						<div class="container">
 							<div class="row">
 								<div class="col-md">
-									<h4>Text input</h4>
-									<p>Type the latitude and longitude of the location you like to share.</p>
 									<form action="#" autocomplete="off">
-										<input type="text" id="textlocation"/>
+										<input type="text" id="textlocation" placeholder="Latitude, longitude"/>
 									</form>
 								</div>
 							</div>
@@ -187,22 +266,24 @@ if($configuration['mode'] == 'development') {
 <?php } ?>
 					</div>
 					<div class="tab-pane" id="followers" role="tabpanel" aria-labelledby="followers-tab">
-						<table id="followurls" class="table table-striped table-sm">
-							<thead>
-								<tr>
-									<th><?= $tl->get('followidheader', 'html') ?></th>
-									<th><?= $tl->get('aliasheader', 'html') ?></th>
-									<!-- <th><?= $tl->get('delayheader', 'html') ?></th> -->
-									<th><?= $tl->get('startsheader', 'html') ?></th>
-									<th><?= $tl->get('expiresheader', 'html') ?></th>
-									<th><?= $tl->get('enabledheader', 'html') ?></th>
-									<th><?= $tl->get('shareheader', 'html') ?></th>
-									<th><?= $tl->get('deleteheader', 'html') ?></th>
-								</tr>
-							</thead>
-							<tbody>
-							</tbody>
-						</table>
+						<div style="overflow: auto">
+							<table id="followurls" class="table table-striped table-sm">
+								<thead>
+									<tr>
+										<th></th>
+										<th><?= $tl->get('followidheader', 'html') ?></th>
+										<th><?= $tl->get('aliasheader', 'html') ?></th>
+										<!-- <th><?= $tl->get('delayheader', 'html') ?></th> -->
+										<th><?= $tl->get('startsheader', 'html') ?></th>
+										<th><?= $tl->get('expiresheader', 'html') ?></th>
+										<th><?= $tl->get('enabledheader', 'html') ?></th>
+										<th colspan="2"><span id="refreshfollowers" class="fa fa-refresh"></span></th>
+									</tr>
+								</thead>
+								<tbody>
+								</tbody>
+							</table>
+						</div>
 						<div id="sharefollowid-modal" class="modal">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
@@ -213,18 +294,18 @@ if($configuration['mode'] == 'development') {
 										</button>
 									</div>
 									<div class="modal-body">
-										<img src="" id="sharefollowid-qrcode"/><br/>
+										<img id="sharefollowid-qrcode" alt=""/><br/>
 										&nbsp;
-										<div><input type="text" value="" id="sharefollowid-clipboardtext" readonly="readonly"><button type="button" id="sharefollowid-clipboard">Copy to Clipboard</button></div>
+										<div><input type="text" value="" id="sharefollowid-clipboardtext" readonly="readonly"><button type="button" id="sharefollowid-clipboard"><span class="fa fa-clipboard"></span></button></div>
 										&nbsp;
 										<div id="sharefollowid-buttons">
-											<input type="image" src="/email.svg" id="sharefollowid-email"/>
-											<input type="image" src="/whatsapp.png" id="sharefollowid-whatsapp"/>
-											<!--  input type="image" src="/skype.svg" id="sharefollowid-skype"/ -->
-											<input type="image" src="/telegram.svg" id="sharefollowid-telegram"/>
-											<input type="image" src="/twitter.png" id="sharefollowid-twitter"/>
-											<input type="image" src="/facebook.png" id="sharefollowid-facebook"/>
-											<input type="image" src="/linkedin.png" id="sharefollowid-linkedin"/>
+											<input type="image" src="/email.svg" id="sharefollowid-email" alt="eMail"/>
+											<input type="image" src="/whatsapp.png" id="sharefollowid-whatsapp" alt="WhataApp"/>
+											<!--  input type="image" src="/skype.svg" id="sharefollowid-skype" alt="Skype"/ -->
+											<input type="image" src="/telegram.svg" id="sharefollowid-telegram" alt="Telegram"/>
+											<input type="image" src="/twitter.png" id="sharefollowid-twitter" alt="Twitter"/>
+											<input type="image" src="/facebook.png" id="sharefollowid-facebook" alt="Facebook"/>
+											<input type="image" src="/linkedin.png" id="sharefollowid-linkedin" alt="LinkedIn"/>
 										</div>
 									</div>
 									<div class="modal-footer">
@@ -234,46 +315,53 @@ if($configuration['mode'] == 'development') {
 							</div>
 						</div>
 						<p><?= $tl->get('managefollowersintro', 'html') ?></p>
-						<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#generatefollowid-modal"><?= $tl->get('addfollowerbutton', 'html') ?></button>
-						<div id="generatefollowid-modal" class="modal">
+						<button type="button" id="createfollowerbutton" class="btn btn-primary btn-sm"><span class="fa fa-plus-circle"></span>  <?= $tl->get('createfollowerbutton', 'html') ?></button>
+						<div id="createupdatefollowermodal" class="modal">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
-									<form action="#" id="generatefollowid" autocomplete="off">
+									<form action="#" id="createupdatefollowerform" action="#" autocomplete="off">
 										<div class="modal-header">
-											<h5 class="modal-title"><?= $tl->get('addfollowertitle', 'html') ?></h5>
+											<h5 class="modal-title"><span class="createfollower"><?= $tl->get('createfollowertitle', 'html') ?></span><span class="updatefollower"><?= $tl->get('updatefollowertitle', 'html') ?></span></h5>
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">&times;</span>
 											</button>
 										</div>
 										<div class="modal-body">
-											<div class="row">
-												<div class="col"><?= $tl->get('addfollowerreference', 'html') ?></div>
-												<div class="col"><input name="reference" type="text" placeholder="<?= $tl->get('addfollowerreferenceplaceholder', 'htmlattr') ?>"/></div>
+											<div class="form-group">
+												<label for="referenceInput"><?= $tl->get('createupdatefollowerreferencelabel', 'html') ?></label>
+												<input name="reference" id="referenceInput" type="text" class="form-control" placeholder="<?= $tl->get('createupdatefollowerreferenceplaceholder', 'htmlattr') ?>"/>
+												<small class="form-text text-muted"><?= $tl->get('createupdatefollowerreferencehelp', 'htmlattr') ?></small>
 											</div>
-											<div class="row">
-												<div class="col"><?= $tl->get('addfolloweralias', 'html') ?></div>
-												<div class="col"><input name="alias" type="text" placeholder="<?= $tl->get('addfolloweraliasplaceholder', 'htmlattr') ?>"/></div>
+											<div class="form-group">
+												<label for="aliasInput"><?= $tl->get('createupdatefolloweraliaslabel', 'html') ?></label>
+												<input name="alias" id="aliasInput" type="text" class="form-control" placeholder="<?= $tl->get('createupdatefolloweraliasplaceholder', 'htmlattr') ?>"/>
+												<small class="form-text text-muted"><?= $tl->get('createupdatefolloweraliashelp', 'htmlattr') ?></small>
 											</div>
-											<!-- <div class="row">
-												<div class="col"><?= $tl->get('addfollowerdelay', 'html') ?></div>
-												<div class="col"><input name="delay" type="time"/></div>
+											<!-- <div class="form-group">
+												<label for="delayInput"><?= $tl->get('createupdatefollowerdelaylabel', 'html') ?></label>
+												<input name="delay" id="delayInput" type="time" class="form-control"/>
+												<small class="form-text text-muted"><?= $tl->get('createupdatefollowerdelayhelp', 'htmlattr') ?></small>
 											</div> -->
-											<div class="row">
-												<div class="col"><?= $tl->get('addfollowerstarts', 'html') ?></div>
-												<div class="col"><input name="starts" type="datetime-local"/></div>
+											<div class="form-group">
+												<label for="startsInput"><?= $tl->get('createupdatefollowerstartslabel', 'html') ?></label>
+												<input name="starts" id="startsInput" type="datetime-local" class="form-control"/>
+												<small class="form-text text-muted"><?= $tl->get('createupdatefollowerstartshelp', 'htmlattr') ?></small>
 											</div>
-											<div class="row">
-												<div class="col"><?= $tl->get('addfollowerexpires', 'html') ?></div>
-												<div class="col"><input name="expires" type="datetime-local"/></div>
+											<div class="form-group">
+												<label for="expiresInput"><?= $tl->get('createupdatefollowerexpireslabel', 'html') ?></label>
+												<input name="expires" id="expiresInput" type="datetime-local" class="form-control"/>
+												<small class="form-text text-muted"><?= $tl->get('createupdatefollowerexpireshelp', 'htmlattr') ?></small>
 											</div>
-											<div class="row">
-												<div class="col"><?= $tl->get('addfollowerenable', 'html') ?></div>
-												<div class="col"><input name="enabled" type="checkbox"/></div>
+											<div class="form-group">
+												<label for="enabledInput"><?= $tl->get('createupdatefollowerenablelabel', 'html') ?></label>
+												<input name="enabled" id="enabledInput" type="checkbox" class="form-control"/>
+												<small class="form-text text-muted"><?= $tl->get('createupdatefollowerenablehelp', 'htmlattr') ?></small>
 											</div>
 										</div>
 										<div class="modal-footer">
-											<button type="button" class="btn btn-secondary" data-dismiss="modal"><?= $tl->get('addfollowerclosebutton', 'html') ?></button>
-											<button type="submit" class="btn btn-primary"><?= $tl->get('addfollowercreatebutton', 'html') ?></button>
+											<button type="button" class="btn btn-secondary" data-dismiss="modal"><span class="fa fa-times-circle"></span> <?= $tl->get('createupdatefollowerclosebutton', 'html') ?></button>
+											<button type="submit" class="createfollower btn btn-primary"><span class="fa fa-plus-circle"></span> <?= $tl->get('createfollowerbutton', 'html') ?></button>
+											<button type="submit" class="updatefollower btn btn-primary"><span class="fa fa-pencil"></span> <?= $tl->get('updatefollowerbutton', 'html') ?></button>
 										</div>
 									</form>
 								</div>
@@ -289,52 +377,41 @@ if($configuration['mode'] == 'development') {
 						<form action="#" id="configuration" autocomplete="off">
 							<?= $tl->get('configurealias', 'html') ?> <input name="alias" type="text" value="<?= htmlspecialchars(@$shareID['alias']) ?>"/>
 						</form>
-						<h3><?= $tl->get('integration', 'html') ?></h3>
-						<h4><?= $tl->get('integrationapiosmand', 'html') ?></h4>
-						<div>
-							<p><?= $tl->get('integrationosmandintroduction') ?></p>
-							<p><?= $protocol . $_SERVER['HTTP_HOST'] ?>/<?= $shareID->encode() ?>?la={0}&amp;lo={1}&amp;hd={3}&amp;al={4}&amp;sp={5}</p>
-						</div>
-						<h4><?= $tl->get('integrationapi', 'html') ?></h4>
-						<div><a href="/apidoc" rel="noopener noreferrer"><?= $tl->get('integrationapidocumentation', 'html') ?></a></div>
 					</div>
 				</div>
 <?php $footertl = new Translation('footer'); ?>
-				<div class="d-none d-sm-block">
-					<footer class="pt-4 my-md-5 pt-md-5 border-top">
-						<div class="row">
-							<div class="col-md">
-								<div class="row">
-									<div class="col">
-										<h5><?= $footertl->get('footeraboutheader', 'html') ?></h5>
-										<ul class="list-unstyled text-small">
-											<li><a class="text-muted" href="/credits" rel="noopener noreferrer"><?= $footertl->get('credits', 'html') ?></a></li>
-											<li><a class="text-muted" href="https://blog.follw.app/" target="_blank" rel="noopener noreferrer"><?= $footertl->get('blog', 'html') ?></a></li>
-										</ul>
-									</div>
-									<div class="col">
-										<h5><?= $footertl->get('footerprivacyheader', 'html') ?></h5>
-										<p><?= $footertl->get('footerprivacyintro') ?></p>
-										<ul class="list-unstyled text-small">
-											<li><a class="text-muted" href="/terms" rel="noopener noreferrer"><?= $footertl->get('termsconditions', 'html') ?></a></li>
-										</ul>
-									</div>
-<?php if(isset($configuration['features']['share']['app'])) { ?>
-									<div class="col">
-										<h5><?= $footertl->get('footerappsheader', 'html') ?></h5>
-										<p><?= $footertl->get('footerappsintro', 'html') ?></p>
-										<ul class="list-unstyled text-small">
-<?php	foreach($configuration['features']['share']['app'] as $app) { ?>
-											<li><a class="text-muted" href="<?= $app['url'] ?>" target="_blank" rel="noopener noreferrer"><?= $footertl->get('appfor', 'html', $footertl->get('appplatform' . $app['platform'])) ?></a></li>
-<?php	} ?>
-										</ul>
-									</div>
-<?php } ?>
+				<footer class="d-block d-sm-none">
+					<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= $footertl->get('sharinglocationwith', 'html') ?></a> · <a href="/privacy" target="_blank" rel="noopener noreferrer"><?= $footertl->get('privacystatement', 'html') ?></a>
+				</footer>
+				<footer class="pt-4 d-none d-sm-block">
+					<div class="row">
+						<div class="col-md">
+							<div class="row">
+								<div class="col">
+									<h5><?= $footertl->get('aboutheader', 'html') ?></h5>
+									<p><?= $footertl->get('aboutintro') ?></p>
+									<p><?= $footertl->get('blogintro') ?></p>
 								</div>
+								<div class="col">
+									<h5><?= $footertl->get('privacyheader', 'html') ?></h5>
+									<p><?= $footertl->get('privacyintro') ?></p>
+									<p><?= $footertl->get('termsintro') ?></p>
+								</div>
+<?php if(isset($configuration['features']['share']['app'])) { ?>
+								<div class="col">
+									<h5><?= $footertl->get('appsheader', 'html') ?></h5>
+									<p><?= $footertl->get('appsintro', 'html') ?></p>
+									<ul class="list-unstyled text-small">
+<?php	foreach($configuration['features']['share']['app'] as $app) { ?>
+										<li><a class="text-muted" href="<?= $app['url'] ?>" target="_blank" rel="noopener noreferrer"><?= $footertl->get('appfor', 'html', $footertl->get('appplatform' . $app['platform'])) ?></a></li>
+<?php	} ?>
+									</ul>
+								</div>
+<?php } ?>
 							</div>
 						</div>
-					</footer>
-				</div>
+					</div>
+				</footer>
 			</div>
 		</main>
 <?php // Scripts ?>
@@ -353,16 +430,16 @@ if($configuration['mode'] == 'development') {
 
 			// Configuration
 			function submitConfig(config) {
-				$.post("/<?=$shareID->encode()?>/config", config, function() {
+				$.post("/<?=$shareID->encode()?>/config", config, () => {
 				});
 			}
 
-			$(function() {
-				$('#configuration input[name="alias"]').on("keydown", function(e) {
-					if(e.keyCode == 13) { // Enter
+			$(() => {
+				$("#configuration input[name=alias]").on("keydown", function(event) {
+					if(event.keyCode == 13) { // Enter
 						event.preventDefault();
 						var config = {};
-						config['alias'] = $(this).val();
+						config["alias"] = $(this).val();
 						submitConfig(config);
 					}
 				});
@@ -387,31 +464,31 @@ if($configuration['mode'] == 'development') {
 					follw.map.scrollWheelZoom.enable();
 				}
 			}
-			
+
 			class ShareLocation {
 				constructor() {
 					this.isSharing = false;
 					this.watchLocationID = null;
 					this.previousLocation = null;
 					this.lastShare = null;
-					
+
 					// Create the share location map
 					this.map = new Follw("shareLocationMap", "/<?=$shareID->encode()?>", 12);
 					this.map.nolocation = <?= $tl->get('nolocation', 'js') ?>;
-					this.map.addEventListener('locationchanged', onLocationChange);
-					this.map.addEventListener('iddeleted', function () { location.reload(); });
+					this.map.addEventListener("locationchanged", onLocationChange);
+					this.map.addEventListener("iddeleted", () => { location.reload(); });
 					this.map.startUpdate();
 
 					// See if DOM is already available
-					if (document.readyState === 'complete' || document.readyState === 'interactive') {
+					if (document.readyState === "complete" || document.readyState === "interactive") {
 						// call on next available tick
 						var _this = this;
-						setTimeout(function() {
+						setTimeout(() => {
 							_this.init();
 						}, 1);
 					} else {
 						var _this = this;
-						document.addEventListener('DOMContentLoaded', function() {
+						document.addEventListener("DOMContentLoaded", () => {
 							_this.init();
 						});
 					}
@@ -420,41 +497,50 @@ if($configuration['mode'] == 'development') {
 
 				init() {
 					var _this = this;
-					this.map.map.on('click', function(event) {
+					this.map.map.on("click", (event) => {
 						if(!_this.isSharing) { 
 							_this.updateLocation({latitude: event.latlng.lat, longitude: event.latlng.lng});
 						}
 					});
+
+					// Resume updating if that was what we were doing
+					if(window.localStorage.getItem("sharinglocation") == "true") {
+						this.startSharing();
+					}
 				}
 
 				startSharing() {
 					if(!this.isSharing) {
 						this.isSharing = true;
-						this.map.pauseUpdate();
 
+						this.map.pauseUpdate();
+						window.localStorage.setItem("sharinglocation", true);
 						var _this = this;
-						this.watchLocationID = navigator.geolocation.watchPosition(function(position) {
+						this.watchLocationID = navigator.geolocation.watchPosition((position) => {
 							_this.updateLocation(position.coords);
 						});
 
-						$('#start_pause_devicelocation').text(<?= $tl->get('pausesharing', 'js') ?>);
-						$('#deletelocation').text(<?= $tl->get('stopsharing', 'js') ?>);
+						$("#start_pause_devicelocation").html('<span class="fa fa-pause fa-2x" title="<?= $tl->get('pausesharing', 'htmlattr') ?>"></span>');
+						$("#deletelocation").html('<span class="fa fa-stop fa-2x" title="<?= $tl->get('stopsharing', 'htmlattr') ?>"></span>');
 						$("#deletelocation").prop("disabled", false);
 					}
 				}
-				
+
 				stopSharing() {
 					this.isSharing = false;
-					this.map.resumeUpdate();
+
 					navigator.geolocation.clearWatch(this.watchLocationID);
-					$('#start_pause_devicelocation').text(<?= $tl->get('startsharing', 'js') ?>);
-					$('#deletelocation').text(<?= $tl->get('deletelocation', 'js') ?>);
+					window.localStorage.setItem("sharinglocation", false);
+					this.map.resumeUpdate();
+
+					$("#start_pause_devicelocation").html('<span class="fa fa-play fa-2x" title="<?= $tl->get('startsharing', 'htmlattr') ?>"></span>');
+					$("#deletelocation").html('<span class="fa fa-trash fa-2x" title="<?= $tl->get('deletelocation', 'htmlattr') ?>"></span>');
 				}
 
 				deleteLocation() {
 					var _this = this;
 					_this.stopSharing();
-					$.get("/<?=$shareID->encode()?>/deletelocation", function(data) {
+					$.get("/<?=$shareID->encode()?>/deletelocation", (data) => {
 						_this.map.getLocation(true);
 						$("#deletelocation").prop("disabled", true);
 					});
@@ -477,7 +563,7 @@ if($configuration['mode'] == 'development') {
 				updateLocation(location) {
 					console.log(location);
 					var _this = this;
-					$.post("/<?=$shareID->encode()?>/", location, function() {
+					$.post("/<?=$shareID->encode()?>/", location, () => {
 						_this.map.setMarker([location.latitude, location.longitude], location.accuracy);
 						_this.previousLocation = location;
 						_this.lastShare = Date.now();
@@ -489,27 +575,27 @@ if($configuration['mode'] == 'development') {
 						return map.prettyPrintCoordinates(latitude, longitude);
 					}
 
-					return '';
+					return "";
 				}
 			}
 
 			var shareLocation = null;
 
-			$(function() {
+			$(() => {
 				var shareLocation = new ShareLocation();
 
 				// Share location map
-				$('a#sharelocation-tab').on('shown.bs.tab', function (e) {
+				$("a#sharelocation-tab").on("shown.bs.tab", () => {
 					shareLocation.map.invalidateSize();
 				});
 
 				// Share location Geolocation API
 				// JavaScript Geolocation API can only be used when using SSL
-				if(window.location.protocol == 'https:' && 'geolocation' in navigator) {
-					$('.geolocationenabled').show();
-					$('.geolocationdisabled').hide();
+				if(window.location.protocol == "https:" && "geolocation" in navigator) {
+					$(".geolocationenabled").show();
+					$(".geolocationdisabled").hide();
 
-					$('#start_pause_devicelocation').click(function() {
+					$("#start_pause_devicelocation").click(() => {
 						if(shareLocation.isSharing) {
 							shareLocation.stopSharing();
 						} else {
@@ -519,8 +605,8 @@ if($configuration['mode'] == 'development') {
 				}
 
 				// Share location text input
-				$('#textlocation').on("keydown", function(e) {
-					if(e.keyCode == 13) { // Enter
+				$("#textlocation").on("keydown", (event) => {
+					if(event.keyCode == 13) { // Enter
 						event.preventDefault();
 
 						var numericRegex = /^\s*([0-9]*[\.,]?[0-9]*)\s([0-9]*[\.,]?[0-9]*)\s*$/;
@@ -554,227 +640,288 @@ if($configuration['mode'] == 'development') {
 					}
 				});
 
-				$('#deletelocation').click(function(event) {
+				$("#deletelocation").click((event) => {
 					event.preventDefault();
 					shareLocation.deleteLocation();
 				});
 			});
 
 			// Managing followers
-			function updateFollowIDs() {
-				$.get("/<?=$shareID->encode()?>/followers.json", function(data) {
-					var rows = $('<tbody></tbody>');
-					data.forEach(function(entry) {
-						var row = $('<tr></tr>');
+			function refreshFollowIDs() {
+				$("#refreshfollowers").addClass("fa-spin");
 
-						var reference = entry['id'];
-						if(entry['reference'] != null)
-							reference = entry['reference'];
+				$.get("/<?=$shareID->encode()?>/followers.json", (data) => {
+					var rows = $("<tbody></tbody>");
+					data.forEach((entry) => {
+						var row = $("<tr></tr>");
 
-						if(entry['enabled'] && entry['started'] && !entry['expired'])
-							$(row).append(`<td class="followurl enabled"><a href="${entry['url']}" target="_blank" rel="noopener noreferrer">${reference}</a></td>`);
+						var reference = entry["id"];
+						if(entry["reference"] != null)
+							reference = entry["reference"];
+
+						$(row).append('<td><span class="fa fa-pencil editfollowid"></span></td>');
+						$(".editfollowid", row).click(entry["id"], (event) => {
+							editFollowID(event.data);
+						});
+
+ 						if(entry["enabled"] && entry["started"] && !entry["expired"]) {
+ 	 						if(entry["reference"])
+								$(row).append(`<td class="followurl enabled text-muted"><a href="${entry["url"]}" target="_blank" rel="noopener noreferrer">${entry["reference"]}</a></td>`);
+ 	 						else
+								$(row).append(`<td class="followurl enabled text-muted"><a href="${entry["url"]}" target="_blank" rel="noopener noreferrer">${entry["id"]}</a></td>`);
+ 						} else if(entry["reference"]) {
+							$(row).append(`<td class="followurl disabled">${entry["reference"]}</td>`);
+ 						} else {
+							$(row).append(`<td class="followurl disabled text-muted">${entry["id"]}</td>`);
+ 						}
+
+						if(entry["alias"] != null)
+							$(row).append(`<td class="alias">${entry["alias"]}</td>`);
+						else if(config && "alias" in config)
+							$(row).append(`<td class="alias text-muted">${config["alias"]}</td>`);
 						else
-							$(row).append(`<td class="followurl disabled">${reference}</td>`);
+							$(row).append(`<td class="alias text-muted"></td>`);
 
-						if(entry['alias'] != null)
-							$(row).append(`<td class="alias">${entry['alias']}</td>`);
-						else
-							$(row).append('<td class="alias"></td>');
-
-						/*if(entry['delay'])
+						/*if(entry["delay"])
 							$(row).append('<td class="delay"></td>');
 						else
 							$(row).append('<td class="delay">Realtime</td>');*/
 
-						console.log(entry['started']);
-						if(entry['started'])
+						if(entry["started"])
 							$(row).append('<td class="starts">Active</td>');
-						else if(entry['starts'] != null) {
-							console.debug(entry['starts']);
-							entry['starts'] = new Date(entry['starts'] * 1000).toLocaleString();
-							$(row).append(`<td class="starts">${entry['starts']}</td>`);
+						else if(entry["starts"] != null) {
+							entry["starts"] = new Date(entry["starts"] * 1000).toLocaleString();
+							$(row).append(`<td class="starts">${entry["starts"]}</td>`);
 						} else
 							$(row).append('<td class="starts"></td>');
-							
 
-						if(entry['expired'])
+						if(entry["expired"])
 							$(row).append('<td class="expires">Expired</td>');
-						else if(entry['expires'] != null) {
-							entry['expires'] = new Date(entry['expires'] * 1000).toLocaleString();
-							$(row).append(`<td class="expires">${entry['expires']}</td>`);
+						else if(entry["expires"] != null) {
+							entry["expires"] = new Date(entry["expires"] * 1000).toLocaleString();
+							$(row).append(`<td class="expires">${entry["expires"]}</td>`);
 						} else
 							$(row).append('<td class="expires">Never</td>');
 
-						if(entry['expired'])
-							$(row).append(`<td><input type="checkbox" disabled="disabled"/></td>`);
-						else if(entry['enabled'])
-							$(row).append(`<td><input type="checkbox" id="disable${entry['id']}" checked="checked"/></td>`);
+						if(entry["expired"])
+							$(row).append('<td><input type="checkbox" disabled="disabled"/></td>');
+						else if(entry["enabled"])
+							$(row).append(`<td><input type="checkbox" id="disable${entry["id"]}" checked="checked"/></td>`);
 						else
-							$(row).append(`<td><input type="checkbox" id="enable${entry['id']}"/></td>`);
-						$(`#disable${entry['id']}`, row).click(entry['id'], function(event) {
+							$(row).append(`<td><input type="checkbox" id="enable${entry["id"]}"/></td>`);
+						$(`#disable${entry["id"]}`, row).click(entry["id"], (event) => {
 							disableFollowID(event.data);
 						});
-						$(`#enable${entry['id']}`, row).click(entry['id'], function(event) {
+						$(`#enable${entry["id"]}`, row).click(entry["id"], (event) => {
 							enableFollowID(event.data);
 						});
 
-						$(row).append('<td class="sharefollowid"><img src="/share_macos.png"/></td>');
-						$('.sharefollowid', row).click(entry, function(event) {
+						$(row).append('<td><span class="fa fa-share sharefollowid"></span></td>');
+						$(".sharefollowid", row).click(entry, (event) => {
 							shareFollowID(event.data);
 						});
 
-						$(row).append('<td><span class="deletefollowid">&#x1F5D1;</span></td>');
-						$('.deletefollowid', row).click(entry['id'], function(event) {
+						$(row).append('<td><span class="fa fa-trash deletefollowid"></span></td>');
+						$(".deletefollowid", row).click(entry["id"], (event) => {
 							deleteFollowID(event.data);
 						});
 
 						$(rows).append(row);
 					});
-					$('table#followurls tbody').replaceWith(rows);
-				});
-			}
+					$("table#followurls tbody").replaceWith(rows);
 
-			function generateFollowID(followid) {
-				$.post("/<?=$shareID->encode()?>/generatefollowid", { reference:null }, function() {
-					updateFollowIDs();
-				});
-			}
+					$("#refreshfollowers").removeClass("fa-spin");
 
-			function updateFollowID(followid) {
-				$.post("/<?=$shareID->encode()?>/followid/" + follower, { }, function() {
-					updateFollowIDs();
 				});
 			}
 
 			function enableFollowID(followid) {
-				$.get("/<?=$shareID->encode()?>/follower/" + followid + "/enable").always(function() {
-					updateFollowIDs();
+				$.get(`/<?=$shareID->encode()?>/follower/${followid}/enable`).always(() => {
+					refreshFollowIDs();
 				});
 			}
 
 			function disableFollowID(followid) {
-				$.get("/<?=$shareID->encode()?>/follower/" + followid + "/disable").always(function() {
-					updateFollowIDs();
+				$.get(`/<?=$shareID->encode()?>/follower/${followid}/disable`).always(() => {
+					refreshFollowIDs();
 				});
 			}
 
+			function deleteFollowID(followid) {
+				$.get(`/<?=$shareID->encode()?>/follower/${followid}/delete`).always(() => {
+					refreshFollowIDs();
+				});
+			}
+
+			var config = [];
+			function getConfiguration(success = null) {
+				$.get(`/<?=$shareID->encode()?>.json`, (data) => {
+					config = data;
+					if(success) {
+						success(data);
+					}
+				});
+			}
+
+			// Show the alias as the placeholder text for the alias override form field
+			$("#createupdatefollowermodal").on("shown.bs.modal", () => {
+				getConfiguration((data) => {
+					var alias = "";
+					if("alias" in data)
+						alias = data["alias"];
+					$("#createupdatefollower input[name=alias]").prop("placeholder", data["alias"]);
+				});
+			});
+
+			$("#createfollowerbutton").click(() => {
+				$("#createupdatefollowerform").prop("action", "/<?=$shareID->encode()?>/generatefollowid");
+				$(".createfollower").show();
+
+				$("#createupdatefollowermodal").modal("show");
+			});
+
+
+			function editFollowID(followid) {
+				$.get(`/<?=$shareID->encode()?>/follower/${followid}.json`, (data) => {
+					$(`#createupdatefollowermodal input[name=reference]`).prop("placeholder", data["id"]);
+					$(`#createupdatefollowermodal input[name=reference]`).val(data["reference"]);
+					$(`#createupdatefollowermodal input[name=alias]`).val(data["alias"]);
+					if(data["starts"]) {
+						var starts = new Date(new Date(data["starts"] * 1000).toString().split('GMT')[0]+' UTC').toISOString().slice(0,16);
+						$(`#createupdatefollowermodal input[name=starts]`).val(starts);
+					}
+					if(data["expires"]) {
+						var expires = new Date(new Date(data["expires"] * 1000).toString().split('GMT')[0]+' UTC').toISOString().slice(0,16);
+						$(`#createupdatefollowermodal input[name=expires]`).val(expires);
+					}
+					$(`#createupdatefollowermodal input[name=enabled]`).prop("checked", data["enabled"]);
+
+					$("#createupdatefollowerform").prop("action", `/<?=$shareID->encode()?>/follower/${followid}`);
+					$(".updatefollower").show(); 
+
+					$("#createupdatefollowermodal").modal("show");
+				});
+			}
+
+			// Reset generate Follow ID form on modal close
+			$("#createupdatefollowermodal").on("hidden.bs.modal", () => {
+				$("#createupdatefollowerform").get(0).reset();
+				$("#createupdatefollower input[name=reference]").prop("placeholder", <?= $tl->get('createupdatefollowerreferenceplaceholder', 'js') ?>);
+				$("#createupdatefollowerform").prop("action", "#");
+				$(".createfollower").hide();
+				$(".updatefollower").hide();
+			});
+
+			$("#createupdatefollowerform").submit(function(event) {
+				event.preventDefault();
+
+				var reference = $("input[name=reference]", this).val();
+				if(reference == "")
+					reference = null;
+				var alias = $("input[name=alias]", this).val();
+				if(alias == "")
+					alias = null;
+				var enabled = $("input[name=enabled]", this).is(":checked");
+				var starts = $("input[name=starts]", this).val();
+				if(starts) {
+					console.debug(starts);
+					starts = new Date(starts).getTime()/1000;
+					console.log(starts);
+				} else
+					starts = null;
+				var expires = $("input[name=expires]", this).val();
+				if(expires) {
+					console.debug(expires);
+					expires = new Date(expires).getTime()/1000;
+					console.log(expires);
+				} else
+					expires = null;
+
+				$.post($("#createupdatefollowerform").prop("action"), { reference:reference, alias:alias, enabled:enabled, starts:starts, expires:expires }, () => {
+					refreshFollowIDs();
+					$("#createupdatefollowermodal").modal("hide");
+				});
+			});
+
+			// Sharing Follow ID
 			function shareFollowID(entry) {
-				console.debug(entry);
-				var message = `Follow my location ${entry['url']}`;
+				var message = `Follow my location ${entry["url"]}`;
 
 				// QR code
-				$("#sharefollowid-qrcode").attr("src", entry['url'] + "qrcode.svg");
+				$("#sharefollowid-qrcode").prop("src", `${entry["url"]}qrcode.svg`);
 
 				// Twitter
-				$("#sharefollowid-twitter").click(entry, function(event) {
+				$("#sharefollowid-twitter").click(entry, (event) => {
 					event.preventDefault();
-					window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(event.data['url'])}&text=${encodeURIComponent("Follow my location")}`, "_blank", "noopener,noreferrer");
+					window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(event.data["url"])}&text=${encodeURIComponent("Follow my location")}`, "_blank", "noopener,noreferrer");
 				});
 
 				// Facebook
-				$("#sharefollowid-facebook").click(entry, function(event) {
+				$("#sharefollowid-facebook").click(entry, (event) => {
 					event.preventDefault();
-					window.open("https://facebook.com/sharer.php?u=" + encodeURIComponent(event.data['url']), "_blank", "noopener,noreferrer");
+					window.open(`https://facebook.com/sharer.php?u=${encodeURIComponent(event.data["url"])}`, "_blank", "noopener,noreferrer");
 				});
 
 				// eMail
-				$("#sharefollowid-email").click(message, function(event) {
+				$("#sharefollowid-email").click(message, (event) => {
 					event.preventDefault();
 					window.open(`mailto:?subject=${encodeURIComponent("Follow my location")}&body=${encodeURIComponent(event.data)}`, "_blank", "noopener,noreferrer");
 				});
 
 				// LinkedIn
-				$("#sharefollowid-linkedin").click(entry, function(event) {
+				$("#sharefollowid-linkedin").click(entry, (event) => {
 					event.preventDefault();
-					window.open("https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(event.data['url']), "_blank", "noopener,noreferrer");
+					window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(event.data["url"])}`, "_blank", "noopener,noreferrer");
 				});
 
 				// WhatsApp
-				$("#sharefollowid-whatsapp").click(message, function(event) {
+				$("#sharefollowid-whatsapp").click(message, (event) => {
 					event.preventDefault();
-					window.open("whatsapp://send?text=" + encodeURIComponent(event.data), "_blank", "noopener,noreferrer");
+					window.open(`whatsapp://send?text=${encodeURIComponent(event.data)}`, "_blank", "noopener,noreferrer");
 				});
 
 				// Telegram
-				$("#sharefollowid-telegram").click(entry, function(event) {
+				$("#sharefollowid-telegram").click(entry, (event) => {
 					event.preventDefault();
-					window.open(`https://t.me/share/url?url=${encodeURIComponent(event.data['url'])}&text=${encodeURIComponent("Follow my location")}`, "_blank", "noopener,noreferrer");
+					window.open(`https://t.me/share/url?url=${encodeURIComponent(event.data["url"])}&text=${encodeURIComponent("Follow my location")}`, "_blank", "noopener,noreferrer");
 				});
 
 				// Clipboard
 				$("#sharefollowid-clipboardtext").val(message);
-				$("#sharefollowid-clipboard").off('click').click(function(event) {
+				$("#sharefollowid-clipboard").off("click").click((event) => {
 					event.preventDefault();
 					var copyText = document.getElementById("sharefollowid-clipboardtext");
 					copyText.select();
 					copyText.setSelectionRange(0, 99999);
 					document.execCommand("copy");
-					alert("Copied the text: " + copyText.value);
+					alert(`Copied the text: ${copyText.value}`);
 				});
 
-				$("#sharefollowid-modal").modal()
+				$("#sharefollowid-modal").modal("show")
 			}
 
-			function deleteFollowID(followid) {
-				$.get("/<?=$shareID->encode()?>/follower/" + followid + "/delete").always(function() {
-					updateFollowIDs();
+			$().ready(() => {
+				getConfiguration();
+				refreshFollowIDs();
+
+				$("#refreshfollowers").click(() => {
+					refreshFollowIDs();
 				});
-			}
 
-			$().ready(function() {
-				updateFollowIDs();
+				// Show tab that was open before
+				if(window.localStorage.getItem("tab")) {
+					$(`.nav-tabs a[href="${window.localStorage.getItem("tab")}"]`).tab("show");
+				}
 
-				$('#generatefollowid').submit(function() {
-					event.preventDefault();
+				// Store open tab in local storage
+				$("a[data-toggle=tab]").on("shown.bs.tab", (event) => {
+					window.localStorage.setItem("tab", $(event.target).prop("href"));
+				});
 
-					var reference = $('input[name="reference"]', this).val();
-					if(reference == "")
-						reference = null;
-					var alias = $('input[name="alias"]', this).val();
-					if(alias == "")
-						alias = null;
-					var enabled = $('input[name="enabled"]', this).is(':checked');
-					var starts = $('input[name="starts"]', this).val();
-					if(starts) {
-						starts = new Date(starts).getTime()/1000;
-						console.log(starts);
-					} else
-						starts = null;
-					var expires = $('input[name="expires"]', this).val();
-					if(expires) {
-						expires = new Date(expires).getTime()/1000;
-						/*console.log(expires);
-						console.log(new Date(expires).getTime()/1000);
-						// Add timezone to expires timestamp
-						var timeOffsetH = Math.floor(new Date().getTimezoneOffset()/60);
-						var timeOffsetM = new Date().getTimezoneOffset() % 60;
-						if(timeOffsetH == 0)
-							expires += "+00:00";
-						else {
-							if(timeOffsetH > 0)
-								expires += "-";
-							else {
-								expires += "+";
-								timeOffsetH = -timeOffsetH;
-							}
-							if(timeOffsetH < 10)
-								expires += "0";
-							expires += timeOffsetH;
-							if(timeOffsetM > 10)
-								expires += ":" + timeOffsetM
-							else if(timeOffsetM > 0)
-								expires += ":0" + timeOffsetM
-							else
-								expires += ":00"
-						}*/
-						console.log(expires);
-					} else
-						expires = null;
-
-					$.post("/<?=$shareID->encode()?>/generatefollowid", { reference:reference, alias:alias, enabled:enabled, starts:starts, expires:expires }, function() {
-						updateFollowIDs();
-						$('#generatefollowid-modal').modal('hide');
-						$('#generatefollowid').get(0).reset();
+				// Load configuration when configuration tab is shown
+				$("a#configuration-tab").on("shown.bs.tab", (e) => {
+					getConfiguration((data) => {
+						$("input[name=alias]").val(data["alias"]);
 					});
 				});
 			});
@@ -782,18 +929,18 @@ if($configuration['mode'] == 'development') {
 if($showIntro) {
 ?>
 
-			$(function() {
-				if(navigator.platform.toUpperCase().indexOf('MAC') !== -1)
-					$('#bookmarkMac').show();
-				else if(navigator.platform.toUpperCase().indexOf('WIN') !== -1)
-					$('#bookmarkWin').show();
-				else if(navigator.userAgent.toUpperCase().indexOf('ANDROID') !== -1)
-					$('#bookmarkAndroid').show();
-				else if(navigator.userAgent.toUpperCase().indexOf('IPHONE') !== -1
-					|| navigator.userAgent.toUpperCase().indexOf('IPAD') !== -1
-					|| navigator.userAgent.toUpperCase().indexOf('IPOD') !== -1)
-					$('#bookmarkIos').show();
-				$('#intro-modal').modal('show');
+			$(() => {
+				if(navigator.platform.toUpperCase().indexOf("MAC") !== -1)
+					$("#bookmarkMac").show();
+				else if(navigator.platform.toUpperCase().indexOf("WIN") !== -1)
+					$("#bookmarkWin").show();
+				else if(navigator.userAgent.toUpperCase().indexOf("ANDROID") !== -1)
+					$("#bookmarkAndroid").show();
+				else if(navigator.userAgent.toUpperCase().indexOf("IPHONE") !== -1
+					|| navigator.userAgent.toUpperCase().indexOf("IPAD") !== -1
+					|| navigator.userAgent.toUpperCase().indexOf("IPOD") !== -1)
+					$("#bookmarkIos").show();
+				$("#intro-modal").modal("show");
 			});
 <?php } ?>
 		</script>

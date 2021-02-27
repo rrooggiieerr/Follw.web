@@ -31,45 +31,52 @@ class FollowID extends ID implements JsonSerializable {
 		global $configuration;
 
 		$ds = DataStore::getInstance();
-		
+
 		if ($this->id > -1) {
+			$ds->beginTransaction();
+
 			// Update configuration in database
 			$query = 'UPDATE `issuedids` SET `config` = ? WHERE `id` = ?';
-			return $ds->execute($query, [json_encode($this->getArrayCopy(), $configuration['jsonoptions']), $this->id]) !== FALSE;
-		}
+			$ds->execute($query, [json_encode($this->getArrayCopy(), $configuration['jsonoptions']), $this->id]) !== FALSE;
 
-		$ds->beginTransaction();
-		$failureCounter = 0;
-		$success = FALSE;
-		do {
-			// Generate unique ID
-			$bytes = $this->generate();
+			$query = 'UPDATE `followers` SET `enabled` = ?, `starts` = FROM_UNIXTIME(?), `expires` = FROM_UNIXTIME(?), `delay` = ? WHERE `shareid` = ? AND `followid` = ?';
+			$ds->execute($query, [(int) $this->enabled, $this->starts, $this->expires, $this->delay, $this->shareID->id, $this->id]);
 
-			try {
-				// Insert ID in database
-				$query = 'INSERT INTO `issuedids` (`hash`, `type`, `config`) VALUES (?, \'follow\', ?)';
-				$ds->execute($query, [$this->hash($bytes), json_encode($this->getArrayCopy(), $configuration['jsonoptions'])]);
-				$this->id = $ds->lastInsertId();
-				$this->bytes = $bytes;
-				$success = TRUE;
-			} catch(PDOException $e) {
+			return $ds->commit();
+		} else {
+			$ds->beginTransaction();
+			$failureCounter = 0;
+			$success = FALSE;
+			do {
+				// Generate unique ID
+				$bytes = $this->generate();
+
+				try {
+					// Insert ID in database
+					$query = 'INSERT INTO `issuedids` (`hash`, `type`, `config`) VALUES (?, \'follow\', ?)';
+					$ds->execute($query, [$this->hash($bytes), json_encode($this->getArrayCopy(), $configuration['jsonoptions'])]);
+					$this->id = $ds->lastInsertId();
+					$this->bytes = $bytes;
+					$success = TRUE;
+				} catch(PDOException $e) {
+					//TODO Log error
+					//$e->getCode()
+					$failureCounter++;
+				}
+			} while (!$success && $failureCounter < 10);
+
+			// Check if insert was successful
+			if (!$success) {
 				//TODO Log error
-				//$e->getCode()
-				$failureCounter++;
+				$ds->rollback();
+				return FALSE;
 			}
-		} while (!$success && $failureCounter < 10);
-		
-		// Check if insert was successful
-		if (!$success) {
-			//TODO Log error
-			$ds->rollback();
-			return FALSE;
-		}
-		
-		$query = 'INSERT INTO `followers` (`shareid`, `followid`, `followidencrypted`, `enabled`, `starts`, `expires`, `delay`) VALUES (?, ?, ?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?), ?)';
-		$ds->execute($query, [$this->shareID->id, $this->id, $this->encrypt(), $this->enabled, $this->starts, $this->expires, $this->delay]);
 
-		return $ds->commit();
+			$query = 'INSERT INTO `followers` (`shareid`, `followid`, `followidencrypted`, `enabled`, `starts`, `expires`, `delay`) VALUES (?, ?, ?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?), ?)';
+			$ds->execute($query, [$this->shareID->id, $this->id, $this->encrypt(), (int) $this->enabled, $this->starts, $this->expires, $this->delay]);
+
+			return $ds->commit();
+		}
 	}
 
 	function enable() {
@@ -171,8 +178,7 @@ class FollowID extends ID implements JsonSerializable {
 			$a = array_merge($a,
 				['enabled' => $this->enabled,
 				'started' => $this->started,
-				'expired' => $this->expired,
-				'url' => $this->url()]);
+				'expired' => $this->expired]);
 		}
 
 		return $a;

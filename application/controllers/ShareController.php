@@ -38,7 +38,7 @@ class ShareController {
 				$this->deleteSharer($shareID);
 				break;
 			case 'generatefollowid':
-				$this->generateFollowID($shareID);
+				$this->createupdateFollowID($shareID);
 				break;
 			case 'followers.json':
 				$this->getFollowers($shareID);
@@ -48,6 +48,11 @@ class ShareController {
 				exit();
 			case 'manifest.webmanifest':
 				require_once(dirname(__DIR__) . '/views/share.manifest.webmanifest.php');
+				exit();
+			case (preg_match('/^follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})$/', $action, $matches) ? TRUE : FALSE):
+				$this->createupdateFollowID($shareID, $matches[1]);
+			case (preg_match('/^follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})\.json$/', $action, $matches) ? TRUE : FALSE):
+				$this->getFollower($shareID, $matches[1]);
 				exit();
 			case (preg_match('/^follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})\/(enable|disable|delete)$/', $action, $matches) ? TRUE : FALSE):
 				$followID = ID::decode($matches[1], $shareID);
@@ -80,11 +85,6 @@ class ShareController {
 							http_response_code(204);
 							exit();
 						}
-						break;
-					default:
-						// This should not happen as the regex only supports the options enable, disable and delete
-						http_response_code(500);
-						exit();
 						break;
 				}
 
@@ -298,7 +298,7 @@ class ShareController {
 			case 'json':
 				global $configuration;
 				header('Content-Type: application/json');
-				$json = json_encode(array_merge($location->jsonSerialize(), $shareID->jsonSerialize()), $configuration['jsonoptions']);
+				$json = json_encode(array_merge($shareID->jsonSerialize(), $location->jsonSerialize()), $configuration['jsonoptions']);
 				header('Content-Length: ' . strlen($json));
 				print($json);
 				break;
@@ -359,54 +359,88 @@ class ShareController {
 		exit();
 	}
 
-	function generateFollowID(ShareID $shareID) {
-		if($_SERVER['REQUEST_METHOD'] == 'POST') {
+	function createupdateFollowID(ShareID $shareID, string $followID = NULL) {
+		if($followID) {
+			$followID = ID::decode($followID, $shareID);
+
+			if (!$followID) {
+				http_response_code(404);
+				exit();
+			}
+
+			if($followID->type === 'deleted') {
+				http_response_code(410);
+				exit();
+			}
+
+			if(!$followID instanceof FollowID) {
+				http_response_code(404);
+				exit();
+			}
+		} else {
+			require_once(dirname(__DIR__) . '/models/FollowID.php');
+			$followID = new FollowID($shareID);
+		}
+
+		if($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$formValues = $_POST;
 		} else {
 			$formValues = $_GET;
 		}
 
-		require_once(dirname(__DIR__) . '/models/FollowID.php');
-		$follower = new FollowID($shareID);
-
 		if(!empty($formValues['reference'])) {
 			//TODO Input validation
-			$follower['reference'] = $formValues['reference'];
+			$followID['reference'] = $formValues['reference'];
+		} else if(isset($followID['reference'])){
+			unset($followID['reference']);
 		}
+
 		if(!empty($formValues['alias'])) {
 			//TODO Input validation
-			$follower['alias'] = $formValues['alias'];
-		}
-		if($formValues['enabled'] == 'true') {
-			$follower->enabled = TRUE;
+			$followID['alias'] = $formValues['alias'];
+		} else if(isset($followID['alias'])) {
+			unset($followID['alias']);
 		}
 
 		if(!empty($formValues['starts']) && is_numeric($formValues['starts'])) {
-			$follower->starts = $formValues['starts'];
+			// Unix time
+			$followID->starts = $formValues['starts'];
 		} else if(!empty($formValues['starts'])) {
+			// ISO 8601 date time
 			$starts = $formValues['starts'];
 			// ISO 8601 date time to unix time
 			$starts = strtotime($starts);
 			// Unix time to MySQL timestamps
-			$follower->starts = date('Y-m-d H:i:s', $starts);
+			$followID->starts = date('Y-m-d H:i:s', $starts);
+		} else {
+			$followID->starts = NULL;
 		}
 
 		if(!empty($formValues['expires']) && is_numeric($formValues['expires'])) {
-			$follower->expires = $formValues['expires'];
+			// Unix time
+			$followID->expires = $formValues['expires'];
 		} else if(!empty($formValues['expires'])) {
+			// ISO 8601 date time
 			$expires = $formValues['expires'];
 			// ISO 8601 date time to unix time
 			$expires = strtotime($expires);
 			// Unix time to MySQL timestamps
-			$follower->expires = date('Y-m-d H:i:s', $expires);
+			$followID->expires = date('Y-m-d H:i:s', $expires);
+		} else {
+			$followID->expires = NULL;
 		}
 
 		if(!empty($formValues['delay']) && is_numeric($formValues['delay'])) {
-			$follower->delay = $formValues['delay'];
+			$followID->delay = $formValues['delay'];
 		}
 
-		if ($follower->store()) {
-			echo($follower->encode());
+		$followID->enabled = $formValues['enabled'] === 'true';
+
+		if ($followID->store()) {
+			header('Content-Type: application/json');
+			$json = $followID->json();
+			header('Content-Length: ' . strlen($json));
+			print($json);
 			exit();
 		}
 
@@ -427,6 +461,31 @@ class ShareController {
 		}
 
 		http_response_code(500);
+		exit();
+	}
+
+	function getFollower(ShareID $shareID, string $followID) {
+		$followID = ID::decode($followID, $shareID);
+
+		if (!$followID) {
+			http_response_code(404);
+			exit();
+		}
+
+		if($followID->type === 'deleted') {
+			http_response_code(410);
+			exit();
+		}
+
+		if(!$followID instanceof FollowID) {
+			http_response_code(404);
+			exit();
+		}
+
+		header('Content-Type: application/json');
+		$json = $followID->json();
+		header('Content-Length: ' . strlen($json));
+		print($json);
 		exit();
 	}
 }

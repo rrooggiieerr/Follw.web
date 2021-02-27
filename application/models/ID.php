@@ -41,7 +41,7 @@ class ID extends ArrayObject {
 		}*/
 
 		if ($shareID) {
-			$query = 'SELECT f.`id`, f.`type`, f.`type`, f.`config`, sf.`enabled`, sf.`starts`, sf.`expires`, sf.`delay`
+			$query = 'SELECT f.`id`, f.`type`, f.`type`, f.`config`, sf.`enabled`, UNIX_TIMESTAMP(sf.`starts`) AS \'starts\', UNIX_TIMESTAMP(sf.`expires`) AS \'expires\', TIME_TO_SEC(sf.`delay`) AS \'delay\'
 				FROM `issuedids` f, `followers` sf
 				WHERE f.`id` = sf.`followid` AND f.`type` = \'follow\' AND f.`hash` = ? AND sf.`shareid` = ?';
 			//$query = 'SELECT `followid`, `enabled`, `starts`, `expires`, `delay` FROM `followers` WHERE `shareid` = ? AND `followidraw` = ?';
@@ -63,12 +63,8 @@ class ID extends ArrayObject {
 			}
 
 			$result = $statement->fetch();
-			$id = $result['id'];
-			$instance = new FollowID($shareID, $id, $binary);
-			$instance->enabled = $result['enabled'] === 1; // TRUE if 1 else FALSE
-			$instance->starts = $result['starts'];
-			$instance->expires = $result['expires'];
-			$instance->delay = $result['delay'];
+
+			$instance = new FollowID($shareID, $result['id'], $binary);
 		} else {
 			$query = 'SELECT f.`id`, f.`type`, f.`config`, sf.`enabled`, UNIX_TIMESTAMP(sf.`starts`) AS \'starts\', UNIX_TIMESTAMP(sf.`expires`) AS \'expires\', TIME_TO_SEC(sf.`delay`) AS \'delay\', s.`config` AS \'sharerConfig\'
 				FROM `issuedids` f
@@ -101,36 +97,60 @@ class ID extends ArrayObject {
 					break;
 				case 'follow':
 					$instance = new FollowID(NULL, $id, $binary);
-					$instance->enabled = $result['enabled'] === 1; // TRUE if 1 else FALSE
-					$instance->starts = $result['starts'];
-					$instance->expires = $result['expires'];
-					$instance->delay = $result['delay'];
 					break;
-				case 'deleted':
+				default:
 					$instance = new ID(-1, $binary);
-					$instance->type = 'deleted';
-					break;
-				case 'reserved':
-					$instance = new ID(-1, $binary);
-					$instance->type = 'reserved';
+					$instance->type = $type;
 					break;
 			}
 		}
 
-		$config = $result['config'];
-		if ($config) {
-			$config = json_decode($config, TRUE);
-			foreach ($config as $key => $value) {
-				$instance[$key] = $value;
-			}
-		}
+		if($instance instanceof FollowID) {
+			$instance->enabled = $result['enabled'] ? TRUE : FALSE;
 
-		if ($instance instanceof FollowID && !isset($instance['alias']) && array_key_exists('sharerConfig', $result)) {
-			$sharerConfig = json_decode($result['sharerConfig'], TRUE);
-			if ($sharerConfig && array_key_exists('alias', $sharerConfig)) {
-				$instance['alias'] = $sharerConfig['alias'];
+			if($result['starts']) {
+				$instance->starts = $result['starts'];
+				$instance->started = $instance->starts < time();
 			} else {
-				$instance['alias'] = 'Something';
+				$instance->started = TRUE;
+			}
+
+			if($result['expires']) {
+				$instance->expires = $result['expires'];
+				$instance->expired = $instance->expires < time();
+			} else {
+				$instance->expired = FALSE;
+			}
+
+			if($result['delay']) {
+				$instance->delay = $result['delay'];
+			}
+
+			$config = $result['config'];
+			if ($config) {
+				$config = json_decode($config, TRUE);
+				foreach ($config as $key => $value) {
+					$instance[$key] = $value;
+				}
+			}
+
+			if(!isset($instance['alias']) && array_key_exists('sharerConfig', $result)) {
+				$sharerConfig = json_decode($result['sharerConfig'], TRUE);
+				if ($sharerConfig && array_key_exists('alias', $sharerConfig)) {
+					$instance['alias'] = $sharerConfig['alias'];
+				} else {
+					$instance['alias'] = 'Something';
+				}
+			}
+		}
+
+		if($instance instanceof ShareID) {
+			$config = $result['config'];
+			if ($config) {
+				$config = json_decode($config, TRUE);
+				foreach ($config as $key => $value) {
+					$instance[$key] = $value;
+				}
 			}
 		}
 
@@ -176,7 +196,10 @@ class ID extends ArrayObject {
 	}
 
 	function jsonSerialize() {
-		return array_merge(['id' => $this->encode()], $this->getArrayCopy());
+		return array_merge(['id' => $this->encode(),
+				'type' => $this->type,
+				'url' => $this->url()],
+				$this->getArrayCopy());
 	}
 
 	function json() {

@@ -1,5 +1,5 @@
 follwslogan = Sharing your location with privacy
-sharelocationtab = Share your location
+sharelocationtab = Share Location
 managefollowerstab = Manage Followers
 configurationtab = Configuration
 
@@ -16,29 +16,36 @@ nolocation = No location is currently being shared
 
 managefollowersintro = Create a Follow ID and manage who is allowed to see your location.
 
-followidheader = Follow ID/Reference
-aliasheader = Alias Override
+followidheader = Reference
+aliasheader = Alias
 delayheader = Delay
 startsheader = Starts
 expiresheader = Expires
 enabledheader = Enabled
-shareheader = Share
-deleteheader = Delete
+shareheader = 
+deleteheader = 
 
 sharefollowidtitle = Share Follow ID
 
-addfollowerbutton = Create Follow ID
-addfollowertitle = Create a Follow ID
-addfollowerreference = Reference for your convenience
-addfollowerreferenceplaceholder = Reference
-addfolloweralias = Alias override
-addfolloweraliasplaceholder = Alias override
-addfollowerdelay = Delay
-addfollowerstarts = Starts
-addfollowerexpires = Expires
-addfollowerenable = Enabled
-addfollowerclosebutton = Close
-addfollowercreatebutton = Create Follow ID
+createfollowerbutton = Create Follow ID
+createfollowertitle = Create Follow ID
+updatefollowertitle = Update Follow ID
+createupdatefollowerreferencelabel = Reference
+createupdatefollowerreferenceplaceholder = Reference
+createupdatefollowerreferencehelp = Add a reference for your convenience
+createupdatefolloweraliaslabel = Alias override
+createupdatefolloweraliasplaceholder = Alias override
+createupdatefolloweraliashelp = Override the alias your follower gets to see
+createupdatefollowerdelaylabel = Delay
+createupdatefollowerdelayhelp =
+createupdatefollowerstartslabel = Starts
+createupdatefollowerstartshelp =
+createupdatefollowerexpireslabel = Expires
+createupdatefollowerexpireshelp =
+createupdatefollowerenablelabel = Enabled
+createupdatefollowerenablehelp =
+createupdatefollowerclosebutton = Close
+updatefollowerbutton = Update Follow ID
 
 welcometofollw = Welcome to Follw
 yoursharingid = Your Location Sharing ID: <b>%s</b>
@@ -51,18 +58,3 @@ boomarkios = Press <b>Action</b> and then <b>Add to Home Screen</b> to add this 
 sharingidcantberecoveredwarning = Because Follw doesn't have your contact details this Location Sharing ID can not be recovered if you lose it.
 configurealiasintro = You can configure an alias which your Followers see so they know who they are following. This is not required and can be anything, it does not have to be your name or anything that gives away who you are.
 configurealias = Alias:
-
-integration = Integration
-integrationosmand = Configuring OsmAnd
-integrationosmandintroduction = You can configure OsmAnd to automatically log your current position when you are online.<br/>Set the <i>time buffer</i> to the lowest value of 1 minute.
-integrationapi = Using the Follw API
-integrationapidocumentation = API documentation
-
-footerabout = About
-footerprivacy = Privacy
-footerapps = Apps
-credits = Credits
-blog = Blog
-termsconditions = Terms & conditions
-privacystatement = Privacy statement
-appfor = Follw for

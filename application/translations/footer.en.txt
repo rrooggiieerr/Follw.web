@@ -1,19 +1,22 @@
-footeraboutheader = About
-footeraboutintro =
-creditsintro = Credits
-blog = Blog
+aboutheader = About
+aboutintro = Follw is made possible thanks to some great Open Source software and kind contributors, read more about it in the <a href="/credits" rel="noopener noreferrer">Credits</a>.
+blogintro = Read about the latest developments, features, instructions, tips and tricks and other relevant information in te <a href="https://blog.follw.app" rel="noopener noreferrer">Follw Blog</a>.
 onsocialmedia = Follw on %s
+sharinglocationwith = Location sharing with Follw
+sharedlocationwith = Location shared with Follw
 
-footerprivacyheader = Privacy
-footerprivacyintro = We don't use cookies nor store your IP address. Read more on how Follw respects your privacy in the <a href="/privacy" rel="noopener noreferrer">Privacy statement</a>.
-privacystatement = Privacy statement
+privacyheader = Privacy
+privacyintro = Follw doesn't use cookies nor stores your IP address. Read more on how Follw respects your privacy in the <a href="/privacy" rel="noopener noreferrer">Privacy Statement</a>.
+privacystatement = Privacy Statement
+termsintro = Follw is free for personal and low volume use, read more about the <a href="/privacy" rel="noopener noreferrer">Terms &amp; Conditions</a>.
 termsconditions = Terms & conditions
 
-footerappsheader = Apps
-footerappsintro = To share your location from your mobile device you need one of the native apps.
+appsheader = Apps
+appsintro = To share your location from your mobile device you need one of the compatible native apps.
 appfor = Follw for %s
 appplatformplay = Android
 appplatformitunes = iOS
 
-footerintegrationheader = Apps
-footerintegrationintro = You can integrate Follw in your own software, check out the <a href="/apidoc" rel="noopener noreferrer">API documentation</a>.
+integrationheader = Integration
+integrationintro = Check out the <a href="/apidoc" rel="noopener noreferrer">API Documentation</a> to learn how to integrate Follw in your own software.
+htmlintro = Include your location on your own website with the <a href="/htmlsnippet" rel="noopener noreferrer">HTML Snippet</a> or <a href="/wordpress" rel="noopener noreferrer">WordPress Plugin</a>.
