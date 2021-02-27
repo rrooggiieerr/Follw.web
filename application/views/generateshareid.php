@@ -40,7 +40,7 @@ header('Content-Language: ' . $tr->language);
 				width: 50vw;
 				margin: 0 auto;
 			}
-			
+
 			#captcha {
 				margin-bottom: 8px;
 			}

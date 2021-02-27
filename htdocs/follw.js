@@ -19,7 +19,7 @@ class Follw {
 		this.offScreen = false;
 		this.offline = false;
 		this.timeoutCounter = 0;
-		
+
 		this.translations = {'nolocation': 'No location is currently being shared',
 			'offline': 'Offline',
 			'iddeleted': 'Follw ID is deleted'
@@ -29,7 +29,7 @@ class Follw {
 			this.followURL = followURL;
 		else
 			this.followURL = followURL + ".json";
-			
+
 		// See if DOM is already available
 		if (document.readyState === 'complete' || document.readyState === 'interactive') {
 			// call on next available tick
@@ -222,7 +222,7 @@ class Follw {
 		request.ontimeout = function() {
 			console.error('Timeout');
 			this.timeoutCounter++;
-			
+
 			if(this.timeoutCounter > 3) {
 				_this.offline = true;
 				_this.trigerEvent('offline');
@@ -255,7 +255,7 @@ class Follw {
 
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -359,7 +359,7 @@ class Follw {
 				});
 			}, { root: document.documentElement });
 			observer.observe(_this.element);
-		
+
 			window.addEventListener('online', function() {
 				console.debug('Browser might be online');
 				_this.resumeUpdate();

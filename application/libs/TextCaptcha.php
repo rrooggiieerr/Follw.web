@@ -27,7 +27,7 @@ class TextCaptcha {
 			// Error occurted when decoding the JSON
 			error_log('Failed to decode TextCaptcha JSON');
 			//return NULL;
-			
+
 			// Fallback challenge
 			$captcha = array(
 				'question'=>'Is ice hot or cold?',
@@ -53,7 +53,7 @@ class TextCaptcha {
 			error_log('Form submitted to slow');
 			return FALSE;
 		}
-		
+
 		$answer = strtolower(trim($answer));
 		if(strlen($answer) === 0) {
 			error_log('Empty captcha answer');

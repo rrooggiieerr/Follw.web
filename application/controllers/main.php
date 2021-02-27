@@ -141,7 +141,7 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 				preg_match('/facebookexternalhit|twitterbot|whatsapp|skypeuripreview preview/', strtolower($_SERVER['HTTP_USER_AGENT']))) {
 			header('X-Robots-Tag: ' . $_SERVER['HTTP_USER_AGENT'] . ': nofollow', FALSE);
 		}
-				
+
 		require_once(dirname(__DIR__) . '/controllers/FollowController.php');
 		(new FollowController())->route($id, $action, $format);
 	} else if($id instanceof ShareID) {

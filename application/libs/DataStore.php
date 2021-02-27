@@ -148,7 +148,7 @@ class DataStore {
 
 		return $this->pdo->query($statement);
 	}
-	
+
 	function lastInsertId() {
 		return $this->pdo->lastInsertId();
 	}

@@ -132,6 +132,7 @@ class ShareID extends ID {
 				if($row['delay']) {
 					$instance->delay = $row['delay'];
 				}
+
 				$followers[] = $instance;
 			}
 		}
