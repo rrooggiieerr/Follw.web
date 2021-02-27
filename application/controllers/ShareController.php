@@ -404,28 +404,24 @@ class ShareController {
 
 		if(!empty($formValues['starts']) && is_numeric($formValues['starts'])) {
 			// Unix time
-			$followID->starts = $formValues['starts'];
+			$followID->starts = intval($formValues['starts']);
 		} else if(!empty($formValues['starts'])) {
 			// ISO 8601 date time
 			$starts = $formValues['starts'];
 			// ISO 8601 date time to unix time
-			$starts = strtotime($starts);
-			// Unix time to MySQL timestamps
-			$followID->starts = date('Y-m-d H:i:s', $starts);
+			$followID->starts = strtotime($starts);
 		} else {
 			$followID->starts = NULL;
 		}
 
 		if(!empty($formValues['expires']) && is_numeric($formValues['expires'])) {
 			// Unix time
-			$followID->expires = $formValues['expires'];
+			$followID->expires = intval($formValues['expires']);
 		} else if(!empty($formValues['expires'])) {
 			// ISO 8601 date time
 			$expires = $formValues['expires'];
 			// ISO 8601 date time to unix time
-			$expires = strtotime($expires);
-			// Unix time to MySQL timestamps
-			$followID->expires = date('Y-m-d H:i:s', $expires);
+			$followID->expires = strtotime($expires);
 		} else {
 			$followID->expires = NULL;
 		}

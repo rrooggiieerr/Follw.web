@@ -175,6 +175,14 @@ class FollowID extends ID implements JsonSerializable {
 			'delay' => $this->delay]);
 
 		if ($this->shareID) {
+			if(!isset($this->started)) {
+				$this->started = $this->starts < time();;
+			}
+
+			if(!isset($this->expired)) {
+				$this->expired = $this->expires < time();
+			}
+
 			$a = array_merge($a,
 				['enabled' => $this->enabled,
 				'started' => $this->started,
