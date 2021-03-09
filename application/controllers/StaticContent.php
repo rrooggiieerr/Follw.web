@@ -12,6 +12,7 @@ class StaticContent {
 			case '/':
 				require_once(dirname(__DIR__) . '/views/intro.php');
 				return TRUE;
+			case '/credits':
 			case '/privacy':
 			case '/terms':
 			case '/htmlsnippet':

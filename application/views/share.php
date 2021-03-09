@@ -132,7 +132,6 @@ header('Content-Language: ' . $tl->language);
 					text-align: center;
 					padding: 4px;
 				}
-
 			}
 
 			@media (max-width: 991px) {

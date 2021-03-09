@@ -76,7 +76,7 @@ if(isset($location)) {
 					}
 				});
 			}
-	
+
 			if(window.caches) {
 				caches.open("<?= $id->encode() ?>").then((cache) => {
 					console.log(cache);
@@ -139,16 +139,13 @@ if(isset($location)) {
 				font-family: sans-serif;
 			}
 
-			#header, #footer {
+			header, footer {
 				text-align: center;
-				padding: 8px;
+				padding: 4px;
 			}
 
-			#header > *:first-of-type, #footer > *:first-of-type {
+			header > * {
 				margin-top: 0;
-			}
-
-			#header > *:last-of-type, #footer > *:last-of-type {
 				margin-bottom: 0;
 			}
 
@@ -174,7 +171,7 @@ if(isset($location)) {
 			document.ontouchmove = function(e) {e.preventDefault()};
 
 			function resizeMap() {
-				$("#follwMap").height($("body").innerHeight() - ($("#header").outerHeight() + $("#footer").outerHeight()));
+				$("#follwMap").height($("body").innerHeight() - ($("header").outerHeight() + $("footer").outerHeight()));
 				follw.invalidateSize();
 			}
 
@@ -248,13 +245,13 @@ if(isset($location)) {
 		</script>
 	</head>
 	<body>
-		<div id="header">
+		<header>
 			<h1 id="title"><?= htmlspecialchars($title, ENT_NOQUOTES) ?></h1>
 			<div id="coordinates">&nbsp;</div>
-		</div>
+		</header>
 		<div id="follwMap"></div>
-		<div id="footer">
+		<footer>
 			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= $tl->get('credits', 'html') ?></a> · <a href="/privacy" target="_blank" rel="noopener noreferrer"><?= $tl->get('privacystatement', 'html') ?></a>
-		</div>
+		</footer>
 	</body>
 </html>

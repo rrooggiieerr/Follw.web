@@ -3,4 +3,5 @@ iddeleted = The location you have requested has been deleted
 offline = You are currently not connected to the internet
 ishere = %s is here
 credits = Location shared with Follw
+sharedlocationwith = Location shared with Follw
 privacystatement = Privacy statement

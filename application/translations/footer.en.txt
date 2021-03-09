@@ -4,6 +4,7 @@ blogintro = Read about the latest developments, features, instructions, tips and
 onsocialmedia = Follw on %s
 sharinglocationwith = Location sharing with Follw
 sharedlocationwith = Location shared with Follw
+credits = Credits
 
 privacyheader = Privacy
 privacyintro = Follw doesn't use cookies nor stores your IP address. Read more on how Follw respects your privacy in the <a href="/privacy" rel="noopener noreferrer">Privacy Statement</a>.
@@ -20,3 +21,4 @@ appplatformitunes = iOS
 integrationheader = Integration
 integrationintro = Check out the <a href="/apidoc" rel="noopener noreferrer">API Documentation</a> to learn how to integrate Follw in your own software.
 htmlintro = Include your location on your own website with the <a href="/htmlsnippet" rel="noopener noreferrer">HTML Snippet</a> or <a href="/wordpress" rel="noopener noreferrer">WordPress Plugin</a>.
+pythonsharingclientsourcecode = Python location sharing client on GitHub

@@ -5,7 +5,10 @@ global $configuration;
 
 $footertl = new Translation('footer');
 ?>
-				<footer class="pt-4 border-top">
+				<footer class="d-block border-top d-sm-none">
+					<a href="/credits" rel="noopener noreferrer"><?= $footertl->get('credits', 'html') ?></a> · <a href="/terms" rel="noopener noreferrer"><?= $footertl->get('termsconditions', 'html') ?></a> · <a href="/privacy" rel="noopener noreferrer"><?= $footertl->get('privacystatement', 'html') ?></a>
+				</footer>
+				<footer class="pt-4 border-top d-none d-sm-block">
 					<div class="row">
 						<div class="col-md">
 							<div class="row">
@@ -44,7 +47,7 @@ $footertl = new Translation('footer');
 									<p><?= $footertl->get('integrationintro') ?></p>
 									<p><?= $footertl->get('htmlintro') ?></p>
 									<ul class="list-unstyled text-small">
-										<li><a href="https://github.com/rrooggiieerr/Follw.py" target="_blank" rel="noopener noreferrer">Python client on GitHub</a></li>
+										<li><a href="https://github.com/rrooggiieerr/Follw.py" target="_blank" rel="noopener noreferrer"><?= $footertl->get('pythonsharingclientsourcecode', 'html') ?></a></li>
 									</ul>
 								</div>
 							</div>
