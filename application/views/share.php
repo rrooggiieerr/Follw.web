@@ -403,11 +403,13 @@ if($configuration['mode'] == 'development') {
 			// Global settings are stored on the server.
 			// Currently only the alias.
 			var globalSettings = {};
-			function getGlobalSettings(success = null) {
-				$.get(`/${shareID}.json`, (data) => {
-					globalSettings = data;
-					if(success) {
-						success(data);
+			function getGlobalSettings(callback = null) {
+				$.get(`/${shareID}/settings.json`, (data) => {
+					if(data) {
+						globalSettings = data;
+						if(callback) {
+							callback(data);
+						}
 					}
 				});
 			}

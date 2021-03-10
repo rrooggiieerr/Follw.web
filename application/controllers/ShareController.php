@@ -28,6 +28,13 @@ class ShareController {
 					$this->getLocation($shareID, $format);
 				}
 				break;
+			case 'settings.json':
+				header('Content-Type: application/json');
+				$json = json_encode($shareID->jsonSerialize(), $configuration['jsonoptions']);
+				header('Content-Length: ' . strlen($json));
+				print($json);
+				exit();
+				break;
 			case 'deletelocation':
 				$this->deleteLocation($shareID);
 				break;
