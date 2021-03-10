@@ -1,6 +1,7 @@
 <?php
 // Fixes false "Variable is undefined" validation errors
-/* @var String $path */
+/* @var boolean $evaluate */
+/* @var String $filename */
 
 // Preconnect to third party domains to improve page loading speed
 header('Link: <https://unpkg.com/>; rel=preconnect', FALSE);
@@ -68,7 +69,13 @@ header('Link: <https://unpkg.com/>; rel=dns-prefetch', FALSE);
 					<h1><a href="/">Follw</a> <small class="h4 text-muted">· Sharing your location with privacy</small></h1>
 				</div>
 				<div>
-<?php include_once(dirname(__DIR__) . '/views' . $path. '.php'); ?>
+<?php
+if($evaluate) {
+	include($filename);
+} else {
+	print(file_get_contents($filename));
+}
+?>
 				</div>
 <?php include_once('footer.php');?>
 			</div>
