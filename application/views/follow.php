@@ -126,8 +126,14 @@ if(isset($location)) {
 		<meta name="twitter:image" content="/apple-touch-icon-180x180.png">
 <?php } ?>
 <?php // Styles ?>
+		<link rel="stylesheet" href="https://unpkg.com/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+			integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+			crossorigin="anonymous"/>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
+			crossorigin="anonymous"/>
+		<link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.css"
+			integrity="sha384-FckWOBo7yuyMS7In0aXZ0aoVvnInlnFMwCv77x9sZpFgOonQgnBj1uLwenWVtsEj"
 			crossorigin="anonymous"/>
 		<style>
 			html, body {
@@ -156,10 +162,31 @@ if(isset($location)) {
 			#follwMap {
 				height: 250px;
 			}
+
+			@media (max-width: 575px) {
+				.modal-dialog {
+					max-width: 100%;
+					width: 100%;
+					height: 100%;
+					margin: 0;
+					padding: 0;
+				}
+
+				.modal-content {
+					height: auto;
+					min-height: 100%;
+					height: auto;
+					border: 0;
+					border-radius: 0;
+				}
+			}
 		</style>
 <?php // Scripts ?>
 		<script src="https://unpkg.com/jquery@3.5.1/dist/jquery.js"
 			integrity="sha384-/LjQZzcpTzaYn7qWqRIWYC5l8FWEZ2bIHIz0D73Uzba4pShEcdLdZyZkI4Kv676E"
+			crossorigin="anonymous"></script>
+		<script src="https://unpkg.com/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
 			crossorigin="anonymous"></script>
 		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha384-RFZC58YeKApoNsIbBxf4z6JJXmh+geBSgkCQXFyh+4tiFSJmJBt+2FbjxW7Ar16M"
@@ -258,7 +285,46 @@ if(isset($location)) {
 				}
 			});
 
+			// 
+			function showStaticModal(title, content) {
+				if($("#static-modal").length == 0) {
+					var staticModal = $(`<div id="static-modal" class="modal">
+	<div class="modal-dialog modal-dialog-scrollable" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title"></h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="<?= $tl->get('close', 'htmlattr') ?>">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal"><span class="fa fa-times-circle"></span>  <?= $tl->get('close', 'html') ?></button>
+			</div>
+		</div>
+	</div>
+</div>`);
+					$("main").append(staticModal);
+				}
+
+				$("#static-modal .modal-title").text(title);
+				if(typeof content === "object") {
+					$("#static-modal .modal-body").html(content);
+					$("#static-modal").modal("show");
+				} else {
+					$("#static-modal .modal-body").load(content + "?raw", () => {
+						$("#static-modal").modal("show");
+					})
+				}
+			}
+
 			$().ready(() => {
+				$(".privacylink").click(function(event) {
+					event.preventDefault();
+					showStaticModal($(this).text(), $(this).attr("href"));
+				});
+				
 				resizeMap()
 				follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
 <?php if(isset($location))  { ?>
@@ -269,13 +335,15 @@ if(isset($location)) {
 		</script>
 	</head>
 	<body>
-		<header>
-			<h1 id="title"><?= htmlspecialchars($title, ENT_NOQUOTES) ?></h1>
-			<div id="coordinates">&nbsp;</div>
-		</header>
-		<div id="follwMap"></div>
-		<footer>
-			<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= $tl->get('credits', 'html') ?></a> · <a href="/privacy" target="_blank" rel="noopener noreferrer"><?= $tl->get('privacystatement', 'html') ?></a>
-		</footer>
+		<main>
+			<header>
+				<h1 id="title"><?= htmlspecialchars($title, ENT_NOQUOTES) ?></h1>
+				<div id="coordinates">&nbsp;</div>
+			</header>
+			<div id="follwMap"></div>
+			<footer>
+				<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= $tl->get('credits', 'html') ?></a> · <a href="/privacy" class="privacylink" target="_blank" rel="noopener noreferrer"><?= $tl->get('privacystatement', 'html') ?></a>
+			</footer>
+		</main>
 	</body>
 </html>
