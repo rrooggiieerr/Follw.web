@@ -1,7 +1,7 @@
 follwslogan = Sharing your location with privacy
 sharelocationtab = Share Location
 managefollowerstab = Manage Followers
-configurationtab = Configuration
+settingstab = Settings
 
 usedevicelocation = Use your device location
 orselectlocationonmap = Or select any location you like to share on the map.

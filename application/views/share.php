@@ -204,10 +204,10 @@ header('Content-Language: ' . $tl->language);
 				<header class="navbar">
 					<div class="navbar-brand">Follw <span class="text-muted">· <?= $tl->get('follwslogan', 'html') ?></span></div>
 				</header>
-				<ul class="nav nav-tabs">
+				<ul class="nav nav-tabs" role="tablist">
 					<li class="nav-item"><a class="nav-link active" id="sharelocation-tab" data-toggle="tab" href="#sharelocation" role="tab" aria-controls="sharelocation" aria-selected="true"><?= $tl->get('sharelocationtab', 'html') ?></a></li>
 					<li class="nav-item"><a class="nav-link" id="followers-tab" data-toggle="tab" href="#followers" role="tab" aria-controls="followers" aria-selected="false"><?= $tl->get('managefollowerstab', 'html') ?></a></li>
-					<li class="nav-item"><a class="nav-link" id="configuration-tab" data-toggle="tab" href="#configuration" role="tab" aria-controls="configuration" aria-selected="false"><span class="d-inline d-sm-none fa fa-cog" title="<?= $tl->get('configurationtab', 'htmlattr') ?>"></span> <span class="d-none d-sm-inline"><?= $tl->get('configurationtab', 'htmlattr') ?></span></a></li>
+					<li class="nav-item"><a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false"><span class="d-inline d-sm-none fa fa-cog" title="<?= $tl->get('settingstab', 'htmlattr') ?>"></span> <span class="d-none d-sm-inline"><?= $tl->get('settingstab', 'htmlattr') ?></span></a></li>
 				</ul>
 				<div class="tab-content">
 <?php
@@ -318,7 +318,7 @@ if($configuration['mode'] == 'development') {
 						<div id="createupdatefollowermodal" class="modal">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
-									<form action="#" id="createupdatefollowerform" action="#" autocomplete="off">
+									<form id="createupdatefollowerform" action="#" autocomplete="off">
 										<div class="modal-header">
 											<h5 class="modal-title"><span class="createfollower"><?= $tl->get('createfollowertitle', 'html') ?></span><span class="updatefollower"><?= $tl->get('updatefollowertitle', 'html') ?></span></h5>
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -367,13 +367,13 @@ if($configuration['mode'] == 'development') {
 							</div>
 						</div>
 					</div>
-					<div class="tab-pane" id="configuration" role="tabpanel" aria-labelledby="configuration-tab">
+					<div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
 						<p><?= $tl->get('yoursharingid', NULL, $shareID->encode()) ?></p>
 						<p><?= $tl->get('dontsharesharingid') ?></p>
 						<p><?= $tl->get('bookmarkthissharingurl', 'html') ?></p>
 						<p><?= $tl->get('sharingidcantberecoveredwarning', 'html') ?></p>
 						<p><?= $tl->get('configurealiasintro', 'html') ?></p>
-						<form action="#" id="configuration" autocomplete="off">
+						<form action="#" id="settingsform" autocomplete="off">
 							<?= $tl->get('configurealias', 'html') ?> <input name="alias" type="text" value="<?= htmlspecialchars(@$shareID['alias']) ?>"/>
 						</form>
 					</div>
@@ -426,21 +426,73 @@ if($configuration['mode'] == 'development') {
 		<script src="/follw.js" crossorigin="anonymous"></script>
 		<script>
 			'use strict';
+			var shareID = "<?=$shareID->encode()?>";
 
-			// Configuration
-			function submitConfig(config) {
-				$.post("/<?=$shareID->encode()?>/config", config, () => {
+			// Global settings
+			// Global settings are stored on the server.
+			// Currently only the alias.
+			var globalSettings = {};
+			function getGlobalSettings(success = null) {
+				$.get(`/${shareID}.json`, (data) => {
+					globalSettings = data;
+					if(success) {
+						success(data);
+					}
+				});
+			}
+			getGlobalSettings();
+
+			function storeGlobalSettings() {
+				$.post(`/${shareID}/config`, globalSettings, () => {
 				});
 			}
 
 			$(() => {
-				$("#configuration input[name=alias]").on("keydown", function(event) {
+				// Refresh global settings when settings tab is shown.
+				$("a#settings-tab").on("shown.bs.tab", (e) => {
+					getGlobalSettings((data) => {
+						if("alias" in data) {
+							$("#settingsform input[name=alias]").val(data["alias"]);
+						}
+					});
+				});
+
+				// Store global settings when settings have been modified on the settings tab.
+				$("#settingsform input[name=alias]").on("keydown", function(event) {
 					if(event.keyCode == 13) { // Enter
 						event.preventDefault();
-						var config = {};
-						config["alias"] = $(this).val();
-						submitConfig(config);
+						globalSettings["alias"] = $(this).val();
+						storeGlobalSettings();
 					}
+				});
+			});
+
+			// Local settings
+			// Local settings is stored in local storage and not shared with the server,
+			// it contains settings like which tab is shown, map zoom level etc.
+			var localSettings = JSON.parse(window.localStorage.getItem(shareID));
+			console.log(localSettings);
+			if(!localSettings) {
+				localSettings = {};
+			}
+
+			function storeLocalSettings() {
+				window.localStorage.setItem(shareID, JSON.stringify(localSettings));
+			}
+
+			$(() => {
+				// Show tab that was open before
+				if(localSettings["tab"]) {
+					$(`.nav-tabs a[href='${localSettings["tab"]}']`).tab("show");
+				} else {
+					$(".nav-tabs a[href='#sharelocation']").tab("show");
+				}
+	
+				// Store open tab in local settings
+				$("a[data-toggle=tab]").on("shown.bs.tab", (event) => {
+					console.debug($(event.target).attr("href"));
+					localSettings["tab"] = $(event.target).attr("href");
+					storeLocalSettings();
 				});
 			});
 
@@ -472,7 +524,7 @@ if($configuration['mode'] == 'development') {
 					this.lastShare = null;
 
 					// Create the share location map
-					this.map = new Follw("shareLocationMap", "/<?=$shareID->encode()?>", 12);
+					this.map = new Follw("shareLocationMap", `/${shareID}`, 12);
 					this.map.nolocation = <?= $tl->get('nolocation', 'js') ?>;
 					this.map.addEventListener("locationchanged", onLocationChange);
 					this.map.addEventListener("iddeleted", () => { location.reload(); });
@@ -503,7 +555,7 @@ if($configuration['mode'] == 'development') {
 					});
 
 					// Resume updating if that was what we were doing
-					if(window.localStorage.getItem("sharinglocation") == "true") {
+					if(localSettings["sharing"] == true) {
 						this.startSharing();
 					}
 				}
@@ -513,7 +565,8 @@ if($configuration['mode'] == 'development') {
 						this.isSharing = true;
 
 						this.map.pauseUpdate();
-						window.localStorage.setItem("sharinglocation", true);
+						localSettings["sharing"] = true;
+						storeLocalSettings();
 						var _this = this;
 						this.watchLocationID = navigator.geolocation.watchPosition((position) => {
 							_this.updateLocation(position.coords);
@@ -529,7 +582,8 @@ if($configuration['mode'] == 'development') {
 					this.isSharing = false;
 
 					navigator.geolocation.clearWatch(this.watchLocationID);
-					window.localStorage.setItem("sharinglocation", false);
+					localSettings["sharing"] = false;
+					storeLocalSettings();
 					this.map.resumeUpdate();
 
 					$("#start_pause_devicelocation").html('<span class="fa fa-play fa-2x" title="<?= $tl->get('startsharing', 'htmlattr') ?>"></span>');
@@ -539,7 +593,7 @@ if($configuration['mode'] == 'development') {
 				deleteLocation() {
 					var _this = this;
 					_this.stopSharing();
-					$.get("/<?=$shareID->encode()?>/deletelocation", (data) => {
+					$.get(`/${shareID}/deletelocation`, (data) => {
 						_this.map.getLocation(true);
 						$("#deletelocation").prop("disabled", true);
 					});
@@ -562,7 +616,7 @@ if($configuration['mode'] == 'development') {
 				updateLocation(location) {
 					console.log(location);
 					var _this = this;
-					$.post("/<?=$shareID->encode()?>/", location, () => {
+					$.post(`/${shareID}/`, location, () => {
 						_this.map.setMarker([location.latitude, location.longitude], location.accuracy);
 						_this.previousLocation = location;
 						_this.lastShare = Date.now();
@@ -649,7 +703,7 @@ if($configuration['mode'] == 'development') {
 			function refreshFollowIDs() {
 				$("#refreshfollowers").addClass("fa-spin");
 
-				$.get("/<?=$shareID->encode()?>/followers.json", (data) => {
+				$.get(`/${shareID}/followers.json`, (data) => {
 					var rows = $("<tbody></tbody>");
 					data.forEach((entry) => {
 						var row = $("<tr></tr>");
@@ -676,8 +730,8 @@ if($configuration['mode'] == 'development') {
 
 						if(entry["alias"] != null)
 							$(row).append(`<td class="alias">${entry["alias"]}</td>`);
-						else if(config && "alias" in config)
-							$(row).append(`<td class="alias text-muted">${config["alias"]}</td>`);
+						else if("alias" in globalSettings)
+							$(row).append(`<td class="alias text-muted">${globalSettings["alias"]}</td>`);
 						else
 							$(row).append(`<td class="alias text-muted"></td>`);
 
@@ -735,36 +789,26 @@ if($configuration['mode'] == 'development') {
 			}
 
 			function enableFollowID(followid) {
-				$.get(`/<?=$shareID->encode()?>/follower/${followid}/enable`).always(() => {
+				$.get(`/${shareID}/follower/${followid}/enable`).always(() => {
 					refreshFollowIDs();
 				});
 			}
 
 			function disableFollowID(followid) {
-				$.get(`/<?=$shareID->encode()?>/follower/${followid}/disable`).always(() => {
+				$.get(`/${shareID}/follower/${followid}/disable`).always(() => {
 					refreshFollowIDs();
 				});
 			}
 
 			function deleteFollowID(followid) {
-				$.get(`/<?=$shareID->encode()?>/follower/${followid}/delete`).always(() => {
+				$.get(`/${shareID}/follower/${followid}/delete`).always(() => {
 					refreshFollowIDs();
-				});
-			}
-
-			var config = [];
-			function getConfiguration(success = null) {
-				$.get(`/<?=$shareID->encode()?>.json`, (data) => {
-					config = data;
-					if(success) {
-						success(data);
-					}
 				});
 			}
 
 			// Show the alias as the placeholder text for the alias override form field
 			$("#createupdatefollowermodal").on("shown.bs.modal", () => {
-				getConfiguration((data) => {
+				getGlobalSettings((data) => {
 					var alias = "";
 					if("alias" in data)
 						alias = data["alias"];
@@ -773,7 +817,7 @@ if($configuration['mode'] == 'development') {
 			});
 
 			$("#createfollowerbutton").click(() => {
-				$("#createupdatefollowerform").prop("action", "/<?=$shareID->encode()?>/generatefollowid");
+				$("#createupdatefollowerform").prop("action", `/${shareID}/generatefollowid`);
 				$(".createfollower").show();
 
 				$("#createupdatefollowermodal").modal("show");
@@ -781,7 +825,7 @@ if($configuration['mode'] == 'development') {
 
 
 			function editFollowID(followid) {
-				$.get(`/<?=$shareID->encode()?>/follower/${followid}.json`, (data) => {
+				$.get(`/${shareID}/follower/${followid}.json`, (data) => {
 					$(`#createupdatefollowermodal input[name=reference]`).prop("placeholder", data["id"]);
 					$(`#createupdatefollowermodal input[name=reference]`).val(data["reference"]);
 					$(`#createupdatefollowermodal input[name=alias]`).val(data["alias"]);
@@ -795,7 +839,7 @@ if($configuration['mode'] == 'development') {
 					}
 					$(`#createupdatefollowermodal input[name=enabled]`).prop("checked", data["enabled"]);
 
-					$("#createupdatefollowerform").prop("action", `/<?=$shareID->encode()?>/follower/${followid}`);
+					$("#createupdatefollowerform").prop("action", `/${shareID}/follower/${followid}`);
 					$(".updatefollower").show(); 
 
 					$("#createupdatefollowermodal").modal("show");
@@ -900,28 +944,10 @@ if($configuration['mode'] == 'development') {
 			}
 
 			$().ready(() => {
-				getConfiguration();
 				refreshFollowIDs();
 
 				$("#refreshfollowers").click(() => {
 					refreshFollowIDs();
-				});
-
-				// Show tab that was open before
-				if(window.localStorage.getItem("tab")) {
-					$(`.nav-tabs a[href="${window.localStorage.getItem("tab")}"]`).tab("show");
-				}
-
-				// Store open tab in local storage
-				$("a[data-toggle=tab]").on("shown.bs.tab", (event) => {
-					window.localStorage.setItem("tab", $(event.target).prop("href"));
-				});
-
-				// Load configuration when configuration tab is shown
-				$("a#configuration-tab").on("shown.bs.tab", (e) => {
-					getConfiguration((data) => {
-						$("input[name=alias]").val(data["alias"]);
-					});
 				});
 			});
 <?php
