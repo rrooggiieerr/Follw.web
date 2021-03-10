@@ -61,7 +61,6 @@ class Follw {
 		var _this = this;
 
 		this.map.on('zoomend', function() {
-			console.debug(_this.data);
 			if(_this.data !== null && _this.zoom !== this._zoom) {
 				_this.zoom = this._zoom;
 				_this.trigerEvent('zoomchanged', _this.zoom);

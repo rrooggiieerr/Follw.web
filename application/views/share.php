@@ -445,7 +445,8 @@ if($configuration['mode'] == 'development') {
 			// it contains settings like which tab is shown, map zoom level etc.
 			var localSettings = JSON.parse(window.localStorage.getItem(shareID));
 			if(!localSettings) {
-				localSettings = {};
+				localSettings = {"type": "share"};
+				storeLocalSettings();
 			}
 
 			function storeLocalSettings() {
@@ -495,6 +496,7 @@ if($configuration['mode'] == 'development') {
 					this.lastShare = null;
 
 					// Create the share location map
+					// Restore zoom level from local settings
 					var zoomlevel = 12;
 					if("zoomlevel" in localSettings) {
 						zoomlevel = localSettings["zoomlevel"];
@@ -504,6 +506,7 @@ if($configuration['mode'] == 'development') {
 					this.map.addEventListener("locationchanged", onLocationChange);
 					this.map.addEventListener("iddeleted", () => { location.reload(); });
 					this.map.addEventListener("zoomchanged", (follw, zoomlevel) => {
+						// Store zoom level in local settings
 						localSettings["zoomlevel"] = zoomlevel;
 						storeLocalSettings();
 					});

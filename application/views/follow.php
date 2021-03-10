@@ -54,7 +54,7 @@ if(isset($location)) {
 		<script>
 			// Start Service Worker as soon as possible to also cache icons and other resource files for offline usage
 			if(window.navigator && navigator.serviceWorker) {
-				navigator.serviceWorker.register("/<?=$id->encode()?>/serviceworker.js", { scope: "/<?=$id->encode()?>/" }).then(function() {
+				navigator.serviceWorker.register("/<?=$id->encode()?>/serviceworker.js", { scope: "/<?=$id->encode()?>/" }).then(() => {
 					console.debug("Registered Service Worker");
 					//TODO Try to unregister Service Worker and Cache?
 				}).catch(function(error) {
@@ -167,6 +167,20 @@ if(isset($location)) {
 		<script src="/follw.js" crossorigin="anonymous"></script>
 		<script>
 			'use strict';
+			var id = "<?=$id->encode()?>";
+
+			// Local settings
+			// Local settings is stored in local storage and not shared with the server,
+			// it contains settings like which tab is shown, map zoom level etc.
+			var localSettings = JSON.parse(window.localStorage.getItem(id));
+			if(!localSettings) {
+				localSettings = {"type": "follow"};
+				storeLocalSettings();
+			}
+
+			function storeLocalSettings() {
+				window.localStorage.setItem(id, JSON.stringify(localSettings));
+			}
 
 			document.ontouchmove = function(e) {e.preventDefault()};
 
@@ -211,22 +225,32 @@ if(isset($location)) {
 				}
 			}
 
-			var follw = new Follw("follwMap", "/<?=$id->encode()?>", 14);
+			// Restore zoom level from local settings
+			var zoomlevel = 14;
+			if("zoomlevel" in localSettings) {
+				zoomlevel = localSettings["zoomlevel"];
+			}
+			var follw = new Follw("follwMap", `/${id}`, zoomlevel);
 			follw.translations["nolocation"] = <?= $tl->get('nolocation', 'js') ?>;
 			follw.translations["offline"] = <?= $tl->get('offline', 'js') ?>;
 			follw.translations["iddeleted"] = <?= $tl->get('iddeleted', 'js') ?>;
 			follw.addEventListener("locationchanged", onLocationChanged);
-			follw.addEventListener("offline", function() {
+			follw.addEventListener("offline", () => {
 					$("title").text(follw.translations["offline"]);
 					$("#title").text(follw.translations["offline"]);
 					resizeMap();
 					$("#coordinates").html("&nbsp;");
 			});
-			follw.addEventListener("iddeleted", function() {
+			follw.addEventListener("iddeleted", () => {
 				location.reload();
 			});
+			follw.addEventListener("zoomchanged", (follw, zoomlevel) => {
+				// Store zoom level in local settings
+				localSettings["zoomlevel"] = zoomlevel;
+				storeLocalSettings();
+			});
 
-			$(window).scroll(function() {
+			$(window).scroll(() => {
 				try {
 					document.body.requestFullscreen();
 				} catch(error) {
@@ -234,7 +258,7 @@ if(isset($location)) {
 				}
 			});
 
-			$().ready(function() {
+			$().ready(() => {
 				resizeMap()
 				follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
 <?php if(isset($location))  { ?>
