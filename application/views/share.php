@@ -210,35 +210,6 @@ header('Content-Language: ' . $tl->language);
 					<li class="nav-item"><a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false"><span class="d-inline d-sm-none fa fa-cog" title="<?= $tl->get('settingstab', 'htmlattr') ?>"></span> <span class="d-none d-sm-inline"><?= $tl->get('settingstab', 'htmlattr') ?></span></a></li>
 				</ul>
 				<div class="tab-content">
-<?php
-if($showIntro) {
-?>
-					<div id="intro-modal" class="modal">
-						<div class="modal-dialog" role="document">
-							<div class="modal-content">
-								<div class="modal-header">
-									<h5 class="modal-title"><?= $tl->get('welcometofollw', 'html') ?></h5>
-									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-										<span aria-hidden="true">&times;</span>
-									</button>
-								</div>
-								<div class="modal-body">
-									<p><?= $tl->get('yoursharingid', NULL, $shareID->encode()) ?></p>
-									<p><?= $tl->get('dontsharesharingid') ?></p>
-									<p><?= $tl->get('bookmarkthissharingurl', 'html') ?></p>
-									<p id="bookmarkMac" style="display: none;"><?= $tl->get('bookmarkmacos') ?></p>
-									<p id="bookmarkWin" style="display: none;"><?= $tl->get('bookmarkwindows') ?></p>
-									<p id="bookmarkAndroid" style="display: none;"><?= $tl->get('bookmarkandroid') ?></p>
-									<p id="bookmarkIos" style="display: none;"><?= $tl->get('bookmarkios') ?></p>
-									<p><?= $tl->get('sharingidcantberecoveredwarning', 'html') ?></p>
-								</div>
-								<div class="modal-footer">
-									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-								</div>
-							</div>
-						</div>
-					</div>
-<?php } ?>
 					<div class="tab-pane active" id="sharelocation" role="tabpanel" aria-labelledby="sharelocation-tab">
 						<div class="geolocationenabled">
 							<p><?= $tl->get('usedevicelocation', 'html') ?></p>
@@ -288,7 +259,7 @@ if($configuration['mode'] == 'development') {
 								<div class="modal-content">
 									<div class="modal-header">
 										<h5 class="modal-title"><?= $tl->get('sharefollowidtitle', 'html') ?></h5>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										<button type="button" class="close" data-dismiss="modal" aria-label="<?= $tl->get('close', 'htmlattr') ?>">
 											<span aria-hidden="true">&times;</span>
 										</button>
 									</div>
@@ -308,7 +279,7 @@ if($configuration['mode'] == 'development') {
 										</div>
 									</div>
 									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										<button type="button" class="btn btn-secondary" data-dismiss="modal"><span class="fa fa-times-circle"></span>  <?= $tl->get('close', 'html') ?></button>
 									</div>
 								</div>
 							</div>
@@ -321,7 +292,7 @@ if($configuration['mode'] == 'development') {
 									<form id="createupdatefollowerform" action="#" autocomplete="off">
 										<div class="modal-header">
 											<h5 class="modal-title"><span class="createfollower"><?= $tl->get('createfollowertitle', 'html') ?></span><span class="updatefollower"><?= $tl->get('updatefollowertitle', 'html') ?></span></h5>
-											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<button type="button" class="close" data-dismiss="modal" aria-label="<?= $tl->get('close', 'htmlattr') ?>">
 												<span aria-hidden="true">&times;</span>
 											</button>
 										</div>
@@ -380,7 +351,7 @@ if($configuration['mode'] == 'development') {
 				</div>
 <?php $footertl = new Translation('footer'); ?>
 				<footer class="d-block d-sm-none">
-					<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= $footertl->get('sharinglocationwith', 'html') ?></a> · <a href="/privacy" target="_blank" rel="noopener noreferrer"><?= $footertl->get('privacystatement', 'html') ?></a>
+					<a href="<?= $protocol ?><?= $_SERVER['HTTP_HOST'] ?>" target="_blank" rel="noopener noreferrer"><?= $footertl->get('sharinglocationwith', 'html') ?></a> · <a href="/privacy" class="privacylink" rel="noopener noreferrer"><?= $footertl->get('privacystatement', 'html') ?></a>
 				</footer>
 				<footer class="pt-4 d-none d-sm-block">
 					<div class="row">
@@ -490,7 +461,6 @@ if($configuration['mode'] == 'development') {
 	
 				// Store open tab in local settings
 				$("a[data-toggle=tab]").on("shown.bs.tab", (event) => {
-					console.debug($(event.target).attr("href"));
 					localSettings["tab"] = $(event.target).attr("href");
 					storeLocalSettings();
 				});
@@ -950,22 +920,69 @@ if($configuration['mode'] == 'development') {
 					refreshFollowIDs();
 				});
 			});
-<?php
-if($showIntro) {
-?>
+
+			// 
+			function showStaticModal(title, content) {
+				if($("#static-modal").length == 0) {
+					var staticModal = $(`<div id="static-modal" class="modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title"></h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="<?= $tl->get('close', 'htmlattr') ?>">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal"><span class="fa fa-times-circle"></span>  <?= $tl->get('close', 'html') ?></button>
+			</div>
+		</div>
+	</div>
+</div>`);
+					$("main").append(staticModal);
+				}
+
+				$("#static-modal .modal-title").text(title);
+				if(typeof content === "object") {
+					$("#static-modal .modal-body").html(content);
+					$("#static-modal").modal("show");
+				} else {
+					$("#static-modal .modal-body").load(content + "?raw", () => {
+						$("#static-modal").modal("show");
+					})
+				}
+			}
+
+			$().ready(() => {
+				$(".creditslink,.privacylink,.termslink").click(function(event) {
+					event.preventDefault();
+					showStaticModal($(this).text(), $(this).attr("href"));
+				});
+			});
+<?php if($showIntro) { ?>
 
 			$(() => {
+				var content = $(`<p><?= $tl->get('yoursharingid', NULL, $shareID->encode()) ?></p>
+<p><?= $tl->get('dontsharesharingid') ?></p>
+<p><?= $tl->get('bookmarkthissharingurl', 'html') ?></p>
+<p id="bookmarkMac" style="display: none;"><?= $tl->get('bookmarkmacos') ?></p>
+<p id="bookmarkWin" style="display: none;"><?= $tl->get('bookmarkwindows') ?></p>
+<p id="bookmarkAndroid" style="display: none;"><?= $tl->get('bookmarkandroid') ?></p>
+<p id="bookmarkIos" style="display: none;"><?= $tl->get('bookmarkios') ?></p>
+<p><?= $tl->get('sharingidcantberecoveredwarning', 'html') ?></p>`);
 				if(navigator.platform.toUpperCase().indexOf("MAC") !== -1)
-					$("#bookmarkMac").show();
+					$("#bookmarkMac", content).show();
 				else if(navigator.platform.toUpperCase().indexOf("WIN") !== -1)
-					$("#bookmarkWin").show();
+					$("#bookmarkWin", content).show();
 				else if(navigator.userAgent.toUpperCase().indexOf("ANDROID") !== -1)
-					$("#bookmarkAndroid").show();
+					$("#bookmarkAndroid", content).show();
 				else if(navigator.userAgent.toUpperCase().indexOf("IPHONE") !== -1
 					|| navigator.userAgent.toUpperCase().indexOf("IPAD") !== -1
 					|| navigator.userAgent.toUpperCase().indexOf("IPOD") !== -1)
-					$("#bookmarkIos").show();
-				$("#intro-modal").modal("show");
+					$("#bookmarkIos", content).show();
+				showStaticModal(<?= $tl->get('welcometofollw', 'js') ?>, content);
 			});
 <?php } ?>
 		</script>

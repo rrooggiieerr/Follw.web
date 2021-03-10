@@ -1,15 +1,15 @@
 aboutheader = About
-aboutintro = Follw is made possible thanks to some great Open Source software and kind contributors, read more about it in the <a href="/credits" rel="noopener noreferrer">Credits</a>.
-blogintro = Read about the latest developments, features, instructions, tips and tricks and other relevant information in te <a href="https://blog.follw.app" rel="noopener noreferrer">Follw Blog</a>.
+aboutintro = Follw is made possible thanks to some great Open Source software and kind contributors, read more about it in the <a href="/credits" class="creditslink" rel="noopener noreferrer">Credits</a>.
+blogintro = Read about the latest developments, features, instructions, tips and tricks and other relevant information in te <a href="https://blog.follw.app" target="_blank" rel="noopener noreferrer">Follw Blog</a>.
 onsocialmedia = Follw on %s
 sharinglocationwith = Location sharing with Follw
 sharedlocationwith = Location shared with Follw
 credits = Credits
 
 privacyheader = Privacy
-privacyintro = Follw doesn't use cookies nor stores your IP address. Read more on how Follw respects your privacy in the <a href="/privacy" rel="noopener noreferrer">Privacy Statement</a>.
+privacyintro = Follw doesn't use cookies nor stores your IP address. Read more on how Follw respects your privacy in the <a href="/privacy" class="privacylink" rel="noopener noreferrer">Privacy Statement</a>.
 privacystatement = Privacy Statement
-termsintro = Follw is free for personal and low volume use, read more about the <a href="/privacy" rel="noopener noreferrer">Terms &amp; Conditions</a>.
+termsintro = Follw is free for personal and low volume use, read more about the <a href="/terms" class="termslink" rel="noopener noreferrer">Terms &amp; Conditions</a>.
 termsconditions = Terms & conditions
 
 appsheader = Apps
