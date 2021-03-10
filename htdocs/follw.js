@@ -5,6 +5,7 @@ class Follw {
 		this.element = element;
 		this.zoom = zoom
 
+		this.data = null;
 		this.marker = null;
 		this.accuracy = null;
 		this.textOverlay = null;
@@ -58,6 +59,14 @@ class Follw {
 		}).addTo(this.map);
 
 		var _this = this;
+
+		this.map.on('zoomend', function() {
+			console.debug(_this.data);
+			if(_this.data !== null && _this.zoom !== this._zoom) {
+				_this.zoom = this._zoom;
+				_this.trigerEvent('zoomchanged', _this.zoom);
+			}
+		});
 
 		// Decrease update interval if window is not in focus
 		var _onblur = window.onblur;
@@ -179,6 +188,7 @@ class Follw {
 				var data = JSON.parse(this.response);
 
 				if(typeof _this.lastTimestamp == "undefined" || _this.lastTimestamp == null || _this.lastTimestamp != data.timestamp || _this.offline) {
+					_this.data = data;
 					_this.setTextOverlay(null);
 					_this.offline = false;
 					_this.lastTimestamp = data.timestamp;
@@ -208,6 +218,7 @@ class Follw {
 				_this.trigerEvent('offline');
 			} else {
 				if(typeof _this.lastTimestamp == "undefined" || _this.lastTimestamp != null || _this.offline) {
+					_this.data = null;
 					_this.offline = false;
 					_this.lastTimestamp = null;
 					_this.trigerEvent('locationchanged', null);
@@ -247,7 +258,7 @@ class Follw {
 	}
 
 	addEventListener(type, listener) {
-		if(['locationchanged', 'iddeleted', 'offline', 'online'].includes(type)) {
+		if(['locationchanged', 'iddeleted', 'offline', 'online', 'zoomchanged'].includes(type)) {
 			if(!(type in this.callbacks))
 				this.callbacks[type] = [];
 

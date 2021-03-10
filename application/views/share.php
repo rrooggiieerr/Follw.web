@@ -444,7 +444,6 @@ if($configuration['mode'] == 'development') {
 			// Local settings is stored in local storage and not shared with the server,
 			// it contains settings like which tab is shown, map zoom level etc.
 			var localSettings = JSON.parse(window.localStorage.getItem(shareID));
-			console.log(localSettings);
 			if(!localSettings) {
 				localSettings = {};
 			}
@@ -496,10 +495,18 @@ if($configuration['mode'] == 'development') {
 					this.lastShare = null;
 
 					// Create the share location map
-					this.map = new Follw("shareLocationMap", `/${shareID}`, 12);
+					var zoomlevel = 12;
+					if("zoomlevel" in localSettings) {
+						zoomlevel = localSettings["zoomlevel"];
+					}
+					this.map = new Follw("shareLocationMap", `/${shareID}`, zoomlevel);
 					this.map.nolocation = <?= $tl->get('nolocation', 'js') ?>;
 					this.map.addEventListener("locationchanged", onLocationChange);
 					this.map.addEventListener("iddeleted", () => { location.reload(); });
+					this.map.addEventListener("zoomchanged", (follw, zoomlevel) => {
+						localSettings["zoomlevel"] = zoomlevel;
+						storeLocalSettings();
+					});
 					this.map.startUpdate();
 
 					// See if DOM is already available
@@ -586,7 +593,6 @@ if($configuration['mode'] == 'development') {
 				}
 
 				updateLocation(location) {
-					console.log(location);
 					var _this = this;
 					$.post(`/${shareID}/`, location, () => {
 						_this.map.setMarker([location.latitude, location.longitude], location.accuracy);
