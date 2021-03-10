@@ -972,17 +972,17 @@ if($configuration['mode'] == 'development') {
 <p id="bookmarkAndroid" style="display: none;"><?= $tl->get('bookmarkandroid') ?></p>
 <p id="bookmarkIos" style="display: none;"><?= $tl->get('bookmarkios') ?></p>
 <p><?= $tl->get('sharingidcantberecoveredwarning', 'html') ?></p>`);
+				showStaticModal(<?= $tl->get('welcometofollw', 'js') ?>, content);
 				if(navigator.platform.toUpperCase().indexOf("MAC") !== -1)
-					$("#bookmarkMac", content).show();
+					$("#static-modal .modal-body #bookmarkMac").show();
 				else if(navigator.platform.toUpperCase().indexOf("WIN") !== -1)
-					$("#bookmarkWin", content).show();
+					$("#static-modal .modal-body #bookmarkWin").show();
 				else if(navigator.userAgent.toUpperCase().indexOf("ANDROID") !== -1)
-					$("#bookmarkAndroid", content).show();
+					$("#static-modal .modal-body #bookmarkAndroid").show();
 				else if(navigator.userAgent.toUpperCase().indexOf("IPHONE") !== -1
 					|| navigator.userAgent.toUpperCase().indexOf("IPAD") !== -1
 					|| navigator.userAgent.toUpperCase().indexOf("IPOD") !== -1)
-					$("#bookmarkIos", content).show();
-				showStaticModal(<?= $tl->get('welcometofollw', 'js') ?>, content);
+					$("#static-modal .modal-body #bookmarkIos").show();
 			});
 <?php } ?>
 		</script>
