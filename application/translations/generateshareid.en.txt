@@ -1,5 +1,5 @@
-youranswer = Your answer
-agreetermsconditions = Agree to terms & conditions
+captchaintro = To prove you're not an automated system answer the following question:
+youranswer = Your answer:
+agreetermsconditions = Agree to Terms & Conditions
 submit = Start sharing any location
-credits = Share a location with Follw
 privacystatement = Privacy statement

@@ -101,7 +101,7 @@ header('Content-Language: ' . $tr->language);
 						<?= $honeypot->html() ?>
 						<div class="form-group">
 							<div id="termsconditions" class="form-control form-control-sm">
-<?php include_once('terms.php'); ?>
+<?= file_get_contents((dirname(__DIR__) . '/views/terms.html')) ?>
 							</div>
 							<div id="agreetermsconditions" class="form-check">
 								<input class="form-check-input" type="checkbox" id="agreetermsconditionscheckbox" name="<?= $obfuscator->obfuscate('agreetermsconditions') ?>" value="true"/>
