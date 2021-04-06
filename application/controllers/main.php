@@ -59,14 +59,14 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 		$remainer = $matches[2];
 	}
 
-	if($remainer === '') {
+	if($remainer === '' && $_SERVER['REQUEST_METHOD'] === 'GET') {
 		header('Location: /' . $id . '/');
 		exit();
 	}
 
 	$action = NULL;
 	$format = NULL;
-	if($remainer === '/') {
+	if(in_array($remainer, [ NULL, '', '/'], TRUE)) {
 		$action = 'location';
 		$format = 'html';
 	} else if(preg_match('/^\.[a-z]+\.?[a-z]+$/', $remainer)) {
@@ -147,6 +147,9 @@ if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configur
 	} else if($id instanceof ShareID) {
 		require_once(dirname(__DIR__) . '/controllers/ShareController.php');
 		(new ShareController())->route($id, $action, $format);
+	} else {
+		http_response_code(500);
+		exit();
 	}
 }
 
