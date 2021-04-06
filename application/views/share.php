@@ -87,11 +87,11 @@ header('Content-Language: ' . $tl->language);
 		<link rel="stylesheet" href="https://unpkg.com/bootstrap@4.6.0/dist/css/bootstrap.min.css"
 			integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
 			crossorigin="anonymous"/>
-		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
-			crossorigin="anonymous"/>
 		<link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.css"
 			integrity="sha384-FckWOBo7yuyMS7In0aXZ0aoVvnInlnFMwCv77x9sZpFgOonQgnBj1uLwenWVtsEj"
+			crossorigin="anonymous"/>
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
 			crossorigin="anonymous"/>
 		<style>
 			html, body {
@@ -924,7 +924,7 @@ if($configuration['mode'] == 'development') {
 				$("#sharefollowid-modal").modal("show")
 			}
 
-			$().ready(() => {
+			$(() => {
 				refreshFollowIDs();
 
 				$("#refreshfollowers").click(() => {
@@ -936,7 +936,7 @@ if($configuration['mode'] == 'development') {
 			function showStaticModal(title, content) {
 				if($("#static-modal").length == 0) {
 					var staticModal = $(`<div id="static-modal" class="modal">
-	<div class="modal-dialog" role="document">
+	<div class="modal-dialog modal-dialog-scrollable" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title"></h5>
@@ -966,7 +966,7 @@ if($configuration['mode'] == 'development') {
 				}
 			}
 
-			$().ready(() => {
+			$(() => {
 				$(".creditslink,.privacylink,.termslink").click(function(event) {
 					event.preventDefault();
 					showStaticModal($(this).text(), $(this).attr("href"));
