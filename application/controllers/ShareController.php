@@ -375,13 +375,8 @@ class ShareController {
 				exit();
 			}
 
-			if($followID->type === 'deleted') {
-				http_response_code(410);
-				exit();
-			}
-
 			if(!$followID instanceof FollowID) {
-				http_response_code(404);
+				http_response_code(500);
 				exit();
 			}
 		} else {
