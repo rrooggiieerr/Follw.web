@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Follw API Documentation</title>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="icon" href="/favicon-96x96.png" sizes="96x96" type="image/png">
+		<link rel="icon" href="/favicon-64x64.png" sizes="64x64" type="image/png">
+		<link rel="icon" href="/favicon-48x48.png" sizes="48x48" type="image/png">
+		<link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+		<link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+		<link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml">
+		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#006400">
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="redocContainer"></div>
+		<script src="https://unpkg.com/redoc@2.0.0-rc.50/bundles/redoc.standalone.js"></script>
+		<script>
+		Redoc.init("/openapi.json", {hideLoading: true}, document.getElementById('redocContainer'))
+		</script>
+	</body>
+</html>

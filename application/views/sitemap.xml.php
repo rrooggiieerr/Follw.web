@@ -27,4 +27,9 @@ print('<?xml version="1.0" encoding="utf-8"?>' . PHP_EOL);
         <lastmod><?= date('Y-m-d', filemtime(dirname(__DIR__) . '/views/credits.html')) ?></lastmod>
         <changefreq>monthly</changefreq>
     </url>
+    <url>
+        <loc><?= $protocol . $_SERVER['HTTP_HOST'] ?>/apidoc</loc>
+        <lastmod><?= date('Y-m-d', filemtime(dirname(__DIR__) . '/views/apidoc.html')) ?></lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
 </urlset>

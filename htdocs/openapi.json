@@ -1,0 +1,534 @@
+{
+	"openapi": "3.0.3",
+	"info": {
+		"title": "Follw API",
+		"description": "Follw is a privacy focused location sharing service.",
+		"termsOfService": "/terms",
+		"contact": {
+			"name": "Follw API support",
+			"url": "https://follw.app/contact",
+			"email": "support@follw.app"
+		},
+		"license": {
+			"name": "Apache License 2.0",
+			"url": "http://www.apache.org/licenses/LICENSE-2.0"
+		},
+		"version": "0.1"
+	},
+	"servers": [
+		{
+			"url": "https://dev.follw.app/",
+			"description": "Development server"
+		},
+		{
+			"url": "https://follw.app/",
+			"description": "Production server"
+		}
+	],
+	"components": {},
+	"security": [],
+	"tags": [],
+	"paths": {
+		"/{id}.json": {
+			"get": {
+				"summary": "Get location",
+				"description": "",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": ""
+										},
+										"type": {
+											"type": "string"
+										},
+										"url": {
+											"type": "string",
+											"format": ""
+										},
+										"reference": {
+											"type": "string"
+										},
+										"alias": {
+											"type": "string"
+										},
+										"starts": {
+											"type": "integer",
+											"format": "int64"
+										},
+										"expires": {
+											"type": "integer",
+											"format": "int64"
+										},
+										"delay": {
+											"type": "integer",
+											"format": "int32"
+										},
+										"latitude": {
+											"type": "number",
+											"format": "float"
+										},
+										"longitude": {
+											"type": "number",
+											"format": "float"
+										},
+										"accuracy": {
+											"type": "number",
+											"format": "float"
+										},
+										"altitude": {
+											"type": "number",
+											"format": "float"
+										},
+										"speed": {
+											"type": "number",
+											"format": "float"
+										},
+										"timestamp": {
+											"type": "integer",
+											"format": "int64"
+										},
+										"refresh": {
+											"type": "integer",
+											"format": "int32",
+											"minimum": 1
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"410": {
+						"description": "Gone"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{id}/qrcode.[svg|png]": {
+			"get": {
+				"summary": "Get QR code",
+				"description": "Gets the QR code for the given id",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"image/svg+xml": {},
+							"image/png": {}
+						}
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"410": {
+						"description": "Gone"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}.json": {
+			"get": {
+				"summary": "",
+				"description": "",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": ""
+										},
+										"type": {
+											"type": "string"
+										},
+										"url": {
+											"type": "string",
+											"format": ""
+										},
+										"latitude": {
+											"type": "number",
+											"format": "float"
+										},
+										"longitude": {
+											"type": "number",
+											"format": "float"
+										},
+										"accuracy": {
+											"type": "number",
+											"format": "float"
+										},
+										"altitude": {
+											"type": "number",
+											"format": "float"
+										},
+										"speed": {
+											"type": "number",
+											"format": "float"
+										},
+										"timestamp": {
+											"type": "integer",
+											"format": "int64"
+										},
+										"refresh": {
+											"type": "integer",
+											"format": "int32",
+											"minimum": 1
+										}
+									}
+								}
+							}
+						}
+					},
+					"204": {
+						"description": "No Content"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/settings.json": {
+			"get": {
+				"summary": "Get sharer settings",
+				"description": "Gets the settings of the sharer",
+				"responses": {
+					"200": {
+						"description": "The settings of the sharer",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"format": ""
+										},
+										"type": {
+											"type": "string",
+											"format": ""
+										},
+										"url": {
+											"type": "string",
+											"format": ""
+										},
+										"alias": {
+											"type": "string",
+											"format": ""
+										}
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/config": {
+			"get": {
+				"summary": "Configure sharer setting",
+				"description": "Configures a setting of the sharer",
+				"responses": {
+					"204": {
+						"description": "Successfully set configuration"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			},
+			"post": {
+				"summary": "Configure sharer setting",
+				"description": "Configures a setting of the sharer",
+				"responses": {
+					"204": {
+						"description": "Successfully set configuration"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/deletelocation": {
+			"get": {
+				"summary": "Delete sharer location",
+				"description": "Deletes the location for the sharer",
+				"responses": {
+					"204": {
+						"description": "Successfully deleted the location"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/delete": {
+			"get": {
+				"summary": "Delete sharer",
+				"description": "Deletes the sharer",
+				"responses": {
+					"204": {
+						"description": "Successfully deleted the sharer"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/generatefollowid": {
+			"get": {
+				"summary": "Create follower",
+				"description": "Creates a new follower",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			},
+			"post": {
+				"summary": "Create follower",
+				"description": "Creates a new follower",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"name": "reference",
+					"in": "query",
+					"description": "",
+					"required": false,
+					"allowEmptyValue": true,
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "alias",
+					"in": "query",
+					"description": "",
+					"required": false,
+					"allowEmptyValue": true,
+					"schema": {
+						"type": "string"
+					}
+				},
+				{
+					"name": "starts",
+					"in": "query",
+					"description": "",
+					"required": false,
+					"allowEmptyValue": false,
+					"schema": {
+						"type": "integer"
+					}
+				},
+				{
+					"name": "expires",
+					"in": "query",
+					"description": "",
+					"required": false,
+					"allowEmptyValue": false,
+					"schema": {
+						"type": "integer"
+					}
+				},
+				{
+					"name": "delay",
+					"in": "query",
+					"description": "",
+					"required": false,
+					"allowEmptyValue": false,
+					"schema": {
+						"type": "integer"
+					}
+				},
+				{
+					"name": "enabled",
+					"in": "query",
+					"description": "",
+					"required": false,
+					"allowEmptyValue": false,
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			]
+		},
+		"/{shareId}/followers.json": {
+			"get": {
+				"summary": "Get followers",
+				"description": "",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/follower/{followId}": {
+			"get": {
+				"summary": "Update follower",
+				"description": "",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			},
+			"post": {
+				"summary": "Update follower",
+				"description": "",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/follower/{followId}.json": {
+			"get": {
+				"summary": "Get follower",
+				"description": "",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {}
+						}
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/follower/{followId}/enable": {
+			"get": {
+				"summary": "Enable follower",
+				"description": "Enables the follower",
+				"responses": {
+					"204": {
+						"description": "Successfully enabled the follower"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/follower/{followId}/disable": {
+			"get": {
+				"summary": "Disable follower",
+				"description": "Disables the follower",
+				"responses": {
+					"204": {
+						"description": "Successfully disabled the follower"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		},
+		"/{shareId}/follower/{followId}/delete": {
+			"get": {
+				"summary": "Delete follower",
+				"description": "Deletes the follower",
+				"responses": {
+					"204": {
+						"description": "Successfully deleted the follower"
+					},
+					"404": {
+						"description": "Not Found"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			}
+		}
+	}
+}
