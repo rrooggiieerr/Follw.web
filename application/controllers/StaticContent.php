@@ -53,6 +53,9 @@ class StaticContent {
 				}
 
 				return TRUE;
+			case '/openapi.json':
+				require_once(dirname(__DIR__) . '/views/openapi.json.php');
+				return TRUE;
 			case '/robots.txt':
 				require_once(dirname(__DIR__) . '/views/robots.txt.php');
 				return TRUE;

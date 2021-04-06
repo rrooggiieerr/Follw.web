@@ -5,9 +5,7 @@
 		"description": "Follw is a privacy focused location sharing service.",
 		"termsOfService": "/terms",
 		"contact": {
-			"name": "Follw API support",
-			"url": "https://follw.app/contact",
-			"email": "support@follw.app"
+			"name": "Follw API support"
 		},
 		"license": {
 			"name": "Apache License 2.0",
@@ -15,17 +13,134 @@
 		},
 		"version": "0.1"
 	},
-	"servers": [
-		{
-			"url": "https://dev.follw.app/",
-			"description": "Development server"
-		},
-		{
-			"url": "https://follw.app/",
-			"description": "Production server"
+	"servers": [],
+	"components": {
+		"schemas": {
+			"id": {
+				"type": "string"
+			},
+			"idtype": {
+				"type": "string",
+				"enum": [
+					"share",
+					"follow"
+				]
+			},
+			"location": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/id"
+					},
+					"type": {
+						"$ref": "#/components/schemas/idtype"
+					},
+					"url": {
+						"type": "string"
+					},
+					"alias": {
+						"type": "string"
+					},
+					"starts": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"expires": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"delay": {
+						"type": "integer",
+						"format": "int32"
+					},
+					"latitude": {
+						"type": "number",
+						"format": "float",
+						"minimum": -90.0,
+						"maximum": 90.0
+					},
+					"longitude": {
+						"type": "number",
+						"format": "float",
+						"minimum": -180.0,
+						"maximum": 180.0
+					},
+					"accuracy": {
+						"type": "number",
+						"format": "float",
+						"minimum": 0.0
+					},
+					"altitude": {
+						"type": "number",
+						"format": "float"
+					},
+					"direction": {
+						"type": "number",
+						"format": "float",
+						"minimum": 0.0,
+						"maximum": 360.0
+					},
+					"speed": {
+						"type": "number",
+						"format": "float",
+						"minimum": 0.0
+					},
+					"timestamp": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"refresh": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 1
+					}
+				}
+			},
+			"follower": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/id"
+					},
+					"type": {
+						"type": "string",
+						"enum": "follow"
+					},
+					"url": {
+						"type": "string",
+						"format": ""
+					},
+					"reference": {
+						"type": "string"
+					},
+					"alias": {
+						"type": "string"
+					},
+					"starts": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"expires": {
+						"type": "integer",
+						"format": "int64"
+					},
+					"delay": {
+						"type": "integer",
+						"format": "int32"
+					},
+					"enabled": {
+						"type": "boolean"
+					},
+					"started": {
+						"type": "boolean"
+					},
+					"expired": {
+						"type": "boolean"
+					}
+				}
+			}
 		}
-	],
-	"components": {},
+	},
 	"security": [],
 	"tags": [],
 	"paths": {
@@ -39,67 +154,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"properties": {
-										"id": {
-											"type": "string",
-											"format": ""
-										},
-										"type": {
-											"type": "string"
-										},
-										"url": {
-											"type": "string",
-											"format": ""
-										},
-										"reference": {
-											"type": "string"
-										},
-										"alias": {
-											"type": "string"
-										},
-										"starts": {
-											"type": "integer",
-											"format": "int64"
-										},
-										"expires": {
-											"type": "integer",
-											"format": "int64"
-										},
-										"delay": {
-											"type": "integer",
-											"format": "int32"
-										},
-										"latitude": {
-											"type": "number",
-											"format": "float"
-										},
-										"longitude": {
-											"type": "number",
-											"format": "float"
-										},
-										"accuracy": {
-											"type": "number",
-											"format": "float"
-										},
-										"altitude": {
-											"type": "number",
-											"format": "float"
-										},
-										"speed": {
-											"type": "number",
-											"format": "float"
-										},
-										"timestamp": {
-											"type": "integer",
-											"format": "int64"
-										},
-										"refresh": {
-											"type": "integer",
-											"format": "int32",
-											"minimum": 1
-										}
-									}
+									"$ref": "#/components/schemas/location"
 								}
 							}
 						}
@@ -140,75 +195,6 @@
 				}
 			}
 		},
-		"/{shareId}.json": {
-			"get": {
-				"summary": "",
-				"description": "",
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"id": {
-											"type": "string",
-											"format": ""
-										},
-										"type": {
-											"type": "string"
-										},
-										"url": {
-											"type": "string",
-											"format": ""
-										},
-										"latitude": {
-											"type": "number",
-											"format": "float"
-										},
-										"longitude": {
-											"type": "number",
-											"format": "float"
-										},
-										"accuracy": {
-											"type": "number",
-											"format": "float"
-										},
-										"altitude": {
-											"type": "number",
-											"format": "float"
-										},
-										"speed": {
-											"type": "number",
-											"format": "float"
-										},
-										"timestamp": {
-											"type": "integer",
-											"format": "int64"
-										},
-										"refresh": {
-											"type": "integer",
-											"format": "int32",
-											"minimum": 1
-										}
-									}
-								}
-							}
-						}
-					},
-					"204": {
-						"description": "No Content"
-					},
-					"404": {
-						"description": "Not Found"
-					},
-					"500": {
-						"description": "Internal Server Error"
-					}
-				}
-			}
-		},
 		"/{shareId}/settings.json": {
 			"get": {
 				"summary": "Get sharer settings",
@@ -222,12 +208,11 @@
 									"type": "object",
 									"properties": {
 										"id": {
-											"type": "string",
-											"format": ""
+											"$ref": "#/components/schemas/id"
 										},
 										"type": {
 											"type": "string",
-											"format": ""
+											"enum": ["follow"]
 										},
 										"url": {
 											"type": "string",
@@ -263,7 +248,7 @@
 			},
 			"post": {
 				"summary": "Configure sharer setting",
-				"description": "Configures a setting of the sharer",
+				"description": "Configures a setting of the sharer parameter",
 				"responses": {
 					"204": {
 						"description": "Successfully set configuration"
@@ -311,7 +296,9 @@
 						"description": "OK",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"$ref": "#/components/schemas/follower"
+								}
 							}
 						}
 					},
@@ -328,7 +315,9 @@
 						"description": "OK",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"$ref": "#/components/schemas/follower"
+								}
 							}
 						}
 					},
@@ -409,7 +398,12 @@
 						"description": "OK",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/follower"
+									}
+								}
 							}
 						}
 					},
@@ -428,7 +422,9 @@
 						"description": "OK",
 						"content": {
 							"application/json": {
-								"schema": {}
+								"schema": {
+									"$ref": "#/components/schemas/follower"
+								}
 							}
 						}
 					},
@@ -447,7 +443,11 @@
 					"200": {
 						"description": "OK",
 						"content": {
-							"application/json": {}
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/follower"
+								}
+							}
 						}
 					},
 					"404": {

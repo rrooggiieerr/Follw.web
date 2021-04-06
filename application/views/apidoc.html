@@ -20,9 +20,11 @@
 	</head>
 	<body>
 		<div id="redocContainer"></div>
-		<script src="https://unpkg.com/redoc@2.0.0-rc.50/bundles/redoc.standalone.js"></script>
+		<script src="https://unpkg.com/redoc@2.0.0-rc.50/bundles/redoc.standalone.js"
+			integrity="sha384-YWcR83P+iCIwWinEgobyIHtCpa2GHXZY4EGN+8CK2dDrcay1wIz3l4Txk2AEc7Qc"
+			crossorigin="anonymous"></script>
 		<script>
-		Redoc.init("/openapi.json", {hideLoading: true}, document.getElementById('redocContainer'))
+			Redoc.init("/openapi.json", {hideLoading: true}, document.getElementById("redocContainer"))
 		</script>
 	</body>
 </html>

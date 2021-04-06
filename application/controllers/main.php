@@ -14,7 +14,6 @@ if($configuration['mode'] === 'development') {
 	error_reporting(E_ALL);
 }
 
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 //TODO Check if the HTTP header Service-Worker is present
@@ -46,10 +45,6 @@ if($path === '/generateshareid') {
 	require_once(dirname(__DIR__) . '/controllers/ShareController.php');
 	(new ShareController())->route(NULL, 'generateshareid', NULL);
 }
-
-require_once(dirname(__DIR__) . '/libs/Base.php');
-$configuration['id']['encodedLength'] = BASE::length($configuration['id']['nBytes'], $configuration['id']['baseEncoding']);
-$configuration['id']['encodedChars'] = BASE::chars($configuration['id']['baseEncoding']);
 
 $matches = NULL; // Fixes false "Variable is undefined" validation error
 if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})([\/.].*)?$/', $path, $matches) == TRUE) {

@@ -4,6 +4,7 @@
 
 // Override settings in config.php for public testing and production environments
 $configuration = [
+	// One of development, testing, production
 	'mode' => 'testing',
 	'database' => [
 		// These database settings should be good enough for a local test environment
@@ -44,5 +45,12 @@ $configuration = [
 
 // The above configuration parameters can be overridden in 
 @include_once('config.php');
+
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
+$configuration['baseurl'] = $protocol . $_SERVER['HTTP_HOST'] . '/';
+
+require_once(dirname(__DIR__) . '/application/libs/Base.php');
+$configuration['id']['encodedLength'] = BASE::length($configuration['id']['nBytes'], $configuration['id']['baseEncoding']);
+$configuration['id']['encodedChars'] = BASE::chars($configuration['id']['baseEncoding']);
 
 require_once('controllers/main.php');
