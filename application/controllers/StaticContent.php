@@ -30,7 +30,17 @@ class StaticContent {
 
 				if(array_key_exists('raw', $_GET)) {
 					header('X-Robots-Tag: noindex');
-					
+					$raw = TRUE;
+				}
+
+				$lastmodified = filemtime($filename);
+				if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && date('D, d M Y H:i:s T', $lastmodified) === $_SERVER['HTTP_IF_MODIFIED_SINCE']) {
+					http_response_code(304);
+					return TRUE;
+				}
+				header('Last-Modified: ' . date('D, d M Y H:i:s T', $lastmodified));
+
+				if(isset($raw)) {
 					if($evaluate) {
 						include($filename);
 					} else {
@@ -43,6 +53,9 @@ class StaticContent {
 				return TRUE;
 			case '/robots.txt':
 				require_once(dirname(__DIR__) . '/views/robots.txt.php');
+				return TRUE;
+			case '/sitemap.xml':
+				require_once(dirname(__DIR__) . '/views/sitemap.xml.php');
 				return TRUE;
 			case $path === '/phpinfo' && $configuration['mode'] !== 'production':
 				phpinfo();
