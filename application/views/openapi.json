@@ -17,14 +17,18 @@
 	"components": {
 		"schemas": {
 			"id": {
-				"type": "string"
+				"type": "string",
+				"description": "A unique ID",
+				"example": "uniqid"
 			},
 			"idtype": {
 				"type": "string",
+				"description": "The type of ID",
 				"enum": [
 					"share",
 					"follow"
-				]
+				],
+				"example": "follow"
 			},
 			"location": {
 				"type": "object",
@@ -36,65 +40,99 @@
 						"$ref": "#/components/schemas/idtype"
 					},
 					"url": {
-						"type": "string"
+						"type": "string",
+						"description": "The URL for the follower to view the shared location using the WebAPP",
+						"example": "https://example.com/uniqid"
 					},
 					"alias": {
-						"type": "string"
+						"type": "string",
+						"default": null,
+						"example": "Something"
 					},
 					"starts": {
 						"type": "integer",
-						"format": "int64"
+						"format": "int64",
+						"default": null,
+						"example": 1617700000
 					},
 					"expires": {
 						"type": "integer",
-						"format": "int64"
+						"format": "int64",
+						"default": null,
+						"example": 1617800000
 					},
 					"delay": {
 						"type": "integer",
-						"format": "int32"
+						"format": "int32",
+						"default": 0
 					},
 					"latitude": {
 						"type": "number",
 						"format": "float",
 						"minimum": -90.0,
-						"maximum": 90.0
+						"maximum": 90.0,
+						"example": 52.373004
 					},
 					"longitude": {
 						"type": "number",
 						"format": "float",
 						"minimum": -180.0,
-						"maximum": 180.0
+						"maximum": 180.0,
+						"example": 4.892563
 					},
 					"accuracy": {
 						"type": "number",
 						"format": "float",
-						"minimum": 0.0
+						"description": "Horizontal accuracy of location in meters",
+						"minimum": 0.0,
+						"default": null,
+						"example": 32.4
 					},
 					"altitude": {
 						"type": "number",
-						"format": "float"
+						"format": "float",
+						"description": "Altitude in meters relative to sea level",
+						"default": null,
+						"example": 4.892563
 					},
 					"direction": {
 						"type": "number",
 						"format": "float",
+						"description": "Direction of movement in degrees angle where 0 is nort",
 						"minimum": 0.0,
-						"maximum": 360.0
+						"maximum": 360.0,
+						"default": null,
+						"example": 18.3
 					},
 					"speed": {
 						"type": "number",
 						"format": "float",
-						"minimum": 0.0
+						"description": "Speed in meters per second",
+						"minimum": 0.0,
+						"default": null,
+						"example": 1.3888
 					},
 					"timestamp": {
 						"type": "integer",
-						"format": "int64"
+						"format": "int64",
+						"description": "The UNIX timestamp of when the location was submitted",
+						"example": 1617730771
 					},
 					"refresh": {
 						"type": "integer",
 						"format": "int32",
-						"minimum": 1
+						"description": "Time in seconds when the client is recomended to refresh the location",
+						"minimum": 1,
+						"example": 5
 					}
-				}
+				},
+				"required": [
+					"id",
+					"type",
+					"latitude",
+					"longitude",
+					"refresh"
+				]
 			},
 			"follower": {
 				"type": "object",
@@ -104,46 +142,253 @@
 					},
 					"type": {
 						"type": "string",
-						"enum": "follow"
+						"enum": ["follow"]
 					},
 					"url": {
 						"type": "string",
-						"format": ""
+						"description": "The URL for the follower to view the shared location using the WebAPP",
+						"format": "",
+						"example": "https://example.com/uniqid"
 					},
 					"reference": {
-						"type": "string"
+						"type": "string",
+						"description": "A reference for your convenience",
+						"default": null,
+						"example": "Website"
 					},
 					"alias": {
-						"type": "string"
+						"type": "string",
+						"description": "The alias the follower gets to see",
+						"default": null,
+						"example": "Something"
 					},
 					"starts": {
 						"type": "integer",
-						"format": "int64"
+						"description": "The start time from when the location will be shared",
+						"format": "int64",
+						"default": null,
+						"example": 1617700000
 					},
 					"expires": {
 						"type": "integer",
-						"format": "int64"
+						"description": "The end time untill when the location will be shared",
+						"format": "int64",
+						"default": null,
+						"example": null
 					},
 					"delay": {
 						"type": "integer",
-						"format": "int32"
+						"description": "Not yet implemented. Delay in seconds that the location will be shared to the follower",
+						"format": "int32",
+						"default": 0,
+						"example": 0
 					},
 					"enabled": {
-						"type": "boolean"
+						"type": "boolean",
+						"description": "true when the follower is enabled",
+						"default": false,
+						"example": true
 					},
 					"started": {
-						"type": "boolean"
+						"type": "boolean",
+						"description": "true when current time is past starts time",
+						"default": false,
+						"example": true
 					},
 					"expired": {
-						"type": "boolean"
+						"type": "boolean",
+						"description": "true when current time is past expires time",
+						"default": true,
+						"example": false
 					}
-				}
+				},
+				"required": [
+					"id",
+					"type",
+					"url",
+					"enabled",
+					"started",
+					"expired"
+				]
+			}
+		},
+		"parameters": {
+			"latitude": {
+				"name": "latitude",
+				"in": "query",
+				"description": "",
+				"schema": {
+					"type": "number",
+					"format": "float",
+					"minimum": -90.0,
+					"maximum": 90.0
+				},
+				"example": 52.373004
+			},
+			"longitude": {
+				"name": "longitude",
+				"in": "query",
+				"description": "",
+				"schema": {
+					"type": "number",
+					"format": "float",
+					"minimum": -180.0,
+					"maximum": 180.0
+				},
+				"example": 4.892563
+			},
+			"accuracy": {
+				"name": "accuracy",
+				"in": "query",
+				"description": "Horizontal accuracy of location in meters",
+				"schema": {
+					"type": "number",
+					"format": "float"
+				},
+				"example": 32.4
+			},
+			"altitude": {
+				"name": "altitude",
+				"in": "query",
+				"description": "Altitude in meters relative to sea level",
+				"schema": {
+					"type": "number",
+					"format": "float"
+				},
+				"example": 4.892563
+			},
+			"direction": {
+				"name": "direction",
+				"in": "query",
+				"description": "Direction of movement in degrees angle where 0 is north",
+				"schema": {
+					"type": "number",
+					"format": "float",
+					"minimum": 0.0,
+					"maximum": 360.0
+				},
+				"example": 18.3
+			},
+			"speed": {
+				"name": "speed",
+				"in": "query",
+				"description": "Speed in meters per second",
+				"schema": {
+					"type": "number",
+					"format": "float",
+					"minimum": 0.0
+				},
+				"example": 1.3888
+			},
+			"reference": {
+				"name": "reference",
+				"in": "query",
+				"description": "A reference for your convenience",
+				"allowEmptyValue": true,
+				"schema": {
+					"type": "string"
+				},
+				"example": "Website"
+			},
+			"alias": {
+				"name": "alias",
+				"in": "query",
+				"description": "The alias the follower gets to see",
+				"allowEmptyValue": true,
+				"schema": {
+					"type": "string"
+				},
+				"example": "Something"
+			},
+			"starts": {
+				"name": "starts",
+				"in": "query",
+				"description": "The start time from when the location will be shared",
+				"allowEmptyValue": true,
+				"schema": {
+					"type": "integer"
+				},
+				"example": 1617700000
+			},
+			"expires": {
+				"name": "expires",
+				"in": "query",
+				"description": "The end time untill when the location will be shared",
+				"allowEmptyValue": true,
+				"schema": {
+					"type": "integer"
+				},
+				"example": ""
+			},
+			"delay": {
+				"name": "delay",
+				"in": "query",
+				"description": "Not yet implemented. Delay in seconds that the location will be shared to the follower",
+				"allowEmptyValue": false,
+				"schema": {
+					"type": "integer"
+				},
+				"example": 0
+			},
+			"enabled": {
+				"name": "enabled",
+				"in": "query",
+				"description": "true when the follower is enabled",
+				"allowEmptyValue": false,
+				"schema": {
+					"type": "boolean"
+				},
+				"example": true
 			}
 		}
 	},
-	"security": [],
-	"tags": [],
 	"paths": {
+		"/{shareId}": {
+			"get": {
+				"summary": "Set location",
+				"description": "",
+				"responses": {
+					"204": {
+						"description": "Successfully set location"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			},
+			"post": {
+				"summary": "Set location",
+				"description": "",
+				"responses": {
+					"204": {
+						"description": "Successfully set location"
+					},
+					"500": {
+						"description": "Internal Server Error"
+					}
+				}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/latitude"
+				},
+				{
+					"$ref": "#/components/parameters/longitude"
+				},
+				{
+					"$ref": "#/components/parameters/accuracy"
+				},
+				{
+					"$ref": "#/components/parameters/altitude"
+				},
+				{
+					"$ref": "#/components/parameters/direction"
+				},
+				{
+					"$ref": "#/components/parameters/speed"
+				}
+			]
+		},
 		"/{id}.json": {
 			"get": {
 				"summary": "Get location",
@@ -179,8 +424,17 @@
 					"200": {
 						"description": "",
 						"content": {
-							"image/svg+xml": {},
-							"image/png": {}
+							"image/svg+xml": {
+								"schema": {
+									"type": "string",
+	                				"format": "binary"
+								}
+							},
+							"image/png": {
+								"schema": {
+									"type": "string"
+								}
+							}
 						}
 					},
 					"404": {
@@ -212,17 +466,28 @@
 										},
 										"type": {
 											"type": "string",
-											"enum": ["follow"]
+											"enum": ["share"],
+											"description": "The type of ID, for this request always of type share"
 										},
 										"url": {
 											"type": "string",
-											"format": ""
+											"format": "",
+											"description": "The URL for the sharer to manage the shared location using the WebAPP",
+											"nullable": true,
+											"example": "https://example.com/uniqid"
 										},
 										"alias": {
 											"type": "string",
-											"format": ""
+											"format": "",
+											"description": "An alias which your Followers see so they know who they are following",
+											"nullable": true,
+											"example": "Something"
 										}
-									}
+									},
+									"required": [
+										"id",
+										"type"
+									]
 								}
 							}
 						}
@@ -239,7 +504,7 @@
 				"description": "Configures a setting of the sharer",
 				"responses": {
 					"204": {
-						"description": "Successfully set configuration"
+						"description": "Successfully set configuration parameter(s)"
 					},
 					"500": {
 						"description": "Internal Server Error"
@@ -248,16 +513,21 @@
 			},
 			"post": {
 				"summary": "Configure sharer setting",
-				"description": "Configures a setting of the sharer parameter",
+				"description": "Configures a setting of the sharer",
 				"responses": {
 					"204": {
-						"description": "Successfully set configuration"
+						"description": "Successfully set configuration parameter(s)"
 					},
 					"500": {
 						"description": "Internal Server Error"
 					}
 				}
-			}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/alias"
+				}
+			]
 		},
 		"/{shareId}/deletelocation": {
 			"get": {
@@ -328,64 +598,22 @@
 			},
 			"parameters": [
 				{
-					"name": "reference",
-					"in": "query",
-					"description": "",
-					"required": false,
-					"allowEmptyValue": true,
-					"schema": {
-						"type": "string"
-					}
+					"$ref": "#/components/parameters/reference"
 				},
 				{
-					"name": "alias",
-					"in": "query",
-					"description": "",
-					"required": false,
-					"allowEmptyValue": true,
-					"schema": {
-						"type": "string"
-					}
+					"$ref": "#/components/parameters/alias"
 				},
 				{
-					"name": "starts",
-					"in": "query",
-					"description": "",
-					"required": false,
-					"allowEmptyValue": false,
-					"schema": {
-						"type": "integer"
-					}
+					"$ref": "#/components/parameters/starts"
 				},
 				{
-					"name": "expires",
-					"in": "query",
-					"description": "",
-					"required": false,
-					"allowEmptyValue": false,
-					"schema": {
-						"type": "integer"
-					}
+					"$ref": "#/components/parameters/expires"
 				},
 				{
-					"name": "delay",
-					"in": "query",
-					"description": "",
-					"required": false,
-					"allowEmptyValue": false,
-					"schema": {
-						"type": "integer"
-					}
+					"$ref": "#/components/parameters/delay"
 				},
 				{
-					"name": "enabled",
-					"in": "query",
-					"description": "",
-					"required": false,
-					"allowEmptyValue": false,
-					"schema": {
-						"type": "boolean"
-					}
+					"$ref": "#/components/parameters/enabled"
 				}
 			]
 		},
@@ -457,7 +685,27 @@
 						"description": "Internal Server Error"
 					}
 				}
-			}
+			},
+			"parameters": [
+				{
+					"$ref": "#/components/parameters/reference"
+				},
+				{
+					"$ref": "#/components/parameters/alias"
+				},
+				{
+					"$ref": "#/components/parameters/starts"
+				},
+				{
+					"$ref": "#/components/parameters/expires"
+				},
+				{
+					"$ref": "#/components/parameters/delay"
+				},
+				{
+					"$ref": "#/components/parameters/enabled"
+				}
+			]
 		},
 		"/{shareId}/follower/{followId}.json": {
 			"get": {
@@ -467,7 +715,11 @@
 					"200": {
 						"description": "OK",
 						"content": {
-							"application/json": {}
+							"application/json": {
+								"schema": {
+                                    "$ref": "#/components/schemas/follower"
+                                }
+							}
 						}
 					},
 					"404": {
