@@ -33,6 +33,8 @@ class FollowController {
 				exit();
 			}
 
+			header('Access-Control-Allow-Origin *');
+
 			if (!$location) {
 				// If no location has been set
 				// HTTP Response 204 No Content
@@ -60,7 +62,6 @@ class FollowController {
 					break;
 				case 'gpx':
 					require_once(dirname(__DIR__) . '/views/location.gpx.php');
-					break;
 					break;
 				//TODO Implement other formats
 				default:

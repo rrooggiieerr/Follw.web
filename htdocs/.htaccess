@@ -2,3 +2,8 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule .* /index.php
+
+<IfModule mod_headers.c>
+	Header always set Access-Control-Allow-Origin * "expr=%{REQUEST_URI} == '/follw.js'"
+	Header always set Access-Control-Allow-Origin * "expr=%{REQUEST_URI} =~ m|^/follw-[0-9.]*.js$|"
+</IfModule>
