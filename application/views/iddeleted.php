@@ -10,8 +10,9 @@
 		ID has been deleted
 	</body>
 	<script>
+<?php // Unregistering Service Worker ?>
 		if(window.navigator && navigator.serviceWorker) {
-			navigator.serviceWorker.getRegistration("/<?= $id->encode() ?>/").then(function(registration) {
+			navigator.serviceWorker.getRegistration("/<?= $id->encode() ?>/").then((registration) => {
 				if(registration){
 					console.debug("Unregistering Service Worker");
 					registration.unregister()
@@ -21,10 +22,14 @@
 			});
 		}
 
-<?php // Delete local cache ?>
+<?php // Delete Local Cache ?>
 		if(window.caches) {
-			caches.open("<?= $id->encode() ?>").then((cache) => {
-				caches.delete("<?= $id->encode() ?>");
+			caches.delete("<?= $id->encode() ?>").then((success) => {
+				if(success) {
+					console.debug("Deleted Local Cache");
+				} else {
+					console.debug("No Local Cache to be deleted");
+				}
 			});
 		}
 

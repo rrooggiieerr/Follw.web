@@ -52,6 +52,7 @@ header('Content-Language: ' . $tl->language);
 		</script>
 <?php } else { ?>
 		<script>
+<?php // Unregister Service Worker ?>
 			if(window.navigator && navigator.serviceWorker) {
 				navigator.serviceWorker.getRegistration("/<?= $shareID->encode() ?>/").then((registration) => {
 					if(registration){
@@ -63,12 +64,16 @@ header('Content-Language: ' . $tl->language);
 				});
 			}
 
-			if(window.caches) {
-				caches.open("<?= $shareID->encode() ?>").then((cache) => {
-					console.log(cache);
-					//TODO caches.delete("<?= $shareID->encode() ?>");
-				});
-			}
+<?php // Delete Local Cache ?>
+		if(window.caches) {
+			caches.delete("<?= $shareID->encode() ?>").then((success) => {
+				if(success) {
+					console.debug("Deleted Local Cache");
+				} else {
+					console.debug("No Local Cache to be deleted");
+				}
+			});
+		}
 		</script>
 <?php } ?>
 		<link rel="manifest" href="/<?=$shareID->encode()?>/manifest.webmanifest" />
