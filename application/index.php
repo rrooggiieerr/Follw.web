@@ -52,5 +52,6 @@ $configuration['baseurl'] = $protocol . $_SERVER['HTTP_HOST'] . '/';
 require_once(dirname(__DIR__) . '/application/libs/Base.php');
 $configuration['id']['encodedLength'] = BASE::length($configuration['id']['nBytes'], $configuration['id']['baseEncoding']);
 $configuration['id']['encodedChars'] = BASE::chars($configuration['id']['baseEncoding']);
+$configuration['id']['regexPattern'] = BASE::regexPattern($configuration['id']['nBytes'], $configuration['id']['baseEncoding']);
 
 require_once('controllers/main.php');

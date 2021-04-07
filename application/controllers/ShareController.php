@@ -56,12 +56,12 @@ class ShareController {
 			case 'manifest.webmanifest':
 				require_once(dirname(__DIR__) . '/views/share.manifest.webmanifest.php');
 				exit();
-			case (preg_match('/^follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})$/', $action, $matches) ? TRUE : FALSE):
+			case (preg_match('/^follower\/(' . $configuration['id']['regexPattern'] . ')$/', $action, $matches) ? TRUE : FALSE):
 				$this->createupdateFollowID($shareID, $matches[1]);
-			case (preg_match('/^follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})\.json$/', $action, $matches) ? TRUE : FALSE):
+			case (preg_match('/^follower\/(' . $configuration['id']['regexPattern'] . ')\.json$/', $action, $matches) ? TRUE : FALSE):
 				$this->getFollower($shareID, $matches[1]);
 				exit();
-			case (preg_match('/^follower\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})\/(enable|disable|delete)$/', $action, $matches) ? TRUE : FALSE):
+			case (preg_match('/^follower\/(' . $configuration['id']['regexPattern'] . ')\/(enable|disable|delete)$/', $action, $matches) ? TRUE : FALSE):
 				$followID = ID::decode($matches[1], $shareID);
 
 				if (!$followID) {

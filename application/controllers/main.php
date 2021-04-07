@@ -47,7 +47,7 @@ if($path === '/generateshareid') {
 }
 
 $matches = NULL; // Fixes false "Variable is undefined" validation error
-if(preg_match('/^\/([' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '})([\/.].*)?$/', $path, $matches) == TRUE) {
+if(preg_match('/^\/(' . $configuration['id']['regexPattern'] . ')([\/.].*)?$/', $path, $matches) == TRUE) {
 	$id = $matches[1];
 	$remainer = '';
 	if(count($matches) === 3) {

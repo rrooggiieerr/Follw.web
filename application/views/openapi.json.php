@@ -24,6 +24,6 @@ $json['info']['contact']['email'] = 'support@' . $_SERVER['HTTP_HOST'];
 array_push($json['servers'], ['url' => $configuration['baseurl'],
 		'description' => $serverEnvironments[$configuration['mode']]
 ]);
-$json['components']['schemas']['id']['pattern'] = '^[' . $configuration['id']['encodedChars'] . ']{' . $configuration['id']['encodedLength'] . '}$';
+$json['components']['schemas']['id']['pattern'] = '^' . $configuration['id']['regexPattern'] . '$';
 
 print(json_encode($json, $configuration['jsonoptions']));
