@@ -10,7 +10,7 @@ class Base {
 	 * @return NULL|string
 	 */
 	static function encode($data, int $base) {
-		if ($base > 64) {
+		if($base < 2 || $base > 64) {
 			return NULL;
 		}
 
@@ -60,7 +60,7 @@ class Base {
 	 * @return NULL|object
 	 */
 	static function decode(string $s, int $base) {
-		if ($base > 64) {
+		if($base < 2 || $base > 64) {
 			return NULL;
 		}
 
@@ -117,6 +117,10 @@ class Base {
 	 * @param int $base The base the bytes need to be encoded in
 	 */
 	static function length(int $nBytes, int $base) {
+		if($base < 2 || $base > 64) {
+			return NULL;
+		}
+
 		return ceil(($nBytes * 8) / log($base, 2));
 	}
 
@@ -127,6 +131,10 @@ class Base {
 	 * @return number
 	 */
 	static function bytes(string $s, int $base) {
+		if($base < 2 || $base > 64) {
+			return NULL;
+		}
+
 		return floor((strlen($s) * log($base, 2))/8);
 	}
 
@@ -136,6 +144,64 @@ class Base {
 	 * @return string
 	 */
 	static function chars(int $base) {
+		if($base < 2 || $base > 64) {
+			return NULL;
+		}
+
 		return substr(self::$index, 0, $base);
+	}
+
+	/**
+	 * Generate a regex pattern based on the byte length and base to be used to validate an encoded string
+	 * @param int $nBytes 
+	 * @param int $base The base the bytes need to be encoded in
+	 * @return string The regex pattern to be used to validate an encoded string
+	 */
+	static function regexPattern(int $nBytes, int $base) {
+		if($base < 2 || $base > 64) {
+			return NULL;
+		}
+
+		$chars = '';
+		if($base == 2){
+			$chars .= '01';
+		} else if($base < 10) {
+			$chars .= '0-';
+			$chars .= substr(self::$index, $base - 1, 1);
+		} else {
+			$chars .= '0-9';
+		}
+
+		if($base == 11) {
+			$chars .= 'a';
+		} else if($base == 12) {
+			$chars .= 'ab';
+		} else if($base > 12 && $base < 36) {
+			$chars .= 'a-';
+			$chars .= substr(self::$index, $base - 1, 1);
+		} if($base >= 36) {
+			$chars .= 'a-z';
+		}
+
+		if($base == 37) {
+			$chars .= 'A';
+		} else if($base == 38) {
+			$chars .= 'AB';
+		} else if($base > 38 && $base < 62) {
+			$chars .= 'A-';
+			$chars .= substr(self::$index, $base - 1, 1);
+		} if($base >= 62) {
+			$chars .= 'A-Z';
+		}
+
+		if($base >= 63) {
+			$chars .= '-';
+		}
+
+		if($base >= 64) {
+			$chars .= '_';
+		}
+
+		return '[' . $chars . ']{' . self::length($nBytes, $base) . '}';
 	}
 }
