@@ -20,5 +20,15 @@
 				}
 			});
 		}
+
+<?php // Delete local cache ?>
+		if(window.caches) {
+			caches.open("<?= $id->encode() ?>").then((cache) => {
+				caches.delete("<?= $id->encode() ?>");
+			});
+		}
+
+<?php // Delete local storage ?>
+		window.localStorage.removeItem("<?= $id->encode() ?>");
 	</script>
 </html>
