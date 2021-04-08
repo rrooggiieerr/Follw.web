@@ -40,7 +40,9 @@ $configuration = [
 			// Links to the app store for native app
 			'app' =>  NULL
 		]
-	]
+	],
+	// When sharing a location on Twitter the Twitter Handle is used to link to the Follw Twitter Account
+	'twitterhandle' => '@follw_app'
 ];
 
 // The above configuration parameters can be overridden in 

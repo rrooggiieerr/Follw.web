@@ -3,4 +3,6 @@ iddeleted = De door u opgevraagde locatie is verwijderd
 offline = U bent momenteel niet verbonden met het internet
 ishere = %s is hier
 credits = Locatie gedeeld via Follw
-privacystatement = Privacyverklaring
+sharedlocationwith = Locatie gedeeld met Follw
+privacystatement = Privacyverklaring 🇬🇧
+close = Sluiten

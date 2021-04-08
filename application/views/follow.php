@@ -66,8 +66,9 @@ if(isset($location)) {
 		</script>
 <?php } else { ?>
 		<script>
+<?php // Unregister Service Worker ?>
 			if(window.navigator && navigator.serviceWorker) {
-				navigator.serviceWorker.getRegistration("/<?= $id->encode() ?>/").then(function(registration) {
+				navigator.serviceWorker.getRegistration("/<?= $id->encode() ?>/").then((registration) => {
 					if(registration){
 						console.debug("Unregistering Service Worker");
 						registration.unregister()
@@ -77,10 +78,14 @@ if(isset($location)) {
 				});
 			}
 
+<?php // Delete Local Cache ?>
 			if(window.caches) {
-				caches.open("<?= $id->encode() ?>").then((cache) => {
-					console.log(cache);
-					//TODO caches.delete("<?= $id->encode() ?>");
+				caches.delete("<?= $id->encode() ?>").then((success) => {
+					if(success) {
+						console.debug("Deleted Local Cache");
+					} else {
+						console.debug("No Local Cache to be deleted");
+					}
 				});
 			}
 		</script>
@@ -114,8 +119,11 @@ if(isset($location)) {
 		<meta property="og:image:width" content="180">
 		<meta property="og:image:height" content="180">
 <?php } ?>
-<?php // Twitter ?>
-		<meta name="twitter:site" content="@follw_app?>">
+<?php // Twitter
+	  if(isset($configuration['twitterhandle'])) {
+?>
+		<meta name="twitter:site" content="<?= $configuration['twitterhandle'] ?>">
+<?php } ?>
 		<meta name="twitter:title" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
 		<meta name="twitter:description" content="<?= htmlspecialchars($title, ENT_COMPAT) ?>">
 <?php if(isset($location)) { ?>
@@ -129,11 +137,14 @@ if(isset($location)) {
 		<link rel="stylesheet" href="https://unpkg.com/bootstrap@4.6.0/dist/css/bootstrap.min.css"
 			integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
 			crossorigin="anonymous"/>
+		<link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.css"
+			integrity="sha384-FckWOBo7yuyMS7In0aXZ0aoVvnInlnFMwCv77x9sZpFgOonQgnBj1uLwenWVtsEj"
+			crossorigin="anonymous"/>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			integrity="sha384-VzLXTJGPSyTLX6d96AxgkKvE/LRb7ECGyTxuwtpjHnVWVZs2gp5RDjeM/tgBnVdM"
 			crossorigin="anonymous"/>
-		<link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.css"
-			integrity="sha384-FckWOBo7yuyMS7In0aXZ0aoVvnInlnFMwCv77x9sZpFgOonQgnBj1uLwenWVtsEj"
+		<link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol@0.73.0/dist/L.Control.Locate.min.css"
+			integrity="sha384-vPNGCZwbWwO+u7VXCcmLEJRcz/YmtXGdC3LOF8O4/IvddhfpYZI1O0tJszYkbsD2"
 			crossorigin="anonymous"/>
 		<style>
 			html, body {
@@ -190,6 +201,8 @@ if(isset($location)) {
 			crossorigin="anonymous"></script>
 		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 			integrity="sha384-RFZC58YeKApoNsIbBxf4z6JJXmh+geBSgkCQXFyh+4tiFSJmJBt+2FbjxW7Ar16M"
+			crossorigin="anonymous"></script>
+		<script src="https://unpkg.com/leaflet.locatecontrol@0.73.0/dist/L.Control.Locate.min.js"
 			crossorigin="anonymous"></script>
 		<script src="/follw.js" crossorigin="anonymous"></script>
 		<script>
@@ -277,6 +290,23 @@ if(isset($location)) {
 				storeLocalSettings();
 			});
 
+			$(() => {
+				var lc = L.control.locate({setView: false, showCompass: true, showPopup: false}).addTo(follw.map);
+				follw.map.on("locateactivate", () => {
+					// Store locateactivate in local settings
+					localSettings["locateactivate"] = true;
+					storeLocalSettings();
+				});
+	 			follw.map.on("locatedeactivate", () => {
+					// Store locatedeactivate in local settings
+	 				localSettings["locateactivate"] = false;
+	 				storeLocalSettings();
+	 			});
+	 			if("locateactivate" in localSettings && localSettings["locateactivate"]) {
+	 				lc.start();
+	 			}
+			});
+
 			$(window).scroll(() => {
 				try {
 					document.body.requestFullscreen();
@@ -319,7 +349,7 @@ if(isset($location)) {
 				}
 			}
 
-			$().ready(() => {
+			$(() => {
 				$(".privacylink").click(function(event) {
 					event.preventDefault();
 					showStaticModal($(this).text(), $(this).attr("href"));
