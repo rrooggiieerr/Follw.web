@@ -327,8 +327,7 @@ class ShareController {
 		foreach($formValues as $name => $value) {
 			switch($name) {
 				case 'alias':
-					//TODO Input validation
-					$shareID['alias'] = $value;
+					$shareID['alias'] = filter_var($value, FILTER_SANITIZE_STRING);
 					break;
 			}
 		}
@@ -391,15 +390,13 @@ class ShareController {
 		}
 
 		if(!empty($formValues['reference'])) {
-			//TODO Input validation
-			$followID['reference'] = $formValues['reference'];
+			$followID['reference'] = filter_var($formValues['reference'], FILTER_SANITIZE_STRING);
 		} else if(isset($followID['reference'])){
 			unset($followID['reference']);
 		}
 
 		if(!empty($formValues['alias'])) {
-			//TODO Input validation
-			$followID['alias'] = $formValues['alias'];
+			$followID['alias'] = filter_var($formValues['alias'], FILTER_SANITIZE_STRING);
 		} else if(isset($followID['alias'])) {
 			unset($followID['alias']);
 		}
@@ -429,7 +426,7 @@ class ShareController {
 		}
 
 		if(!empty($formValues['delay']) && is_numeric($formValues['delay'])) {
-			$followID->delay = $formValues['delay'];
+			$followID->delay = intval($formValues['delay']);
 		}
 
 		$followID->enabled = $formValues['enabled'] === 'true';
