@@ -19,8 +19,10 @@ $serverEnvironments = ['development' => 'Development server',
 
 $json = json_decode(file_get_contents($filename), true);
 
-$json['info']['contact']['url'] = $configuration['baseurl'] . 'contact';
-$json['info']['contact']['email'] = 'support@' . $_SERVER['HTTP_HOST'];
+if(isset($configuration['contactemail'])) {
+	$json['info']['contact']['url'] = $configuration['baseurl'] . 'contact';
+	$json['info']['contact']['email'] = $configuration['contactemail'];
+}
 array_push($json['servers'], ['url' => $configuration['baseurl'],
 		'description' => $serverEnvironments[$configuration['mode']]
 ]);

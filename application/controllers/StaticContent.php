@@ -17,6 +17,7 @@ class StaticContent {
 			case '/credits':
 			case '/privacy':
 			case '/terms':
+			case '/contact':
 			case '/htmlsnippet':
 			case '/wordpress':
 				$filename = dirname(__DIR__) . '/views' . $path. '.html';

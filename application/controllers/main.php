@@ -34,7 +34,7 @@ if($configuration['mode'] !== 'production') {
 
 // Handle static content which doesn't need a database connection
 require_once(dirname(__DIR__) . '/controllers/StaticContent.php');
-if ($method === 'GET' && (new StaticContent())->route($path)) {
+if ((new StaticContent())->route($path)) {
 	exit();
 }
 

@@ -1,0 +1,14 @@
+namelabel = Name
+nameplaceholder = Your name
+emaillabel = E-mail
+emailplaceholder = Your e-mail address
+emailhelp = We won't store your e-mail address
+subjectlabel = Subject
+subjectplaceholder = What's your message about
+messagelabel = Message
+messageplaceholder = The message
+submit = Submit
+
+errorinvalidemail = Invalid e-mail address given
+errornoemail = No e-mail address given
+errornomessage = No message given

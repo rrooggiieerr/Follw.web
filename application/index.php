@@ -42,7 +42,8 @@ $configuration = [
 		]
 	],
 	// When sharing a location on Twitter the Twitter Handle is used to link to the Follw Twitter Account
-	'twitterhandle' => '@follw_app'
+	'twitterhandle' => '@follw_app',
+	'contactemail' => NULL
 ];
 
 // The above configuration parameters can be overridden in 
