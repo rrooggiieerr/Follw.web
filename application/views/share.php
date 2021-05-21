@@ -508,14 +508,6 @@ if($configuration['mode'] == 'development') {
 					}
 					this.map = new Follw("shareLocationMap", `/${shareID}`, zoomlevel);
 					this.map.nolocation = <?= $tl->get('nolocation', 'js') ?>;
-					this.map.addEventListener("locationchanged", onLocationChange);
-					this.map.addEventListener("iddeleted", () => { location.reload(); });
-					this.map.addEventListener("zoomchanged", (follw, zoomlevel) => {
-						// Store zoom level in local settings
-						localSettings["zoomlevel"] = zoomlevel;
-						storeLocalSettings();
-					});
-					this.map.startUpdate();
 
 					// See if DOM is already available
 					if (document.readyState === "complete" || document.readyState === "interactive") {
@@ -534,6 +526,14 @@ if($configuration['mode'] == 'development') {
 				}
 
 				init() {
+					this.map.addEventListener("locationchanged", onLocationChange);
+					this.map.addEventListener("iddeleted", () => { location.reload(); });
+					this.map.addEventListener("zoomchanged", (follw, zoomlevel) => {
+						// Store zoom level in local settings
+						localSettings["zoomlevel"] = zoomlevel;
+						storeLocalSettings();
+					});
+
 					var _this = this;
 					this.map.map.on("click", (event) => {
 						if(!_this.isSharing) { 
@@ -544,6 +544,8 @@ if($configuration['mode'] == 'development') {
 					// Resume updating if that was what we were doing
 					if(localSettings["sharing"] == true) {
 						this.startSharing();
+					} else {
+						this.map.startUpdate();
 					}
 				}
 
