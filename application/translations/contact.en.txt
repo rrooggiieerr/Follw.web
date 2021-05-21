@@ -1,3 +1,4 @@
+contactintro = 
 namelabel = Name
 nameplaceholder = Your name
 emaillabel = E-mail
@@ -7,6 +8,8 @@ subjectlabel = Subject
 subjectplaceholder = What's your message about
 messagelabel = Message
 messageplaceholder = The message
+captchaintro = To prove you're not an automated system answer the following question:
+youranswer = Your answer:
 submit = Submit
 
 errorinvalidemail = Invalid e-mail address given
