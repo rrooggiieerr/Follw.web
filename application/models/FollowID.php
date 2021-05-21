@@ -49,7 +49,7 @@ class FollowID extends ID implements JsonSerializable {
 			$success = FALSE;
 			do {
 				// Generate unique ID
-				$bytes = $this->generate();
+				$bytes = self::generate();
 
 				try {
 					// Insert ID in database
@@ -151,21 +151,31 @@ class FollowID extends ID implements JsonSerializable {
 	function encrypt() {
 		global $configuration;
 
-		$ivlen = openssl_cipher_iv_length($configuration['id']['cipher']);
-		$iv = random_bytes($ivlen);
-		$encrypted = openssl_encrypt($this->bytes, $configuration['id']['cipher'], $this->shareID->bytes, OPENSSL_RAW_DATA, $iv);
+		if(in_array($configuration['id']['cipher'], openssl_get_cipher_methods(TRUE))) {
+			$ivlen = openssl_cipher_iv_length($configuration['id']['cipher']);
+			$iv = random_bytes($ivlen);
+			$encrypted = openssl_encrypt($this->bytes, $configuration['id']['cipher'], $this->shareID->bytes, OPENSSL_RAW_DATA, $iv);
 
-		return $iv . $encrypted;
+			return $iv . $encrypted;
+		} else {
+			error_log(sprintf('Ciper %s not in %s', $configuration['id']['cipher'], implode(' ', openssl_get_cipher_methods(TRUE))));
+			return NULL;
+		}
 	}
 
 	static function decrypt($bytes, ShareID $shareID) {
 		global $configuration;
 
-		$ivlen = openssl_cipher_iv_length($configuration['id']['cipher']);
-		$iv = substr($bytes, 0, $ivlen);
-		$encrypted = substr($bytes, $ivlen);
+		if(in_array($configuration['id']['cipher'], openssl_get_cipher_methods(TRUE))) {
+			$ivlen = openssl_cipher_iv_length($configuration['id']['cipher']);
+			$iv = substr($bytes, 0, $ivlen);
+			$encrypted = substr($bytes, $ivlen);
 
-		return openssl_decrypt($encrypted, $configuration['id']['cipher'], $shareID->bytes, OPENSSL_RAW_DATA, $iv);
+			return openssl_decrypt($encrypted, $configuration['id']['cipher'], $shareID->bytes, OPENSSL_RAW_DATA, $iv);
+		} else {
+			error_log(sprintf('Ciper %s not in %s', $configuration['id']['cipher'], implode(' ', openssl_get_cipher_methods(TRUE))));
+			return NULL;
+		}
 	}
 
 	function jsonSerialize() {

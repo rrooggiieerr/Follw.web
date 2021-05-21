@@ -175,7 +175,7 @@ class ID extends ArrayObject {
 		return $s;
 	}
 
-	function generate() {
+	static function generate() {
 		global $configuration;
 
 		return random_bytes($configuration['id']['nBytes']);
@@ -183,16 +183,23 @@ class ID extends ArrayObject {
 
 	/**
 	 * The binary hash is used in the database
-	 * @return object the hash of the ID as a 16 byte binary
+	 * @return object the binary hash of the ID
 	 */
 	function hash($bytes = NULL) {
 		global $configuration;
 
-		if($bytes) {
-			return hash($configuration['id']['hashAlgorithm'], $bytes, TRUE);
+		if(!$bytes) {
+			return $this->hash($this->bytes);
 		}
 
-		return hash($configuration['id']['hashAlgorithm'], $this->bytes, TRUE);
+		if(isset($configuration['id']['hashKey']) && in_array($configuration['id']['hashAlgorithm'], hash_hmac_algos())) {
+			return hash_hmac($configuration['id']['hashAlgorithm'], $bytes, $configuration['id']['hashKey'], TRUE);
+		} else if(in_array($configuration['id']['hashAlgorithm'], hash_algos())) {
+			return hash($configuration['id']['hashAlgorithm'], $bytes, TRUE);
+		} else {
+			error_log(sprintf('Algorithm %s not in %s', $configuration['id']['hashAlgorithm'], implode(hash_algos())));
+			return NULL;
+		}
 	}
 
 	function jsonSerialize() {
