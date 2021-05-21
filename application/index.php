@@ -19,8 +19,10 @@ $configuration = [
 		// 8 bytes equals 64 bits equals 1.84467440737e+19 possible IDs
 		'nBytes' => 8,
 		'baseEncoding' => 62,
-		'hashAlgorithm' => 'md5',
-		'cipher' => 'bf'
+		'hashAlgorithm' => 'sha256',
+		// Hash key needs to be unique to your instalation, set it in config.php
+		//'hashKey' => '',
+		'cipher' => 'aes256'
 	],
 	'captcha' => [
 		'enabled' => FALSE,
@@ -46,8 +48,8 @@ $configuration = [
 	'contactemail' => NULL
 ];
 
-// The above configuration parameters can be overridden in 
-@include_once('config.php');
+// The configuration parameters should be set or overridden in
+include_once('config.php');
 
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 $configuration['baseurl'] = $protocol . $_SERVER['HTTP_HOST'] . '/';
