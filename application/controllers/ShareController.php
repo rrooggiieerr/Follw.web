@@ -104,9 +104,7 @@ class ShareController {
 	}
 
 	function generateShareID() {
-		global $configuration;
-
-		$method = $_SERVER['REQUEST_METHOD'];
+		global $configuration, $method;
 
 		if($method === 'GET') {
 			session_start(['gc_maxlifetime' => 300]);
