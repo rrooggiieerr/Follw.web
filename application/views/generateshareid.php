@@ -7,17 +7,15 @@ require_once(dirname(__DIR__) . '/models/Translation.php');
 /* @var FormHoneypot $honeypot */
 /* @var Obfuscator $obfuscator */
 
-global $protocol;
-
 // Preconnect to third party domains to improve page loading speed
 header('Link: <https://unpkg.com/>; rel=preconnect', FALSE);
 header('Link: <https://unpkg.com/>; rel=dns-prefetch', FALSE);
 
-$tr = new Translation('generateshareid');
-header('Content-Language: ' . $tr->language);
+$tl = new Translation('generateshareid');
+header('Content-Language: ' . $tl->language);
 ?>
 <!doctype html>
-<html lang="<?= $tr->language ?>">
+<html lang="<?= $tl->language ?>">
 	<head>
 		<title>Follw · Sharing your location with privacy</title>
 		<meta charset="utf-8" />
@@ -90,10 +88,10 @@ header('Content-Language: ' . $tr->language);
 						<input type="hidden" name="sessionid" value="<?= session_id() ?>"/>
 <?php if($captcha !== NULL) { ?>
 						<div id="captcha">
-							<p><?= $tr->get('captchaintro', 'html') ?></p>
+							<p><?= $tl->get('captchaintro', 'html') ?></p>
 							<p id="captchaquestion"><?= htmlspecialchars($captcha->question) ?></p>
 							<div id="captchaanswer" class="form-group">
-								<label for="captchaanswer"><?= $tr->get('youranswer', 'html') ?></label>
+								<label for="captchaanswer"><?= $tl->get('youranswer', 'html') ?></label>
 								<input type="text" id="captchaanswer" class="form-control" name="<?= $obfuscator->obfuscate('captchaanswer') ?>" autofocus="autofocus"/>
 							</div>
 						</div>
@@ -105,11 +103,11 @@ header('Content-Language: ' . $tr->language);
 							</div>
 							<div id="agreetermsconditions" class="form-check">
 								<input class="form-check-input" type="checkbox" id="agreetermsconditionscheckbox" name="<?= $obfuscator->obfuscate('agreetermsconditions') ?>" value="true"/>
-								<label class="form-check-label" for="defaultCheck1" for="agreetermsconditionscheckbox"><?= $tr->get('agreetermsconditions', 'html') ?></label>
+								<label class="form-check-label" for="defaultCheck1" for="agreetermsconditionscheckbox"><?= $tl->get('agreetermsconditions', 'html') ?></label>
 							</div>
 						</div>
 						<div id="submit">
-							<button type="submit" class="btn btn-primary"><?= $tr->get('submit', 'html') ?></button>
+							<button type="submit" class="btn btn-primary"><?= $tl->get('submit', 'html') ?></button>
 						</div>
 					</form>
 				</div>
