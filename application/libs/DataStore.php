@@ -50,6 +50,13 @@ class DataStore {
 	}
 
 	function create() {
+		// Calculate the column size for hashed and encrypted IDs
+		// These sizes depend on the ID size, hash algorithm and cipher configured in the settings 
+		require_once(dirname(__DIR__) . '/models/FollowID.php');
+		$id = new FollowID(NULL, -1, FollowID::generate());
+		$hashedidlength = strlen($id->hash());
+		$encryptedidlength = strlen($id->encrypt());
+
 		// Check if issuedids table exist
 		$query = 'SHOW TABLES LIKE \'issuedids\'';
 		$statement = $this->pdo->query($query);
@@ -58,14 +65,16 @@ class DataStore {
 			$query = 'CREATE TABLE `issuedids` (
 						  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 						  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-						  `hash` binary(16) NOT NULL DEFAULT \'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\',
+						  `hash` binary(%d) NOT NULL,
 						  `type` enum(\'share\',\'follow\',\'deleted\',\'reserved\') NOT NULL DEFAULT \'deleted\',
 						  `config` text CHARACTER SET utf8 NOT NULL,
 						  PRIMARY KEY (`id`),
 						  UNIQUE KEY `hash` (`hash`)
 						) ENGINE=InnoDB DEFAULT CHARSET=latin1';
-			$statement = $this->pdo->prepare($query);
-			$statement->execute();
+			// It's not possible to use prepared statements for CREATE TABLE queries
+			// Instead use a string formatting function
+			$query = sprintf($query, $hashedidlength);
+			$statement = $this->pdo->exec($query);
 		}
 
 		// Check if followers table exist
@@ -76,8 +85,8 @@ class DataStore {
 			$query = 'CREATE TABLE `followers` (
 						  `shareid` int(10) unsigned NOT NULL,
 						  `followid` int(10) unsigned NOT NULL,
-						  `followidencrypted` binary(24) NOT NULL DEFAULT \'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\',
-						  `enabled` tinyint(1) NOT NULL DEFAULT \'0\',
+						  `followidencrypted` binary(%d) NOT NULL,
+						  `enabled` tinyint(1) NOT NULL DEFAULT FALSE,
 						  `starts` timestamp NULL DEFAULT NULL,
 						  `expires` timestamp NULL DEFAULT NULL,
 						  `delay` time DEFAULT NULL,
@@ -86,8 +95,10 @@ class DataStore {
 						  CONSTRAINT `followers_ibfk_1` FOREIGN KEY (`shareid`) REFERENCES `issuedids` (`id`),
 						  CONSTRAINT `followers_ibfk_2` FOREIGN KEY (`followid`) REFERENCES `issuedids` (`id`)
 						) ENGINE=InnoDB DEFAULT CHARSET=latin1';
-			$statement = $this->pdo->prepare($query);
-			$statement->execute();
+			// It's not possible to use prepared statements for CREATE TABLE queries
+			// Instead use a string formatting function
+			$query = sprintf($query, $encryptedidlength);
+			$statement = $this->pdo->exec($query);
 		}
 
 		// Check if locations table exist
@@ -102,8 +113,7 @@ class DataStore {
 						  PRIMARY KEY (`id`),
 						  CONSTRAINT `locations_ibfk_1` FOREIGN KEY (`id`) REFERENCES `issuedids` (`id`)
 						) ENGINE=InnoDB DEFAULT CHARSET=latin1';
-			$statement = $this->pdo->prepare($query);
-			$statement->execute();
+			$statement = $this->pdo->exec($query);
 		}
 	}
 
