@@ -30,7 +30,7 @@ class ShareID extends ID {
 		$success = FALSE;
 		do {
 			// Generate unique ID
-			$bytes = $this->generate();
+			$bytes = self::generate();
 
 			try {
 				// Insert ID in database
@@ -40,15 +40,18 @@ class ShareID extends ID {
 				$this->bytes = $bytes;
 				$success = TRUE;
 			} catch(PDOException $e) {
-				//TODO Log error
-				//$e->getCode()
-				$failureCounter++;
+				error_log($e->getMessage());
+				if($e->getCode() === 23000) {
+					$failureCounter++;
+				} else {
+					break;
+				}
 			}
 		} while (!$success && $failureCounter < 10);
 
 		// Check if insert was successful
 		if (!$success) {
-			//TODO Log error
+			error_log('Filed to insert new Share ID in database');
 			$ds->rollback();
 			return FALSE;
 		}
