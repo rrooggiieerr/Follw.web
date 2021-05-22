@@ -61,14 +61,13 @@ class Translation extends ArrayObject {
 	}
 
 	function get(string $key, string $escaping = NULL, ...$values) {
-		if(!isset($this[$key])) {
-			return '';
-		}
+		$s = '';
+		if(isset($this[$key])) {
+			$s = $this[$key];
 
-		$s = $this[$key];
-
-		if($values) {
-			$s = sprintf($s, ...$values);
+			if($values) {
+				$s = sprintf($s, ...$values);
+			}
 		}
 
 		switch($escaping) {
