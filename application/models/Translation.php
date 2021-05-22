@@ -42,14 +42,19 @@ class Translation extends ArrayObject {
 
 		// Read the translation file
 		$file = fopen($filename, 'r');
+		$key = null;
 		while(($line = fgets($file)) !== FALSE) {
 			$line = trim($line);
 			// Empty strings and strings starting with # are ignored
 			if($line !== '' && $line[0] !== '#') {
-				$line = explode('=', $line, 2);
-				$line[0] = trim($line[0]);
-				$line[1] = trim($line[1]);
-				$this[$line[0]] = $line[1];
+				if(strpos($line , '=') !== FALSE) {
+					$line = explode('=', $line, 2);
+					$key = trim($line[0]);
+					$this[$key] = trim($line[1]);
+				} else if(isset($key)) {
+					// If line does not contain an = append to previous entry
+					$this[$key] .= PHP_EOL . $line;
+				}
 			}
 		}
 		fclose($file);
