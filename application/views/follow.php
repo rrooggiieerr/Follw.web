@@ -231,25 +231,106 @@ if(isset($location)) {
 
 			window.addEventListener("resize", resizeMap);
 
+			function getExternalMapURL(alias, latitude, longitude) {
+				var externalMapService = localSettings["externalmapservice"];
+				var externalMapURL = null;
+
+				switch(externalMapService) {
+				case "duckduckgo":
+					externalMapURL = "https://duckduckgo.com/?q=" + latitude + "%2C" + longitude + "&iaxm=maps";
+					break;
+				case "googlemaps":
+					externalMapURL = "https://maps.google.com/?q=" + latitude + "," + longitude;
+					break;
+				case "herewego":
+					externalMapURL = "https://wego.here.com/directions/mix//" + latitude + "," + longitude;
+					break;
+				case "bingmaps":
+					externalMapURL = "https://www.bing.com/maps?q=" + latitude + "," + longitude;
+					break;
+				case "applemaps":
+					externalMapURL = "https://maps.apple.com/?q=" + alias + "&ll=" + latitude + "," + longitude;
+					break;
+				}
+
+				return externalMapURL;
+			}
+
+			function setCoordinatesText(alias, latitude, longitude) {
+				var resize = false;
+				var s = follw.prettyPrintCoordinates(latitude, longitude);
+				if($("#coordinates").text() != s) {
+					resize = true;
+					if(navigator.userAgent.toUpperCase().indexOf("ANDROID") !== -1) {
+						// Android
+						$("#coordinates").html("<a href=\"geo:0,0?q=" + latitude + "," + longitude + "\" rel=\"noopener noreferrer\"></a>");
+					} else if(navigator.userAgent.toUpperCase().indexOf("IPHONE") !== -1
+							|| navigator.userAgent.toUpperCase().indexOf("IPAD") !== -1
+							|| navigator.userAgent.toUpperCase().indexOf("IPOD") !== -1) {
+						// iOS
+						$("#coordinates").html("<a href=\"geo:" + latitude + "," + longitude + "\" rel=\"noopener noreferrer\"></a>");
+					} else {
+						if("externalmapservice" in localSettings) {
+							$("#coordinates").html("<a href=\"" + getExternalMapURL(alias, latitude, longitude) + "\" target=\"_blank\" rel=\"noopener noreferrer\"></a>");
+						} else {									
+							// Modal with external map selector
+							$("#coordinates").html("<a href=\"\" rel=\"noopener noreferrer\"></a>");
+
+							$("#coordinates a").click(function(event) {
+								event.preventDefault();
+								var content = `<?= $tl->get('externalmapserviceintro') ?>
+									<a href="" id="openinduckduckgo" class="externalmapselector" target="_blank" rel="noopener noreferrer">DuckDuckGo</a><br/>
+									<a href="" id="openingooglemaps" class="externalmapselector" target="_blank" rel="noopener noreferrer">Google Maps</a><br/>
+									<a href="" id="openinherewego" class="externalmapselector" target="_blank" rel="noopener noreferrer">HERE WeGo</a><br/>
+									<a href="" id="openinbingmaps" class="externalmapselector" target="_blank" rel="noopener noreferrer">Bing Maps</a><br/>`
+								if(navigator.platform.toUpperCase().indexOf("MAC") !== -1) {
+									content += `<a href="" id="openinapplemaps" class="externalmapselector" target="_blank" rel="noopener noreferrer">Apple Maps</a>`;
+								}
+								content = $(content);
+								showStaticModal(<?= $tl->get('externalmapservicetitle', 'js') ?>, content);
+
+								$(".externalmapselector").click(function(event) {
+									switch(event.target.id) {
+									case "openinduckduckgo":
+										localSettings["externalmapservice"] = "duckduckgo";
+										break;
+									case "openingooglemaps":
+										localSettings["externalmapservice"] = "googlemaps";
+										break;
+									case "openinherewego":
+										localSettings["externalmapservice"] = "herewego";
+										break;
+									case "openinbingmaps":
+										localSettings["externalmapservice"] = "bingmaps";
+										break;
+									case "openinapplemaps":
+										localSettings["externalmapservice"] = "applemaps";
+										break;
+									}
+									
+									//storeLocalSettings();
+									event.target.href = getExternalMapURL(alias, latitude, longitude);
+									$("#static-modal").modal("hide");
+								});
+							});
+
+						}
+					}
+					$("#coordinates a").text(s);
+					resizeMap();
+				}
+			}
+
 			function onLocationChanged(follw, data) {
 				if(data != null) {
 					var s = data.alias + <?= $tl->get('ishere', 'js', '') ?>;
-					var resize = false;
 					if($("title").text() != s) {
 						$("title").text(s);
 						$("#title").text(s);
-						resize = true;
-					}
-
-					s = follw.prettyPrintCoordinates(data.latitude, data.longitude);
-					if($("#coordinates").text() != s) {
-						$("#coordinates").text(s);
-						resize = true;
-					}
-
-					if(resize) {
 						resizeMap();
 					}
+
+					setCoordinatesText(data.alias, data.latitude, data.longitude);
 				} else {
 					s = follw.translations['nolocation'];
 					if($("title").text() != s) {
@@ -358,7 +439,7 @@ if(isset($location)) {
 				resizeMap()
 				follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
 <?php if(isset($location))  { ?>
-				$("#coordinates").text(follw.prettyPrintCoordinates(<?= $location['latitude'] ?>, <?= $location['longitude'] ?>))
+				setCoordinatesText("<?= htmlspecialchars($id['alias']) ?>", <?= $location['latitude'] ?>, <?= $location['longitude'] ?>);
 <?php } ?>
 				follw.startUpdate();
 			});

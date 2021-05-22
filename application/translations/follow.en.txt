@@ -5,3 +5,7 @@ ishere = %s is here
 credits = Location shared with Follw
 privacystatement = Privacy statement
 close = Close
+externalmapservicetitle = Select external map service
+externalmapserviceintro = <p>You can open the shared location in an external map service, for instance for navigation purposes.</p>
+<p>The live location will not be automatically updated on the external map.</p>
+<p>Please select the external map service of your liking.</p>
