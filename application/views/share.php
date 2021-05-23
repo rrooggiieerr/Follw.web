@@ -388,6 +388,23 @@ if($configuration['mode'] == 'development') {
 					</div>
 				</footer>
 			</div>
+			<div id="static-modal" class="modal">
+				<div class="modal-dialog modal-dialog-scrollable" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title"></h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="<?= $tl->get('close', 'htmlattr') ?>">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal"><span class="fa fa-times-circle"></span>  <?= $tl->get('close', 'html') ?></button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</main>
 <?php // Scripts ?>
 		<script src="https://unpkg.com/jquery@3.5.1/dist/jquery.min.js"
@@ -941,27 +958,6 @@ if($configuration['mode'] == 'development') {
 
 			// 
 			function showStaticModal(title, content) {
-				if($("#static-modal").length == 0) {
-					var staticModal = $(`<div id="static-modal" class="modal">
-	<div class="modal-dialog modal-dialog-scrollable" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title"></h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="<?= $tl->get('close', 'htmlattr') ?>">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal"><span class="fa fa-times-circle"></span>  <?= $tl->get('close', 'html') ?></button>
-			</div>
-		</div>
-	</div>
-</div>`);
-					$("main").append(staticModal);
-				}
-
 				$("#static-modal .modal-title").text(title);
 				if(typeof content === "object") {
 					$("#static-modal .modal-body").html(content);
