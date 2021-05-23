@@ -325,7 +325,10 @@ class ShareController {
 		foreach($formValues as $name => $value) {
 			switch($name) {
 				case 'alias':
-					$shareID['alias'] = filter_var($value, FILTER_SANITIZE_STRING);
+					$shareID['alias'] = trim(filter_var($value, FILTER_SANITIZE_STRING));
+					if($shareID['alias'] === '') {
+						unset($shareID['alias']);
+					}
 					break;
 			}
 		}
