@@ -174,6 +174,10 @@ if(isset($location)) {
 				height: 250px;
 			}
 
+			.modal-body > :last-child {
+				margin-bottom: 0 !important;
+			}
+
 			@media (max-width: 575px) {
 				.modal-dialog {
 					max-width: 100%;
@@ -294,27 +298,27 @@ if(isset($location)) {
 			function getExternalMapURL(data) {
 				if(navigator.userAgent.toUpperCase().indexOf("ANDROID") !== -1) {
 					// Android
-					return "geo:0,0?q=" + data.latitude + "," + data.longitude;
+					return "geo:0,0?q=" + data.geometry.coordinates[1] + "," + data.geometry.coordinates[0];
 				} 
 
 				if(navigator.userAgent.toUpperCase().indexOf("IPHONE") !== -1
 						|| navigator.userAgent.toUpperCase().indexOf("IPAD") !== -1
 						|| navigator.userAgent.toUpperCase().indexOf("IPOD") !== -1) {
 					// iOS
-					return "geo:" + data.latitude + "," + data.longitude;
+					return "geo:" + data.geometry.coordinates[1] + "," + data.geometry.coordinates[0];
 				}
 
 				switch(window.localStorage.getItem("externalmapservice")) {
 				case "duckduckgo":
-					return "https://duckduckgo.com/?q=" + data.latitude + "%2C" + data.longitude + "&iaxm=maps";
+					return "https://duckduckgo.com/?q=" + data.geometry.coordinates[1] + "%2C" + data.geometry.coordinates[0] + "&iaxm=maps";
 				case "googlemaps":
-					return "https://maps.google.com/?q=" + data.latitude + "," + data.longitude;
+					return "https://maps.google.com/?q=" + data.geometry.coordinates[1] + "," + data.geometry.coordinates[0];
 				case "herewego":
-					return "https://wego.here.com/directions/mix//" + data.latitude + "," + data.longitude;
+					return "https://wego.here.com/directions/mix//" + data.geometry.coordinates[1] + "," + data.geometry.coordinates[0];
 				case "bingmaps":
-					return "https://www.bing.com/maps?q=" + data.latitude + "," + data.longitude;
+					return "https://www.bing.com/maps?q=" + data.geometry.coordinates[1] + "," + data.geometry.coordinates[0];
 				case "applemaps":
-					return "https://maps.apple.com/?q=" + data.alias + "&ll=" + data.latitude + "," + data.longitude;
+					return "https://maps.apple.com/?q=" + data.properties.alias + "&ll=" + data.geometry.coordinates[1] + "," + data.geometry.coordinates[0];
 				}
 
 				return null;
@@ -352,7 +356,7 @@ if(isset($location)) {
 						resize = true;
 					}
 				} else {
-					var s = data.alias + <?= $tl->get('ishere', 'js', '') ?>;
+					var s = data.properties.alias + <?= $tl->get('ishere', 'js', '') ?>;
 					if($("title").text() != s) {
 						$("title").text(s);
 						$("#title").text(s);
@@ -395,7 +399,7 @@ if(isset($location)) {
 						});
 					}
 					
-					h.text(follw.prettyPrintCoordinates(data.latitude, data.longitude));
+					h.text(follw.prettyPrintCoordinates(data.geometry.coordinates[1], data.geometry.coordinates[0]));
 
 					if($("#coordinates")[0] != $(h).html()) {
 						$("#coordinates").empty().append(h);
@@ -461,7 +465,7 @@ if(isset($location)) {
 				resizeMap()
 <?php if(isset($location)) { ?>
 				follw.setMarker(<?= $_location ?>, <?= $_accuracy ?>);
-				updateHeader(<?= json_encode(array_merge($location->jsonSerialize(), $id->jsonSerialize())) ?>);
+				updateHeader(<?= $location->geoJson() ?>);
 <?php } ?>
 				follw.startUpdate();
 			});

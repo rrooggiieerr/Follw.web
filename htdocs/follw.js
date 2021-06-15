@@ -86,8 +86,8 @@ class Follw {
 		}
 
 		this.addEventListener('locationchanged', (_this, data) => {
-			if(data)
-				_this.setMarker([data.latitude, data.longitude], data.accuracy);
+			if(data && data.type == 'Feature' && data.geometry.type == 'Point')
+				_this.setMarker([data.geometry.coordinates[1], data.geometry.coordinates[0]], data.geometry.accuracy);
 			else
 				_this.setMarker(null, null);
 		});

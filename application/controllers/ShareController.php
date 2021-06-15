@@ -301,9 +301,11 @@ class ShareController {
 
 		switch ($format) {
 			case 'json':
-				global $configuration;
-				header('Content-Type: application/json');
-				$json = json_encode(array_merge($shareID->jsonSerialize(), $location->jsonSerialize()), $configuration['jsonoptions']);
+				header('Content-Type: application/geo+json');
+				header('Cache-Control: max-age=' . $location->refresh);
+				header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + $location->refresh));
+
+				$json = $location->geoJson();
 				header('Content-Length: ' . strlen($json));
 				print($json);
 				break;

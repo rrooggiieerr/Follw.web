@@ -98,4 +98,37 @@ class Location extends ArrayObject implements JsonSerializable {
 
 		return json_encode($this, $configuration['jsonoptions']);
 	}
+
+	function geoJson() {
+		$object = ['type' => 'Feature',
+				'geometry' => [
+						'type' => 'Point',
+						'coordinates' => [$this['longitude'], $this['latitude']]
+				],
+				'properties' => [
+						'timestamp' => $this->timestamp,
+						'refresh' => $this->refresh
+				]
+		];
+
+		if(isset($this['accuracy'])) {
+			$object['geometry']['accuracy'] = $this['accuracy'];
+		}
+
+		if(isset($this['altitude'])) {
+			$object['geometry']['coordinates'][2] = $this['altitude'];
+		}
+
+		if(isset($this->id)) {
+			$object['properties']['id'] = $this->id->encode();
+			$object['properties']['url'] = $this->id->url();
+			if(isset($this->id['alias'])) {
+				$object['properties']['alias'] = $this->id['alias'];
+			}
+		}
+
+		global $configuration;
+
+		return json_encode($object, $configuration['jsonoptions']);
+	}
 }

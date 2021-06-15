@@ -176,6 +176,10 @@ header('Content-Language: ' . $tl->language);
 				width: 100%;
 			}
 
+			.modal-body > :last-child {
+				margin-bottom: 0 !important;
+			}
+			
 			.createfollower, .updatefollower {
 				display: none;
 			}
@@ -495,7 +499,7 @@ if($configuration['mode'] == 'development') {
 				if(data != null) {
 					$("#deletelocation").prop("disabled", false);
 
-					var s = follw.prettyPrintCoordinates(data.latitude, data.longitude);
+					var s = follw.prettyPrintCoordinates(data.geometry.coordinates[1], data.geometry.coordinates[0]);
 					if($("#coordinates").text() != s) {
 						$("#coordinates").text(s);
 					}
