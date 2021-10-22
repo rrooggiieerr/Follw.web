@@ -18,15 +18,6 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 //TODO Check if the HTTP header Service-Worker is present
 
-// Enable HTTP Strict Transport Security when using HTTPS
-if($protocol === 'https://') {
-	if($configuration['mode'] === 'production') {
-		header('Strict-Transport-Security: max-age=63072000; preload', TRUE);
-	} else {
-		header('Strict-Transport-Security: max-age=63072000', TRUE);
-	}
-}
-
 // Don't let anything be indexed by search engines if not in production mode
 if($configuration['mode'] !== 'production') {
 	header('X-Robots-Tag: noindex');
@@ -82,16 +73,12 @@ if(preg_match('/^\/(' . $configuration['id']['regexPattern'] . ')([\/.].*)?$/', 
 	require_once(dirname(__DIR__) . '/models/ID.php');
 	$id = ID::decode($id);
 
-	if (!$id) {
-		http_response_code(404);
-		exit();
-	}
-
-	if($id->type === 'deleted') {
+	if (!$id || $id->type === 'reserved') {
 		if($action === 'location') {
-			http_response_code(410);
+			http_response_code(404);
 			if($format === 'html') {
-				require_once(dirname(__DIR__) . '/views/iddeleted.php');
+				$error = 'idnotfound';
+				require_once(dirname(__DIR__) . '/views/error.php');
 			}
 		} else {
 			http_response_code(404);
@@ -99,8 +86,16 @@ if(preg_match('/^\/(' . $configuration['id']['regexPattern'] . ')([\/.].*)?$/', 
 		exit();
 	}
 
-	if($id->type === 'reserved') {
-		http_response_code(404);
+	if($id->type === 'deleted') {
+		if($action === 'location') {
+			http_response_code(410);
+			if($format === 'html') {
+				$error = 'iddeleted';
+				require_once(dirname(__DIR__) . '/views/error.php');
+			}
+		} else {
+			http_response_code(404);
+		}
 		exit();
 	}
 
@@ -150,4 +145,6 @@ if(preg_match('/^\/(' . $configuration['id']['regexPattern'] . ')([\/.].*)?$/', 
 
 //TODO Limit requests per IP to prevent DOS
 http_response_code(404);
+$error = 'pagenotfound';
+require_once(dirname(__DIR__) . '/views/error.php');
 exit();
