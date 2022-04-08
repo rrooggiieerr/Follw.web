@@ -57,7 +57,7 @@ header('Content-Language: ' . $tl->language);
 				navigator.serviceWorker.getRegistration("/<?= $shareID->encode() ?>/").then((registration) => {
 					if(registration){
 						console.debug("Unregistering Service Worker");
-						registration.unregister()
+						registration.unregister();
 					} else {
 						console.debug("No Service Worker to unregister");
 					}

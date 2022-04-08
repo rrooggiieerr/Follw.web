@@ -71,7 +71,7 @@ if(isset($location)) {
 				navigator.serviceWorker.getRegistration("/<?= $id->encode() ?>/").then((registration) => {
 					if(registration){
 						console.debug("Unregistering Service Worker");
-						registration.unregister()
+						registration.unregister();
 					} else {
 						console.debug("No Service Worker to unregister");
 					}
